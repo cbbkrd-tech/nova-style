@@ -5,8 +5,17 @@ import type { Tables } from '../types/database';
 type Product = Tables<'products'>;
 type ProductVariant = Tables<'product_variants'>;
 
+interface ProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  is_main: boolean;
+  sort_order: number;
+}
+
 interface ProductWithVariants extends Product {
   product_variants: ProductVariant[];
+  product_images?: ProductImage[];
 }
 
 export default function AdminApp() {
@@ -48,7 +57,8 @@ export default function AdminApp() {
       .from('products')
       .select(`
         *,
-        product_variants(*)
+        product_variants(*),
+        product_images(*)
       `)
       .order('created_at', { ascending: false });
 
@@ -225,8 +235,8 @@ function LoginForm({ onLogin }: { onLogin: (email: string, password: string) => 
           className="space-y-4"
         >
           <input
-            type="email"
-            placeholder="Email"
+            type="text"
+            placeholder="Login"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full p-3 bg-gray-700 rounded text-white"
@@ -384,6 +394,12 @@ function StockInput({
   );
 }
 
+interface ImageItem {
+  file: File;
+  preview: string;
+  isMain: boolean;
+}
+
 function AddProductForm({
   onClose,
   onSuccess,
@@ -395,33 +411,50 @@ function AddProductForm({
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState<'women' | 'men'>('women');
   const [color, setColor] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [showOnHomepage, setShowOnHomepage] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newImages: ImageItem[] = Array.from(files).map((file, idx) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        isMain: images.length === 0 && idx === 0, // First image is main by default
+      }));
+      setImages(prev => [...prev, ...newImages]);
     }
+  };
+
+  const handleSetMain = (index: number) => {
+    setImages(prev => prev.map((img, i) => ({ ...img, isMain: i === index })));
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      // If we removed the main image, set first as main
+      if (prev[index].isMain && updated.length > 0) {
+        updated[0].isMain = true;
+      }
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    let imageUrl = null;
-
-    // Upload image if selected
-    if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
+    // Upload all images
+    const uploadedImages: { url: string; isMain: boolean }[] = [];
+    for (const img of images) {
+      const fileExt = img.file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(fileName, imageFile);
+        .upload(fileName, img.file);
 
       if (uploadError) {
         alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
@@ -430,9 +463,10 @@ function AddProductForm({
       }
 
       const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
+      uploadedImages.push({ url: urlData.publicUrl, isMain: img.isMain });
     }
 
+    const mainImage = uploadedImages.find(img => img.isMain)?.url || uploadedImages[0]?.url || null;
     const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
 
     const { data: product, error } = await supabase
@@ -443,7 +477,7 @@ function AddProductForm({
         price: Math.round(parseFloat(price) * 100),
         category,
         color,
-        image_url: imageUrl,
+        image_url: mainImage,
         is_active: true,
         show_on_homepage: showOnHomepage,
       })
@@ -454,6 +488,17 @@ function AddProductForm({
       alert('Błąd przy dodawaniu produktu: ' + error.message);
       setLoading(false);
       return;
+    }
+
+    // Save images to product_images table
+    if (uploadedImages.length > 0) {
+      const imageRecords = uploadedImages.map((img, idx) => ({
+        product_id: product.id,
+        image_url: img.url,
+        is_main: img.isMain,
+        sort_order: idx,
+      }));
+      await supabase.from('product_images').insert(imageRecords);
     }
 
     // Add all sizes (use -1 stock to hide, 0 for out of stock)
@@ -546,17 +591,46 @@ function AddProductForm({
             required
           />
 
-          {/* Image upload */}
+          {/* Multi-image upload */}
           <div className="bg-gray-700 p-4 rounded">
-            <p className="text-sm text-gray-300 mb-2">Zdjęcie produktu:</p>
+            <p className="text-sm text-gray-300 mb-2">Zdjęcia produktu (kliknij aby wybrać główne):</p>
             <input
               type="file"
               accept="image/*"
-              onChange={handleFileChange}
+              multiple
+              onChange={handleFilesChange}
               className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-600 file:text-white hover:file:bg-gray-500"
             />
-            {imagePreview && (
-              <img src={imagePreview} alt="Preview" className="mt-3 w-24 h-24 object-cover rounded" />
+            {images.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={img.preview}
+                      alt={`Preview ${idx + 1}`}
+                      onClick={() => handleSetMain(idx)}
+                      className={`w-20 h-20 object-cover rounded cursor-pointer transition-all ${
+                        img.isMain ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-gray-700' : 'hover:opacity-80'
+                      }`}
+                    />
+                    {img.isMain && (
+                      <span className="absolute -top-1 -left-1 bg-green-500 text-[10px] px-1 rounded text-white">
+                        Główne
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(idx)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {images.length === 0 && (
+              <p className="text-xs text-gray-500 mt-2">Dodaj przynajmniej jedno zdjęcie</p>
             )}
           </div>
 
@@ -582,6 +656,18 @@ function AddProductForm({
   );
 }
 
+interface ExistingImage {
+  id: string;
+  url: string;
+  isMain: boolean;
+}
+
+interface NewImage {
+  file: File;
+  preview: string;
+  isMain: boolean;
+}
+
 function EditProductForm({
   product,
   onClose,
@@ -595,33 +681,88 @@ function EditProductForm({
   const [price, setPrice] = useState((product.price / 100).toString());
   const [category, setCategory] = useState<'women' | 'men'>(product.category);
   const [color, setColor] = useState(product.color);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null);
   const [showOnHomepage, setShowOnHomepage] = useState((product as any).show_on_homepage ?? true);
   const [loading, setLoading] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+  // Multi-image state
+  const [existingImages, setExistingImages] = useState<ExistingImage[]>(() => {
+    const images = product.product_images || [];
+    if (images.length > 0) {
+      return images.map(img => ({ id: img.id, url: img.image_url, isMain: img.is_main }));
     }
+    // Fallback to main image_url if no product_images
+    if (product.image_url) {
+      return [{ id: 'legacy', url: product.image_url, isMain: true }];
+    }
+    return [];
+  });
+  const [newImages, setNewImages] = useState<NewImage[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+
+  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const hasMain = existingImages.some(img => img.isMain) || newImages.some(img => img.isMain);
+      const newImgs: NewImage[] = Array.from(files).map((file, idx) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        isMain: !hasMain && existingImages.length === 0 && newImages.length === 0 && idx === 0,
+      }));
+      setNewImages(prev => [...prev, ...newImgs]);
+    }
+  };
+
+  const handleSetMainExisting = (index: number) => {
+    setExistingImages(prev => prev.map((img, i) => ({ ...img, isMain: i === index })));
+    setNewImages(prev => prev.map(img => ({ ...img, isMain: false })));
+  };
+
+  const handleSetMainNew = (index: number) => {
+    setExistingImages(prev => prev.map(img => ({ ...img, isMain: false })));
+    setNewImages(prev => prev.map((img, i) => ({ ...img, isMain: i === index })));
+  };
+
+  const handleRemoveExisting = (index: number) => {
+    const img = existingImages[index];
+    if (img.id !== 'legacy') {
+      setImagesToDelete(prev => [...prev, img.id]);
+    }
+    setExistingImages(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      if (prev[index].isMain && updated.length > 0) {
+        updated[0].isMain = true;
+      } else if (prev[index].isMain && newImages.length > 0) {
+        setNewImages(curr => curr.map((img, i) => ({ ...img, isMain: i === 0 })));
+      }
+      return updated;
+    });
+  };
+
+  const handleRemoveNew = (index: number) => {
+    setNewImages(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      if (prev[index].isMain && updated.length > 0) {
+        updated[0].isMain = true;
+      } else if (prev[index].isMain && existingImages.length > 0) {
+        setExistingImages(curr => curr.map((img, i) => ({ ...img, isMain: i === 0 })));
+      }
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    let finalImageUrl = product.image_url;
-
-    // Upload new image if selected
-    if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
+    // Upload new images
+    const uploadedImages: { url: string; isMain: boolean }[] = [];
+    for (const img of newImages) {
+      const fileExt = img.file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(fileName, imageFile);
+        .upload(fileName, img.file);
 
       if (uploadError) {
         alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
@@ -630,8 +771,37 @@ function EditProductForm({
       }
 
       const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
-      finalImageUrl = urlData.publicUrl;
+      uploadedImages.push({ url: urlData.publicUrl, isMain: img.isMain });
     }
+
+    // Delete removed images
+    for (const imgId of imagesToDelete) {
+      await supabase.from('product_images').delete().eq('id', imgId);
+    }
+
+    // Update existing images (is_main status)
+    for (const img of existingImages) {
+      if (img.id !== 'legacy') {
+        await supabase.from('product_images').update({ is_main: img.isMain }).eq('id', img.id);
+      }
+    }
+
+    // Insert new images
+    if (uploadedImages.length > 0) {
+      const maxSort = existingImages.length;
+      const imageRecords = uploadedImages.map((img, idx) => ({
+        product_id: product.id,
+        image_url: img.url,
+        is_main: img.isMain,
+        sort_order: maxSort + idx,
+      }));
+      await supabase.from('product_images').insert(imageRecords);
+    }
+
+    // Determine main image URL
+    const mainExisting = existingImages.find(img => img.isMain);
+    const mainNew = uploadedImages.find(img => img.isMain);
+    const mainImageUrl = mainNew?.url || mainExisting?.url || existingImages[0]?.url || uploadedImages[0]?.url || product.image_url;
 
     const { error } = await supabase
       .from('products')
@@ -640,7 +810,7 @@ function EditProductForm({
         price: Math.round(parseFloat(price) * 100),
         category,
         color,
-        image_url: finalImageUrl,
+        image_url: mainImageUrl,
         show_on_homepage: showOnHomepage,
       })
       .eq('id', product.id);
@@ -730,16 +900,72 @@ function EditProductForm({
             required
           />
 
-          {/* Image upload */}
+          {/* Multi-image upload */}
           <div className="bg-gray-700 p-4 rounded">
-            <p className="text-sm text-gray-300 mb-2">Zdjęcie produktu:</p>
-            {imagePreview && (
-              <img src={imagePreview} alt="Current" className="mb-3 w-24 h-24 object-cover rounded" />
+            <p className="text-sm text-gray-300 mb-2">Zdjęcia produktu (kliknij aby wybrać główne):</p>
+
+            {/* Existing images */}
+            {(existingImages.length > 0 || newImages.length > 0) && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {existingImages.map((img, idx) => (
+                  <div key={`existing-${idx}`} className="relative group">
+                    <img
+                      src={img.url}
+                      alt={`Existing ${idx + 1}`}
+                      onClick={() => handleSetMainExisting(idx)}
+                      className={`w-20 h-20 object-cover rounded cursor-pointer transition-all ${
+                        img.isMain ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-gray-700' : 'hover:opacity-80'
+                      }`}
+                    />
+                    {img.isMain && (
+                      <span className="absolute -top-1 -left-1 bg-green-500 text-[10px] px-1 rounded text-white">
+                        Główne
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExisting(idx)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {newImages.map((img, idx) => (
+                  <div key={`new-${idx}`} className="relative group">
+                    <img
+                      src={img.preview}
+                      alt={`New ${idx + 1}`}
+                      onClick={() => handleSetMainNew(idx)}
+                      className={`w-20 h-20 object-cover rounded cursor-pointer transition-all ${
+                        img.isMain ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-gray-700' : 'hover:opacity-80'
+                      }`}
+                    />
+                    {img.isMain && (
+                      <span className="absolute -top-1 -left-1 bg-green-500 text-[10px] px-1 rounded text-white">
+                        Główne
+                      </span>
+                    )}
+                    <span className="absolute -bottom-1 -left-1 bg-blue-500 text-[10px] px-1 rounded text-white">
+                      Nowe
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveNew(idx)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
+
             <input
               type="file"
               accept="image/*"
-              onChange={handleFileChange}
+              multiple
+              onChange={handleFilesChange}
               className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-600 file:text-white hover:file:bg-gray-500"
             />
           </div>

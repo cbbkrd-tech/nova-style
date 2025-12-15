@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Product, ProductVariant } from '../types/types';
+import { Product, ProductVariant, ProductImage } from '../types/types';
 import { supabase } from '../lib/medusa';
 import OptimizedImage from './OptimizedImage';
 
@@ -20,9 +20,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [currentImage, setCurrentImage] = useState(product.image);
 
   useEffect(() => {
-    async function fetchVariants() {
+    async function fetchData() {
       if (!product.supabaseId) {
         // Fallback for demo products without Supabase ID
         setVariants([
@@ -38,28 +40,45 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
       }
 
       try {
-        const { data, error } = await supabase
-          .from('product_variants')
-          .select('id, size, stock')
-          .eq('product_id', product.supabaseId)
-          .order('size');
+        // Fetch variants and images in parallel
+        const [variantsRes, imagesRes] = await Promise.all([
+          supabase
+            .from('product_variants')
+            .select('id, size, stock')
+            .eq('product_id', product.supabaseId)
+            .order('size'),
+          supabase
+            .from('product_images')
+            .select('id, image_url, is_main, sort_order')
+            .eq('product_id', product.supabaseId)
+            .order('sort_order'),
+        ]);
 
-        if (error) {
-          console.error('Error fetching variants:', error);
-          return;
+        if (variantsRes.data && variantsRes.data.length > 0) {
+          setVariants(variantsRes.data.map(v => ({ ...v, stock: v.stock ?? 0 })));
         }
 
-        if (data && data.length > 0) {
-          setVariants(data.map(v => ({ ...v, stock: v.stock ?? 0 })));
+        if (imagesRes.data && imagesRes.data.length > 0) {
+          const productImages = imagesRes.data.map(img => ({
+            id: img.id,
+            url: img.image_url,
+            isMain: img.is_main ?? false,
+          }));
+          setImages(productImages);
+          // Set main image as current
+          const mainImg = productImages.find(img => img.isMain);
+          if (mainImg) {
+            setCurrentImage(mainImg.url);
+          }
         }
       } catch (err) {
-        console.error('Failed to fetch variants:', err);
+        console.error('Failed to fetch product data:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchVariants();
+    fetchData();
   }, [product.supabaseId]);
 
   const selectedVariant = variants.find(v => v.size === selectedSize);
@@ -85,14 +104,40 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
       </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-        {/* Product Image */}
-        <div className="aspect-[3/4] rounded-xl bg-blk-800">
-          <OptimizedImage
-            src={product.image}
-            alt={product.name}
-            containerClassName="w-full h-full rounded-xl"
-            className="w-full h-full object-cover"
-          />
+        {/* Product Images */}
+        <div className="flex gap-3">
+          {/* Thumbnails - only show if multiple images */}
+          {images.length > 1 && (
+            <div className="flex flex-col gap-2 w-16 md:w-20 shrink-0">
+              {images.map((img) => (
+                <button
+                  key={img.id}
+                  onClick={() => setCurrentImage(img.url)}
+                  className={`aspect-square rounded-lg overflow-hidden transition-all ${
+                    currentImage === img.url
+                      ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900'
+                      : 'opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <img
+                    src={img.url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Main Image */}
+          <div className="flex-1 aspect-[3/4] rounded-xl bg-blk-800">
+            <OptimizedImage
+              src={currentImage}
+              alt={product.name}
+              containerClassName="w-full h-full rounded-xl"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
 
         {/* Product Info */}

@@ -1,9 +1,16 @@
+export interface ProductImage {
+  id: string;
+  url: string;
+  isMain: boolean;
+}
+
 export interface Product {
   id: number;
   supabaseId?: string; // Original Supabase UUID
   name: string;
   price: number;
   image: string;
+  images?: ProductImage[]; // Multiple images support
   category: 'men' | 'women';
   subCategory: string; // e.g., "BLUZA OVERSIZE", "SPODNIE CARGO"
   color: string;
