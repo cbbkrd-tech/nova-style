@@ -42,15 +42,15 @@ const ProductGrid: React.FC<ProductGridProps> = ({ title, products, onProductCli
                 </span>
               </div>
               
-              {/* Add To Cart Button - Matches Screenshot Style */}
-              <button 
+              {/* View Product Button */}
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onProductClick(product);
                 }}
                 className="w-full border border-gray-600 text-white text-[10px] font-bold uppercase tracking-widest py-2 rounded hover:bg-white hover:text-black hover:border-white transition-all duration-200 mt-auto"
               >
-                Dodaj do koszyka
+                Wybierz rozmiar
               </button>
             </div>
           </div>

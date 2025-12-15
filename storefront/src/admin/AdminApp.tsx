@@ -15,6 +15,7 @@ export default function AdminApp() {
   const [loading, setLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'women' | 'men'>('all');
 
   // Check auth on mount
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function AdminApp() {
       .eq('id', productId);
 
     if (error) {
-      alert('Błąd przy aktualizacji produktu');
+      alert('Błąd przy aktualizacji produktu: ' + error.message);
     } else {
       fetchProducts();
     }
@@ -117,8 +118,9 @@ export default function AdminApp() {
       </header>
 
       <main className="p-6 max-w-7xl mx-auto">
+        {/* Header with add button */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Produkty ({products.length})</h2>
+          <h2 className="text-xl font-bold">Produkty</h2>
           <button
             onClick={() => setShowAddForm(true)}
             className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
@@ -127,11 +129,41 @@ export default function AdminApp() {
           </button>
         </div>
 
+        {/* Category tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setCategoryFilter('all')}
+            className={`px-4 py-2 rounded font-medium transition-colors ${
+              categoryFilter === 'all' ? 'bg-white text-black' : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            Wszystkie ({products.length})
+          </button>
+          <button
+            onClick={() => setCategoryFilter('women')}
+            className={`px-4 py-2 rounded font-medium transition-colors ${
+              categoryFilter === 'women' ? 'bg-pink-600' : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            Kobiety ({products.filter(p => p.category === 'women').length})
+          </button>
+          <button
+            onClick={() => setCategoryFilter('men')}
+            className={`px-4 py-2 rounded font-medium transition-colors ${
+              categoryFilter === 'men' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            Mężczyźni ({products.filter(p => p.category === 'men').length})
+          </button>
+        </div>
+
         {loading ? (
           <div className="text-center py-10">Ładowanie...</div>
         ) : (
-          <div className="grid gap-4">
-            {products.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            {products
+              .filter(p => categoryFilter === 'all' || p.category === categoryFilter)
+              .map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -226,68 +258,90 @@ function ProductCard({
   onUpdateStock: (variantId: string, stock: number) => void;
   onEdit: () => void;
 }) {
+  const [showStock, setShowStock] = useState(false);
+
   return (
-    <div className="bg-gray-800 rounded-lg p-4">
-      <div className="flex gap-4">
+    <div className="bg-gray-800 rounded-lg overflow-hidden">
+      {/* Image */}
+      <div className="relative">
         <img
           src={product.image_url || '/images/products/placeholder.png'}
           alt={product.name}
-          className="w-24 h-32 object-cover rounded"
+          className="w-full h-32 object-cover"
         />
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-bold text-lg">{product.name}</h3>
-              <p className="text-gray-400 text-sm">
-                {product.category === 'women' ? 'Kobiety' : 'Mężczyźni'} • {product.color}
-              </p>
-              <p className="text-green-400 font-bold mt-1">
-                {(product.price / 100).toFixed(2)} PLN
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => onToggleActive(product.id, product.is_active || false)}
-                className={`px-3 py-1 rounded text-sm ${
-                  product.is_active ? 'bg-green-600' : 'bg-gray-600'
-                }`}
-              >
-                {product.is_active ? 'Aktywny' : 'Nieaktywny'}
-              </button>
-              <button
-                onClick={onEdit}
-                className="px-3 py-1 bg-blue-600 rounded text-sm"
-              >
-                Edytuj
-              </button>
-              <button
-                onClick={() => onDelete(product.id)}
-                className="px-3 py-1 bg-red-600 rounded text-sm"
-              >
-                Usuń
-              </button>
-            </div>
-          </div>
+        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
+          product.is_active ? 'bg-green-600' : 'bg-gray-600'
+        }`}>
+          {product.is_active ? 'Aktywny' : 'Ukryty'}
+        </div>
+        <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold ${
+          product.category === 'women' ? 'bg-pink-600' : 'bg-blue-600'
+        }`}>
+          {product.category === 'women' ? 'K' : 'M'}
+        </div>
+      </div>
 
-          {/* Stock by size */}
-          <div className="mt-4">
-            <p className="text-sm text-gray-400 mb-2">Stan magazynowy:</p>
-            <div className="flex gap-2 flex-wrap">
+      {/* Info */}
+      <div className="p-3">
+        <h3 className="font-bold text-sm truncate">{product.name}</h3>
+        <p className="text-gray-400 text-xs">{product.color}</p>
+        <p className="text-green-400 font-bold text-sm mt-1">
+          {(product.price / 100).toFixed(0)} PLN
+        </p>
+
+        {/* Actions */}
+        <div className="flex gap-1 mt-2">
+          <button
+            onClick={() => onToggleActive(product.id, product.is_active || false)}
+            className="flex-1 px-2 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+          >
+            {product.is_active ? 'Ukryj' : 'Pokaż'}
+          </button>
+          <button
+            onClick={onEdit}
+            className="flex-1 px-2 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+          >
+            Edytuj
+          </button>
+          <button
+            onClick={() => onDelete(product.id)}
+            className="px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded text-xs"
+          >
+            X
+          </button>
+        </div>
+
+        {/* Stock toggle */}
+        <button
+          onClick={() => setShowStock(!showStock)}
+          className="w-full mt-2 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+        >
+          {showStock ? 'Schowaj magazyn ▲' : 'Magazyn ▼'}
+        </button>
+
+        {/* Stock by size */}
+        {showStock && (
+          <div className="mt-2 pt-2 border-t border-gray-700">
+            <div className="grid grid-cols-5 gap-1">
               {product.product_variants?.map((variant) => (
-                <div key={variant.id} className="flex items-center gap-1 bg-gray-700 rounded px-2 py-1">
-                  <span className="text-xs font-bold">{variant.size}</span>
+                <div key={variant.id} className="text-center">
+                  <span className="text-xs text-gray-400 block">{variant.size}</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={variant.stock || 0}
-                    onChange={(e) => onUpdateStock(variant.id, parseInt(e.target.value) || 0)}
-                    className="w-12 bg-gray-600 rounded px-1 text-center text-sm"
-                    min="0"
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      onUpdateStock(variant.id, parseInt(val) || 0);
+                    }}
+                    className="w-full bg-gray-700 rounded px-1 py-1 text-center text-xs"
                   />
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

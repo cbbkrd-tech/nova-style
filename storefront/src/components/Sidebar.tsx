@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onCategorySelect }) 
         </nav>
 
          <div className="mt-auto p-6 text-xs text-gray-500">
-            &copy; 2023 BLK/OUT Streetwear
+            &copy; 2026 NOVA STYLE
          </div>
       </div>
     </div>

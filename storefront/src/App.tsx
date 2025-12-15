@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
+import ProductDetail from './components/ProductDetail';
 import Footer from './components/Footer';
 import CartView from './components/CartView';
 import Sidebar from './components/Sidebar';
@@ -26,6 +27,8 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>(FALLBACK_PRODUCTS);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [previousView, setPreviousView] = useState<ViewState>('home');
 
   // Fetch products from Supabase
   useEffect(() => {
@@ -45,12 +48,14 @@ function App() {
           // Map Supabase products to our Product interface
           const mappedProducts = data.map((p, index) => ({
             id: index + 1,
+            supabaseId: p.id, // Store original UUID for variant lookup
             name: p.name,
             price: p.price / 100, // Convert from grosze to PLN
             image: p.image_url || '/images/products/placeholder.png',
             category: p.category as 'men' | 'women',
             subCategory: p.category === 'women' ? 'KOBIETY' : 'MĘŻCZYŹNI',
             color: p.color,
+            description: p.description,
             showOnHomepage: p.show_on_homepage ?? true,
           }));
           setProducts(mappedProducts as any);
@@ -79,19 +84,35 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAddToCart = (product: Product) => {
-    const existing = cartItems.find(item => item.id === product.id);
+  const handleProductClick = (product: Product) => {
+    setPreviousView(currentView);
+    setSelectedProduct(product);
+    setCurrentView('product');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackFromProduct = () => {
+    setSelectedProduct(null);
+    setCurrentView(previousView);
+  };
+
+  const handleAddToCart = (product: Product, size: string = 'M', qty: number = 1) => {
+    // Check if same product with same size already in cart
+    const existing = cartItems.find(item => item.id === product.id && item.selectedSize === size);
     if (existing) {
-      handleUpdateQuantity(existing.cartId, 1);
+      handleUpdateQuantity(existing.cartId, qty);
     } else {
       const newItem: CartItem = {
         ...product,
         cartId: `new_${Date.now()}`,
-        quantity: 1,
-        selectedSize: 'M',
+        quantity: qty,
+        selectedSize: size,
       };
       setCartItems([...cartItems, newItem]);
     }
+    // Stay on product page, go back to previous view
+    setSelectedProduct(null);
+    setCurrentView(previousView);
   };
 
   const handleUpdateQuantity = (cartId: string, delta: number) => {
@@ -146,6 +167,12 @@ function App() {
                 onRemoveItem={handleRemoveItem}
               />
             </div>
+          ) : currentView === 'product' && selectedProduct ? (
+            <ProductDetail
+              product={selectedProduct}
+              onBack={handleBackFromProduct}
+              onAddToCart={handleAddToCart}
+            />
           ) : (
             <>
               {currentView === 'home' && (
@@ -160,7 +187,7 @@ function App() {
                 ) : (
                   <ProductGrid
                     products={getVisibleProducts()}
-                    onProductClick={handleAddToCart}
+                    onProductClick={handleProductClick}
                   />
                 )}
               </div>

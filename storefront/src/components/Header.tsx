@@ -1,5 +1,5 @@
 import React from 'react';
-import { MenuIcon, SearchIcon, ShoppingCartIcon } from './Icons';
+import { MenuIcon, ShoppingCartIcon } from './Icons';
 
 interface HeaderProps {
   cartCount: number;
@@ -21,16 +21,12 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick, onMenuClick, on
           </button>
           
           <div className="flex flex-col items-center absolute left-1/2 transform -translate-x-1/2 cursor-pointer" onClick={onLogoClick}>
-            <h1 className="text-4xl font-black italic tracking-tighter text-white leading-none">
-              BLK/OUT
+            <h1 className="text-3xl font-black tracking-tight text-white leading-none">
+              NOVA STYLE
             </h1>
-            <span className="text-[10px] tracking-[0.4em] text-gray-400 uppercase mt-1">Streetwear</span>
           </div>
 
-          <div className="flex items-center space-x-6">
-            <button className="text-white hover:text-gray-300">
-              <SearchIcon />
-            </button>
+          <div className="flex items-center">
             <button onClick={onCartClick} className="text-white hover:text-gray-300 relative">
               <ShoppingCartIcon count={cartCount} />
             </button>
@@ -38,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick, onMenuClick, on
         </header>
 
         {/* Sub Navigation */}
-        <nav className="flex justify-center space-x-16 pb-4 text-[13px] font-bold tracking-widest uppercase text-gray-300 border-t border-blk-800/50 pt-3 mt-1">
+        <nav className="flex justify-center space-x-16 pb-4 text-[13px] font-bold tracking-widest uppercase text-gray-300">
           <button 
             onClick={() => onCategoryClick('women')}
             className={`transition-colors duration-200 ${currentCategory === 'women' ? 'text-white' : 'hover:text-white'}`}

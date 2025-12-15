@@ -7,7 +7,7 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ onCategoryClick }) => {
   return (
     <div className="w-full px-4 md:px-6 py-6 max-w-[1400px] mx-auto">
-      <div className="grid grid-cols-2 gap-4 h-[400px] md:h-[500px]">
+      <div className="grid grid-cols-2 gap-4 h-[500px] md:h-[900px]">
         
         {/* Women Card */}
         <div 
@@ -18,7 +18,7 @@ const Hero: React.FC<HeroProps> = ({ onCategoryClick }) => {
           <img 
             src="/images/hero/hero-women.jpg"
             alt="Kobiety" 
-            className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-700"
           />
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <h2 className="text-2xl md:text-6xl font-black italic text-white tracking-tighter drop-shadow-lg">
