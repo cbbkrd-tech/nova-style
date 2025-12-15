@@ -395,13 +395,43 @@ function AddProductForm({
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState<'women' | 'men'>('women');
   const [color, setColor] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showOnHomepage, setShowOnHomepage] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    let imageUrl = null;
+
+    // Upload image if selected
+    if (imageFile) {
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(fileName, imageFile);
+
+      if (uploadError) {
+        alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
+        setLoading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
+      imageUrl = urlData.publicUrl;
+    }
 
     const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
 
@@ -413,7 +443,7 @@ function AddProductForm({
         price: Math.round(parseFloat(price) * 100),
         category,
         color,
-        image_url: imageUrl || null,
+        image_url: imageUrl,
         is_active: true,
         show_on_homepage: showOnHomepage,
       })
@@ -515,13 +545,21 @@ function AddProductForm({
             className="w-full p-3 bg-gray-700 rounded"
             required
           />
-          <input
-            type="text"
-            placeholder="URL zdjęcia (opcjonalne)"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
-          />
+
+          {/* Image upload */}
+          <div className="bg-gray-700 p-4 rounded">
+            <p className="text-sm text-gray-300 mb-2">Zdjęcie produktu:</p>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-600 file:text-white hover:file:bg-gray-500"
+            />
+            {imagePreview && (
+              <img src={imagePreview} alt="Preview" className="mt-3 w-24 h-24 object-cover rounded" />
+            )}
+          </div>
+
           <div className="flex gap-2">
             <button
               type="button"
@@ -557,13 +595,43 @@ function EditProductForm({
   const [price, setPrice] = useState((product.price / 100).toString());
   const [category, setCategory] = useState<'women' | 'men'>(product.category);
   const [color, setColor] = useState(product.color);
-  const [imageUrl, setImageUrl] = useState(product.image_url || '');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null);
   const [showOnHomepage, setShowOnHomepage] = useState((product as any).show_on_homepage ?? true);
   const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    let finalImageUrl = product.image_url;
+
+    // Upload new image if selected
+    if (imageFile) {
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(fileName, imageFile);
+
+      if (uploadError) {
+        alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
+        setLoading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
+      finalImageUrl = urlData.publicUrl;
+    }
 
     const { error } = await supabase
       .from('products')
@@ -572,7 +640,7 @@ function EditProductForm({
         price: Math.round(parseFloat(price) * 100),
         category,
         color,
-        image_url: imageUrl || null,
+        image_url: finalImageUrl,
         show_on_homepage: showOnHomepage,
       })
       .eq('id', product.id);
@@ -661,13 +729,21 @@ function EditProductForm({
             className="w-full p-3 bg-gray-700 rounded"
             required
           />
-          <input
-            type="text"
-            placeholder="URL zdjęcia (opcjonalne)"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
-          />
+
+          {/* Image upload */}
+          <div className="bg-gray-700 p-4 rounded">
+            <p className="text-sm text-gray-300 mb-2">Zdjęcie produktu:</p>
+            {imagePreview && (
+              <img src={imagePreview} alt="Current" className="mb-3 w-24 h-24 object-cover rounded" />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-600 file:text-white hover:file:bg-gray-500"
+            />
+          </div>
+
           <div className="flex gap-2">
             <button
               type="button"
