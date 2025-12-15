@@ -1,0 +1,29 @@
+{
+  "name": "nova-style-backend",
+  "version": "1.0.0",
+  "description": "MedusaJS v2 Backend for Nova-Style",
+  "type": "module",
+  "scripts": {
+    "dev": "medusa develop",
+    "start": "medusa start",
+    "build": "medusa build",
+    "seed": "medusa exec ./src/scripts/seed.ts",
+    "db:migrate": "medusa db:migrate"
+  },
+  "dependencies": {
+    "@medusajs/medusa": "^2.0.0",
+    "@medusajs/admin-sdk": "^2.0.0",
+    "@medusajs/cache-inmemory": "^2.0.0",
+    "@medusajs/event-bus-local": "^2.0.0",
+    "@medusajs/file-local": "^2.0.0",
+    "@medusajs/workflow-engine-inmemory": "^2.0.0"
+  },
+  "devDependencies": {
+    "@medusajs/medusa-cli": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
