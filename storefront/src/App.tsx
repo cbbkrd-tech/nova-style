@@ -88,12 +88,13 @@ function App() {
     setPreviousView(currentView);
     setSelectedProduct(product);
     setCurrentView('product');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   const handleBackFromProduct = () => {
     setSelectedProduct(null);
     setCurrentView(previousView);
+    window.scrollTo(0, 0);
   };
 
   const handleAddToCart = (product: Product, size: string = 'M', qty: number = 1) => {
@@ -142,7 +143,7 @@ function App() {
 
         <Header
           cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-          onCartClick={() => setCurrentView('cart')}
+          onCartClick={() => { setCurrentView('cart'); window.scrollTo(0, 0); }}
           onMenuClick={() => setIsMenuOpen(true)}
           onCategoryClick={handleCategoryChange}
           onLogoClick={() => {
