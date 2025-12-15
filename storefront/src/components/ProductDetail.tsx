@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Product, ProductVariant } from '../types/types';
 import { supabase } from '../lib/medusa';
+import OptimizedImage from './OptimizedImage';
 
 interface ProductDetailProps {
   product: Product;
@@ -77,10 +78,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         {/* Product Image */}
-        <div className="aspect-[3/4] overflow-hidden rounded-xl bg-blk-800">
-          <img
+        <div className="aspect-[3/4] rounded-xl bg-blk-800">
+          <OptimizedImage
             src={product.image}
             alt={product.name}
+            containerClassName="w-full h-full rounded-xl"
             className="w-full h-full object-cover"
           />
         </div>

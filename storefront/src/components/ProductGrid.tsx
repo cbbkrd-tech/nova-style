@@ -1,5 +1,6 @@
 import React from 'react';
 import { Product } from '../types/types';
+import OptimizedImage from './OptimizedImage';
 
 interface ProductGridProps {
   title?: string;
@@ -11,23 +12,23 @@ const ProductGrid: React.FC<ProductGridProps> = ({ title, products, onProductCli
   return (
     <div className="w-full px-4 md:px-6 py-6 max-w-[1400px] mx-auto animate-fade-in">
       {title && <h2 className="text-3xl font-black uppercase tracking-wide text-white mb-6">{title}</h2>}
-      
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {products.map((product) => (
-          <div 
-            key={product.id} 
+          <div
+            key={product.id}
             className="group flex flex-col"
           >
             {/* Image Container */}
-            <div 
-              className="relative aspect-[3/4] overflow-hidden rounded-lg bg-blk-800 mb-3 cursor-pointer"
+            <div
+              className="relative aspect-[3/4] rounded-lg bg-blk-800 mb-3 cursor-pointer"
               onClick={() => onProductClick(product)}
             >
-              <img 
-                src={product.image} 
+              <OptimizedImage
+                src={product.image}
                 alt={product.name}
+                containerClassName="w-full h-full rounded-lg"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
               />
             </div>
 
