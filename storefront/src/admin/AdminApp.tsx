@@ -101,31 +101,6 @@ export default function AdminApp() {
     }
   };
 
-  const handleAddMissingSizes = async () => {
-    if (!confirm('Dodać brakujące rozmiary (XS, XXL) do wszystkich produktów?')) return;
-
-    const sizesToAdd = ['XS', 'XXL'];
-    let added = 0;
-
-    for (const product of products) {
-      const existingSizes = product.product_variants?.map(v => v.size) || [];
-      const missingSizes = sizesToAdd.filter(s => !existingSizes.includes(s));
-
-      if (missingSizes.length > 0) {
-        const variants = missingSizes.map(size => ({
-          product_id: product.id,
-          size,
-          stock: -1, // Hidden by default
-        }));
-        await supabase.from('product_variants').insert(variants);
-        added += missingSizes.length;
-      }
-    }
-
-    alert(`Dodano ${added} brakujących rozmiarów`);
-    fetchProducts();
-  };
-
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
   }
@@ -146,20 +121,12 @@ export default function AdminApp() {
         {/* Header with add button */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Produkty</h2>
-          <div className="flex gap-2">
-            <button
-              onClick={handleAddMissingSizes}
-              className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm"
-            >
-              + Dodaj XS/XXL
-            </button>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
-            >
-              + Dodaj produkt
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+          >
+            + Dodaj produkt
+          </button>
         </div>
 
         {/* Category tabs */}
@@ -358,24 +325,11 @@ function ProductCard({
             <p className="text-[10px] text-gray-500 mb-1">-1 = ukryty, 0 = niedostępny</p>
             <div className="grid grid-cols-6 gap-1">
               {sortBySize(product.product_variants || []).map((variant) => (
-                <div key={variant.id} className="text-center">
-                  <span className="text-xs text-gray-400 block">{variant.size}</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={variant.stock ?? 0}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9-]/g, '');
-                      const num = parseInt(val);
-                      if (!isNaN(num)) {
-                        onUpdateStock(variant.id, num);
-                      }
-                    }}
-                    className={`w-full rounded px-1 py-1 text-center text-xs ${
-                      (variant.stock ?? 0) < 0 ? 'bg-red-900' : 'bg-gray-700'
-                    }`}
-                  />
-                </div>
+                <StockInput
+                  key={variant.id}
+                  variant={variant}
+                  onUpdateStock={onUpdateStock}
+                />
               ))}
             </div>
           </div>
@@ -389,6 +343,37 @@ const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 function sortBySize(variants: ProductVariant[]) {
   return [...variants].sort((a, b) => SIZE_ORDER.indexOf(a.size) - SIZE_ORDER.indexOf(b.size));
+}
+
+// Stock input with local state - saves only on blur
+function StockInput({
+  variant,
+  onUpdateStock,
+}: {
+  variant: ProductVariant;
+  onUpdateStock: (variantId: string, stock: number) => void;
+}) {
+  const [localValue, setLocalValue] = useState(variant.stock.toString());
+
+  const handleBlur = () => {
+    const newStock = parseInt(localValue, 10);
+    if (!isNaN(newStock) && newStock !== variant.stock) {
+      onUpdateStock(variant.id, newStock);
+    }
+  };
+
+  return (
+    <div className="text-center">
+      <span className="text-[10px] text-gray-400 block">{variant.size}</span>
+      <input
+        type="number"
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
+        onBlur={handleBlur}
+        className="w-full p-1 bg-gray-700 rounded text-xs text-center"
+      />
+    </div>
+  );
 }
 
 function AddProductForm({
