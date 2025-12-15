@@ -1,6 +1,6 @@
 import React from 'react';
 import { HomeIcon, SearchIcon, ShoppingCartIcon, UserIcon } from './Icons';
-import { ViewState } from '../types';
+import { ViewState } from '../types/types';
 
 interface BottomNavProps {
   currentView: ViewState;

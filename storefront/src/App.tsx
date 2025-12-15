@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
@@ -6,104 +6,76 @@ import Footer from './components/Footer';
 import CartView from './components/CartView';
 import Sidebar from './components/Sidebar';
 import { Product, CartItem, ViewState } from './types/types';
+import { supabase } from './lib/medusa';
 
-// 8 products from uploaded images
-const ALL_PRODUCTS: Product[] = [
-  // Women (4 products)
-  {
-    id: 1,
-    name: "DRES KHAKI",
-    subCategory: "KOBIETY",
-    price: 449,
-    category: 'women',
-    color: "KHAKI",
-    image: "/images/products/dres-khaki-kobieta.png"
-  },
-  {
-    id: 2,
-    name: "SZARA BLUZA",
-    subCategory: "KOBIETY",
-    price: 249,
-    category: 'women',
-    color: "SZARY",
-    image: "/images/products/szara-bluza-kobieta.png"
-  },
-  {
-    id: 3,
-    name: "DRES GRAFITOWY",
-    subCategory: "KOBIETY",
-    price: 399,
-    category: 'women',
-    color: "GRAFITOWY",
-    image: "/images/products/dres-grafitowy-kobieta.png"
-  },
-  {
-    id: 4,
-    name: "TSHIRT CZARNY",
-    subCategory: "KOBIETY",
-    price: 139,
-    category: 'women',
-    color: "CZARNY",
-    image: "/images/products/tshirt-czarny-kobieta.png"
-  },
-  // Men (4 products)
-  {
-    id: 5,
-    name: "DRES CZARNY",
-    subCategory: "MĘŻCZYŹNI",
-    price: 449,
-    category: 'men',
-    color: "CZARNY",
-    image: "/images/products/dres-czarny-mezczyzna.png"
-  },
-  {
-    id: 6,
-    name: "KURTKA JEANSOWA CZARNA",
-    subCategory: "MĘŻCZYŹNI",
-    price: 329,
-    category: 'men',
-    color: "CZARNY",
-    image: "/images/products/kurtka-jeansowa-mezczyzna.jpg"
-  },
-  {
-    id: 7,
-    name: "TSHIRT CZARNY",
-    subCategory: "MĘŻCZYŹNI",
-    price: 149,
-    category: 'men',
-    color: "CZARNY",
-    image: "/images/products/tshirt-czarny-mezczyzna.png"
-  },
-  {
-    id: 8,
-    name: "BLUZA KHAKI",
-    subCategory: "MĘŻCZYŹNI",
-    price: 279,
-    category: 'men',
-    color: "KHAKI",
-    image: "/images/products/bluza-khaki-mezczyzna.jpg"
-  },
+// Fallback products in case Supabase fails
+const FALLBACK_PRODUCTS: Product[] = [
+  { id: 1, name: "DRES KHAKI", subCategory: "KOBIETY", price: 449, category: 'women', color: "KHAKI", image: "/images/products/dres-khaki-kobieta.png" },
+  { id: 2, name: "SZARA BLUZA", subCategory: "KOBIETY", price: 249, category: 'women', color: "SZARY", image: "/images/products/szara-bluza-kobieta.png" },
+  { id: 3, name: "DRES GRAFITOWY", subCategory: "KOBIETY", price: 399, category: 'women', color: "GRAFITOWY", image: "/images/products/dres-grafitowy-kobieta.png" },
+  { id: 4, name: "TSHIRT CZARNY", subCategory: "KOBIETY", price: 139, category: 'women', color: "CZARNY", image: "/images/products/tshirt-czarny-kobieta.png" },
+  { id: 5, name: "DRES CZARNY", subCategory: "MĘŻCZYŹNI", price: 449, category: 'men', color: "CZARNY", image: "/images/products/dres-czarny-mezczyzna.png" },
+  { id: 6, name: "KURTKA JEANSOWA CZARNA", subCategory: "MĘŻCZYŹNI", price: 329, category: 'men', color: "CZARNY", image: "/images/products/kurtka-jeansowa-mezczyzna.jpg" },
+  { id: 7, name: "TSHIRT CZARNY", subCategory: "MĘŻCZYŹNI", price: 149, category: 'men', color: "CZARNY", image: "/images/products/tshirt-czarny-mezczyzna.png" },
+  { id: 8, name: "BLUZA KHAKI", subCategory: "MĘŻCZYŹNI", price: 279, category: 'men', color: "KHAKI", image: "/images/products/bluza-khaki-mezczyzna.jpg" },
 ];
 
-const INITIAL_CART: CartItem[] = [];
-
 function App() {
-  const [currentView, setCurrentView] = useState<ViewState>('home'); 
-  const [cartItems, setCartItems] = useState<CartItem[]>(INITIAL_CART);
+  const [currentView, setCurrentView] = useState<ViewState>('home');
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>(FALLBACK_PRODUCTS);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('is_active', true);
+
+        if (error) {
+          console.error('Supabase error:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Map Supabase products to our Product interface
+          const mappedProducts = data.map((p, index) => ({
+            id: index + 1,
+            name: p.name,
+            price: p.price / 100, // Convert from grosze to PLN
+            image: p.image_url || '/images/products/placeholder.png',
+            category: p.category as 'men' | 'women',
+            subCategory: p.category === 'women' ? 'KOBIETY' : 'MĘŻCZYŹNI',
+            color: p.color,
+            showOnHomepage: p.show_on_homepage ?? true,
+          }));
+          setProducts(mappedProducts as any);
+        }
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
 
   // Helper to filter products based on category selection
   const getVisibleProducts = () => {
-    if (currentView === 'men') return ALL_PRODUCTS.filter(p => p.category === 'men');
-    if (currentView === 'women') return ALL_PRODUCTS.filter(p => p.category === 'women');
-    
-    // 'home' returns all products
-    return ALL_PRODUCTS; 
+    if (currentView === 'men') return products.filter(p => p.category === 'men');
+    if (currentView === 'women') return products.filter(p => p.category === 'women');
+    // Homepage shows only products marked for homepage
+    return products.filter(p => (p as any).showOnHomepage !== false);
   };
 
   const handleCategoryChange = (category: 'men' | 'women') => {
     setCurrentView(category);
-    setIsMenuOpen(false); // Close menu if open
+    setIsMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -140,17 +112,17 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#222222] text-white font-sans selection:bg-white selection:text-black flex flex-col">
-        
-        <Sidebar 
-          isOpen={isMenuOpen} 
-          onClose={() => setIsMenuOpen(false)} 
-          onCategorySelect={handleCategoryChange} 
+
+        <Sidebar
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          onCategorySelect={handleCategoryChange}
         />
 
-        <Header 
-          cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} 
+        <Header
+          cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
           onCartClick={() => setCurrentView('cart')}
-          onMenuClick={() => setIsMenuOpen(true)} 
+          onMenuClick={() => setIsMenuOpen(true)}
           onCategoryClick={handleCategoryChange}
           onLogoClick={() => {
             setCurrentView('home');
@@ -162,31 +134,35 @@ function App() {
         <main className="flex-grow">
           {isCartView ? (
              <div className="max-w-[1400px] mx-auto w-full">
-              <button 
-                onClick={() => setCurrentView('home')} 
+              <button
+                onClick={() => setCurrentView('home')}
                 className="mt-6 ml-6 text-sm text-gray-400 hover:text-white"
               >
                 &larr; Powrót do sklepu
               </button>
-              <CartView 
-                items={cartItems} 
+              <CartView
+                items={cartItems}
                 onUpdateQuantity={handleUpdateQuantity}
                 onRemoveItem={handleRemoveItem}
               />
             </div>
           ) : (
             <>
-              {/* Hero Section - Only shown on Home view */}
               {currentView === 'home' && (
                 <Hero onCategoryClick={handleCategoryChange} />
               )}
-              
-              {/* Product Row */}
+
               <div id="product-grid">
-                <ProductGrid 
-                  products={getVisibleProducts()} 
-                  onProductClick={handleAddToCart}
-                />
+                {loading ? (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                  </div>
+                ) : (
+                  <ProductGrid
+                    products={getVisibleProducts()}
+                    onProductClick={handleAddToCart}
+                  />
+                )}
               </div>
             </>
           )}

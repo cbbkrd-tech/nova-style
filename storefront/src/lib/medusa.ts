@@ -1,10 +1,14 @@
-import Medusa from '@medusajs/js-sdk';
+// Supabase client for Nova-Style
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database';
 
-const MEDUSA_BACKEND_URL = import.meta.env.VITE_MEDUSA_BACKEND_URL || 'http://localhost:9000';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const medusa = new Medusa({
-  baseUrl: MEDUSA_BACKEND_URL,
-  debug: import.meta.env.DEV,
-});
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
 
-export default medusa;
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+
+export default supabase;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CartItem } from '../types';
+import { CartItem } from '../types/types';
 import { MinusIcon, PlusIcon, XIcon } from './Icons';
 
 interface CartViewProps {

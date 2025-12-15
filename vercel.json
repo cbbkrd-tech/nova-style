@@ -1,0 +1,6 @@
+{
+  "framework": "vite",
+  "installCommand": "cd storefront && npm install",
+  "buildCommand": "cd storefront && npm run build",
+  "outputDirectory": "storefront/dist"
+}

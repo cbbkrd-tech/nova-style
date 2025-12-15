@@ -1,56 +1,87 @@
-import { useQuery } from '@tanstack/react-query';
-import medusa from '../lib/medusa';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/medusa';
+import type { Tables } from '../types/database';
 
-export interface MedusaProduct {
-  id: string;
-  title: string;
-  handle: string;
-  thumbnail: string | null;
-  images: Array<{ url: string }>;
-  variants: Array<{
-    id: string;
-    title: string;
-    prices: Array<{
-      amount: number;
-      currency_code: string;
-    }>;
-  }>;
-  metadata?: {
-    category?: 'men' | 'women';
-    color?: string;
-    subCategory?: string;
-  };
+export type DbProduct = Tables<'products'>;
+export type DbProductVariant = Tables<'product_variants'>;
+
+export interface ProductWithVariants extends DbProduct {
+  variants: DbProductVariant[];
 }
 
 export function useProducts(category?: 'men' | 'women') {
-  return useQuery({
-    queryKey: ['products', category],
-    queryFn: async () => {
-      const { products } = await medusa.store.product.list({
-        limit: 100,
-      });
+  const [products, setProducts] = useState<ProductWithVariants[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-      // Filter by category if provided
-      if (category && products) {
-        return products.filter(
-          (p: MedusaProduct) => p.metadata?.category === category
-        );
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        setLoading(true);
+
+        let query = supabase
+          .from('products')
+          .select(`
+            *,
+            variants:product_variants(*)
+          `)
+          .eq('is_active', true);
+
+        if (category) {
+          query = query.eq('category', category);
+        }
+
+        const { data, error: fetchError } = await query;
+
+        if (fetchError) throw fetchError;
+
+        setProducts((data as ProductWithVariants[]) || []);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to fetch products'));
+      } finally {
+        setLoading(false);
       }
+    }
 
-      return products || [];
-    },
-  });
+    fetchProducts();
+  }, [category]);
+
+  return { products, loading, error };
 }
 
-export function useProduct(handle: string) {
-  return useQuery({
-    queryKey: ['product', handle],
-    queryFn: async () => {
-      const { products } = await medusa.store.product.list({
-        handle,
-      });
-      return products?.[0] || null;
-    },
-    enabled: !!handle,
-  });
+export function useProduct(slug: string) {
+  const [product, setProduct] = useState<ProductWithVariants | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    async function fetchProduct() {
+      if (!slug) return;
+
+      try {
+        setLoading(true);
+
+        const { data, error: fetchError } = await supabase
+          .from('products')
+          .select(`
+            *,
+            variants:product_variants(*)
+          `)
+          .eq('slug', slug)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        setProduct(data as ProductWithVariants);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to fetch product'));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProduct();
+  }, [slug]);
+
+  return { product, loading, error };
 }
