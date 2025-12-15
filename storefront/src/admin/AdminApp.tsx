@@ -160,7 +160,7 @@ export default function AdminApp() {
         {loading ? (
           <div className="text-center py-10">Ładowanie...</div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {products
               .filter(p => categoryFilter === 'all' || p.category === categoryFilter)
               .map((product) => (
@@ -370,7 +370,7 @@ function StockInput({
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         onBlur={handleBlur}
-        className="w-full p-1 bg-gray-700 rounded text-xs text-center"
+        className="w-full p-1 bg-gray-700 rounded text-xs text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
     </div>
   );
