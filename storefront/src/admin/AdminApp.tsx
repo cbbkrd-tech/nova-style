@@ -322,6 +322,7 @@ function ProductCard({
         {/* Stock by size */}
         {showStock && (
           <div className="mt-2 pt-2 border-t border-gray-700">
+            <p className="text-[10px] text-gray-500 mb-1">-1 = ukryty, 0 = niedostępny</p>
             <div className="grid grid-cols-6 gap-1">
               {sortBySize(product.product_variants || []).map((variant) => (
                 <div key={variant.id} className="text-center">
@@ -329,13 +330,17 @@ function ProductCard({
                   <input
                     type="text"
                     inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={variant.stock || 0}
+                    value={variant.stock ?? 0}
                     onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '');
-                      onUpdateStock(variant.id, parseInt(val) || 0);
+                      const val = e.target.value.replace(/[^0-9-]/g, '');
+                      const num = parseInt(val);
+                      if (!isNaN(num)) {
+                        onUpdateStock(variant.id, num);
+                      }
                     }}
-                    className="w-full bg-gray-700 rounded px-1 py-1 text-center text-xs"
+                    className={`w-full rounded px-1 py-1 text-center text-xs ${
+                      (variant.stock ?? 0) < 0 ? 'bg-red-900' : 'bg-gray-700'
+                    }`}
                   />
                 </div>
               ))}
@@ -366,14 +371,7 @@ function AddProductForm({
   const [color, setColor] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [showOnHomepage, setShowOnHomepage] = useState(true);
-  const [selectedSizes, setSelectedSizes] = useState<Record<string, boolean>>({
-    'XS': true, 'S': true, 'M': true, 'L': true, 'XL': true, 'XXL': true
-  });
   const [loading, setLoading] = useState(false);
-
-  const toggleSize = (size: string) => {
-    setSelectedSizes(prev => ({ ...prev, [size]: !prev[size] }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -402,9 +400,8 @@ function AddProductForm({
       return;
     }
 
-    // Add selected sizes only
-    const sizes = SIZE_ORDER.filter(size => selectedSizes[size]);
-    const variants = sizes.map((size) => ({
+    // Add all sizes (use -1 stock to hide, 0 for out of stock)
+    const variants = SIZE_ORDER.map((size) => ({
       product_id: product.id,
       size,
       stock: 10,
@@ -482,24 +479,6 @@ function AddProductForm({
                 <p className="text-sm text-gray-400">Produkt będzie widoczny na głównej stronie sklepu</p>
               </div>
             </label>
-          </div>
-
-          {/* Size selection */}
-          <div className="bg-gray-700 p-4 rounded">
-            <p className="text-sm text-gray-300 mb-3">Dostępne rozmiary:</p>
-            <div className="flex flex-wrap gap-2">
-              {SIZE_ORDER.map(size => (
-                <label key={size} className="flex items-center gap-2 cursor-pointer bg-gray-600 px-3 py-2 rounded">
-                  <input
-                    type="checkbox"
-                    checked={selectedSizes[size]}
-                    onChange={() => toggleSize(size)}
-                    className="w-4 h-4"
-                  />
-                  <span className="font-medium">{size}</span>
-                </label>
-              ))}
-            </div>
           </div>
 
           <input

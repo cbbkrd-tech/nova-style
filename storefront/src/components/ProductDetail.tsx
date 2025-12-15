@@ -129,7 +129,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               </div>
             ) : variants.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {sortBySize(variants).map((variant) => {
+                {sortBySize(variants).filter(v => v.stock >= 0).map((variant) => {
                   const isSelected = selectedSize === variant.size;
                   const outOfStock = variant.stock === 0;
 
