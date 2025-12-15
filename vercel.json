@@ -2,5 +2,8 @@
   "framework": "vite",
   "installCommand": "cd storefront && npm install",
   "buildCommand": "cd storefront && npm run build",
-  "outputDirectory": "storefront/dist"
+  "outputDirectory": "storefront/dist",
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" }
+  ]
 }

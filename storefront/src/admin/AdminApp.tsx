@@ -28,7 +28,7 @@ export default function AdminApp() {
 
   const handleLogin = async (email: string, password: string) => {
     // Simple admin login - in production use Supabase Auth
-    if (email === 'admin@nova-style.pl' && password === 'admin123') {
+    if (email === 'admin123' && password === 'admin123') {
       localStorage.setItem('admin_session', 'true');
       setIsAuthenticated(true);
       fetchProducts();
@@ -246,7 +246,7 @@ function LoginForm({ onLogin }: { onLogin: (email: string, password: string) => 
           </button>
         </form>
         <p className="text-gray-500 text-sm mt-4 text-center">
-          Demo: admin@nova-style.pl / admin123
+          Demo: admin123 / admin123
         </p>
       </div>
     </div>
