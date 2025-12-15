@@ -41,7 +41,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
         }
 
         if (data && data.length > 0) {
-          setVariants(data);
+          setVariants(data.map(v => ({ ...v, stock: v.stock ?? 0 })));
         }
       } catch (err) {
         console.error('Failed to fetch variants:', err);
