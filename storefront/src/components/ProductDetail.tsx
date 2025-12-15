@@ -3,6 +3,12 @@ import { Product, ProductVariant } from '../types/types';
 import { supabase } from '../lib/medusa';
 import OptimizedImage from './OptimizedImage';
 
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+function sortBySize(variants: ProductVariant[]) {
+  return [...variants].sort((a, b) => SIZE_ORDER.indexOf(a.size) - SIZE_ORDER.indexOf(b.size));
+}
+
 interface ProductDetailProps {
   product: Product;
   onBack: () => void;
@@ -20,10 +26,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
       if (!product.supabaseId) {
         // Fallback for demo products without Supabase ID
         setVariants([
-          { id: '1', size: 'S', stock: 5 },
-          { id: '2', size: 'M', stock: 10 },
-          { id: '3', size: 'L', stock: 8 },
-          { id: '4', size: 'XL', stock: 3 },
+          { id: '1', size: 'XS', stock: 3 },
+          { id: '2', size: 'S', stock: 5 },
+          { id: '3', size: 'M', stock: 10 },
+          { id: '4', size: 'L', stock: 8 },
+          { id: '5', size: 'XL', stock: 3 },
+          { id: '6', size: 'XXL', stock: 2 },
         ]);
         setLoading(false);
         return;
@@ -121,7 +129,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               </div>
             ) : variants.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {variants.map((variant) => {
+                {sortBySize(variants).map((variant) => {
                   const isSelected = selectedSize === variant.size;
                   const outOfStock = variant.stock === 0;
 

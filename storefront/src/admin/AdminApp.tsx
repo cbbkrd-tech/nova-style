@@ -322,8 +322,8 @@ function ProductCard({
         {/* Stock by size */}
         {showStock && (
           <div className="mt-2 pt-2 border-t border-gray-700">
-            <div className="grid grid-cols-5 gap-1">
-              {product.product_variants?.map((variant) => (
+            <div className="grid grid-cols-6 gap-1">
+              {sortBySize(product.product_variants || []).map((variant) => (
                 <div key={variant.id} className="text-center">
                   <span className="text-xs text-gray-400 block">{variant.size}</span>
                   <input
@@ -347,6 +347,12 @@ function ProductCard({
   );
 }
 
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+function sortBySize(variants: ProductVariant[]) {
+  return [...variants].sort((a, b) => SIZE_ORDER.indexOf(a.size) - SIZE_ORDER.indexOf(b.size));
+}
+
 function AddProductForm({
   onClose,
   onSuccess,
@@ -360,7 +366,14 @@ function AddProductForm({
   const [color, setColor] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [showOnHomepage, setShowOnHomepage] = useState(true);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, boolean>>({
+    'XS': true, 'S': true, 'M': true, 'L': true, 'XL': true, 'XXL': true
+  });
   const [loading, setLoading] = useState(false);
+
+  const toggleSize = (size: string) => {
+    setSelectedSizes(prev => ({ ...prev, [size]: !prev[size] }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -389,8 +402,8 @@ function AddProductForm({
       return;
     }
 
-    // Add default sizes
-    const sizes = ['XS', 'S', 'M', 'L', 'XL'];
+    // Add selected sizes only
+    const sizes = SIZE_ORDER.filter(size => selectedSizes[size]);
     const variants = sizes.map((size) => ({
       product_id: product.id,
       size,
@@ -469,6 +482,24 @@ function AddProductForm({
                 <p className="text-sm text-gray-400">Produkt będzie widoczny na głównej stronie sklepu</p>
               </div>
             </label>
+          </div>
+
+          {/* Size selection */}
+          <div className="bg-gray-700 p-4 rounded">
+            <p className="text-sm text-gray-300 mb-3">Dostępne rozmiary:</p>
+            <div className="flex flex-wrap gap-2">
+              {SIZE_ORDER.map(size => (
+                <label key={size} className="flex items-center gap-2 cursor-pointer bg-gray-600 px-3 py-2 rounded">
+                  <input
+                    type="checkbox"
+                    checked={selectedSizes[size]}
+                    onChange={() => toggleSize(size)}
+                    className="w-4 h-4"
+                  />
+                  <span className="font-medium">{size}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           <input
