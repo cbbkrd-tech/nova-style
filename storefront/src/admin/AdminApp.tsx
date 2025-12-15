@@ -61,6 +61,15 @@ export default function AdminApp() {
   };
 
   const handleUpdateStock = async (variantId: string, newStock: number) => {
+    // Update local state immediately (optimistic update)
+    setProducts(prev => prev.map(product => ({
+      ...product,
+      product_variants: product.product_variants.map(v =>
+        v.id === variantId ? { ...v, stock: newStock } : v
+      )
+    })));
+
+    // Save to database in background
     const { error } = await supabase
       .from('product_variants')
       .update({ stock: newStock })
@@ -68,8 +77,7 @@ export default function AdminApp() {
 
     if (error) {
       alert('Błąd przy aktualizacji stanu magazynowego');
-    } else {
-      fetchProducts();
+      fetchProducts(); // Revert on error
     }
   };
 
