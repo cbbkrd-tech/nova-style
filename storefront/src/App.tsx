@@ -29,6 +29,34 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [previousView, setPreviousView] = useState<ViewState>('home');
+  const [pendingProductId, setPendingProductId] = useState<string | null>(null);
+
+  // Handle URL hash for product deep linking
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#product/')) {
+      const productId = hash.replace('#product/', '');
+      setPendingProductId(productId);
+    } else if (hash === '#cart') {
+      setCurrentView('cart');
+    } else if (hash === '#women') {
+      setCurrentView('women');
+    } else if (hash === '#men') {
+      setCurrentView('men');
+    }
+  }, []);
+
+  // Open product when products are loaded and we have a pending product ID
+  useEffect(() => {
+    if (pendingProductId && products.length > 0 && !loading) {
+      const product = products.find(p => p.supabaseId === pendingProductId || String(p.id) === pendingProductId);
+      if (product) {
+        setSelectedProduct(product);
+        setCurrentView('product');
+      }
+      setPendingProductId(null);
+    }
+  }, [pendingProductId, products, loading]);
 
   // Fetch products from Supabase
   useEffect(() => {
@@ -81,6 +109,7 @@ function App() {
   const handleCategoryChange = (category: 'men' | 'women') => {
     setCurrentView(category);
     setIsMenuOpen(false);
+    window.location.hash = category;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -88,12 +117,14 @@ function App() {
     setPreviousView(currentView);
     setSelectedProduct(product);
     setCurrentView('product');
+    window.location.hash = `product/${product.supabaseId || product.id}`;
     window.scrollTo(0, 0);
   };
 
   const handleBackFromProduct = () => {
     setSelectedProduct(null);
     setCurrentView(previousView);
+    window.location.hash = previousView === 'home' ? '' : previousView;
     window.scrollTo(0, 0);
   };
 
@@ -143,11 +174,13 @@ function App() {
 
         <Header
           cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-          onCartClick={() => { setCurrentView('cart'); window.scrollTo(0, 0); }}
+          onCartClick={() => { setCurrentView('cart'); window.location.hash = 'cart'; window.scrollTo(0, 0); }}
           onMenuClick={() => setIsMenuOpen(true)}
           onCategoryClick={handleCategoryChange}
           onLogoClick={() => {
             setCurrentView('home');
+            setSelectedProduct(null);
+            window.location.hash = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           currentCategory={currentView !== 'cart' && currentView !== 'home' ? currentView : ''}

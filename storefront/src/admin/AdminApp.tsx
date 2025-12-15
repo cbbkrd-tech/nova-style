@@ -101,6 +101,31 @@ export default function AdminApp() {
     }
   };
 
+  const handleAddMissingSizes = async () => {
+    if (!confirm('Dodać brakujące rozmiary (XS, XXL) do wszystkich produktów?')) return;
+
+    const sizesToAdd = ['XS', 'XXL'];
+    let added = 0;
+
+    for (const product of products) {
+      const existingSizes = product.product_variants?.map(v => v.size) || [];
+      const missingSizes = sizesToAdd.filter(s => !existingSizes.includes(s));
+
+      if (missingSizes.length > 0) {
+        const variants = missingSizes.map(size => ({
+          product_id: product.id,
+          size,
+          stock: -1, // Hidden by default
+        }));
+        await supabase.from('product_variants').insert(variants);
+        added += missingSizes.length;
+      }
+    }
+
+    alert(`Dodano ${added} brakujących rozmiarów`);
+    fetchProducts();
+  };
+
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
   }
@@ -121,12 +146,20 @@ export default function AdminApp() {
         {/* Header with add button */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Produkty</h2>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
-          >
-            + Dodaj produkt
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAddMissingSizes}
+              className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm"
+            >
+              + Dodaj XS/XXL
+            </button>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+            >
+              + Dodaj produkt
+            </button>
+          </div>
         </div>
 
         {/* Category tabs */}
