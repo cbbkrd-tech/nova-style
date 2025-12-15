@@ -353,11 +353,11 @@ function StockInput({
   variant: ProductVariant;
   onUpdateStock: (variantId: string, stock: number) => void;
 }) {
-  const [localValue, setLocalValue] = useState(variant.stock.toString());
+  const [localValue, setLocalValue] = useState((variant.stock ?? 0).toString());
 
   const handleBlur = () => {
     const newStock = parseInt(localValue, 10);
-    if (!isNaN(newStock) && newStock !== variant.stock) {
+    if (!isNaN(newStock) && newStock !== (variant.stock ?? 0)) {
       onUpdateStock(variant.id, newStock);
     }
   };
