@@ -33,26 +33,13 @@ const ProductGrid: React.FC<ProductGridProps> = ({ title, products, onProductCli
             </div>
 
             {/* Product Info */}
-            <div className="flex flex-col flex-grow">
+            <div className="cursor-pointer" onClick={() => onProductClick(product)}>
               <h3 className="text-[13px] font-bold text-gray-200 uppercase tracking-tight leading-tight mb-1 truncate">
                 {product.name}
               </h3>
-              <div className="flex justify-between items-baseline mb-3">
-                 <span className="text-[13px] font-bold text-white">
-                  {product.price} PLN
-                </span>
-              </div>
-              
-              {/* View Product Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onProductClick(product);
-                }}
-                className="w-full border border-gray-600 text-white text-[10px] font-bold uppercase tracking-widest py-2 rounded hover:bg-white hover:text-black hover:border-white transition-all duration-200 mt-auto"
-              >
-                Wybierz rozmiar
-              </button>
+              <span className="text-[13px] font-bold text-white">
+                {product.price} PLN
+              </span>
             </div>
           </div>
         ))}
