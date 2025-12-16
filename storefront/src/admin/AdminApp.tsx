@@ -124,12 +124,12 @@ export default function AdminApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <header className="bg-black p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-black">NOVA-STYLE Admin</h1>
+    <div className="min-h-screen bg-[#37393D] text-white">
+      <header className="bg-[#26272B] p-4 flex justify-between items-center border-b border-gray-700">
+        <h1 className="text-xl tracking-[0.1em]" style={{ fontFamily: "'Playfair Display', serif" }}>NOVA STYLE <span className="text-gray-400 text-sm font-normal">Admin</span></h1>
         <button
           onClick={handleLogout}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm"
+          className="px-4 py-2 border border-gray-500 hover:border-white hover:text-white text-gray-300 text-sm transition-colors"
         >
           Wyloguj
         </button>
@@ -138,10 +138,10 @@ export default function AdminApp() {
       <main className="p-6 max-w-7xl mx-auto">
         {/* Header with add button */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Produkty</h2>
+          <h2 className="text-lg font-medium tracking-wide">Produkty</h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+            className="px-4 py-2 bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors"
           >
             + Dodaj produkt
           </button>
@@ -151,24 +151,24 @@ export default function AdminApp() {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setCategoryFilter('all')}
-            className={`px-4 py-2 rounded font-medium transition-colors ${
-              categoryFilter === 'all' ? 'bg-white text-black' : 'bg-gray-700 hover:bg-gray-600'
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              categoryFilter === 'all' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
             }`}
           >
             Wszystkie ({products.length})
           </button>
           <button
             onClick={() => setCategoryFilter('women')}
-            className={`px-4 py-2 rounded font-medium transition-colors ${
-              categoryFilter === 'women' ? 'bg-pink-600' : 'bg-gray-700 hover:bg-gray-600'
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              categoryFilter === 'women' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
             }`}
           >
             Kobiety ({products.filter(p => p.category === 'women').length})
           </button>
           <button
             onClick={() => setCategoryFilter('men')}
-            className={`px-4 py-2 rounded font-medium transition-colors ${
-              categoryFilter === 'men' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              categoryFilter === 'men' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
             }`}
           >
             Mężczyźni ({products.filter(p => p.category === 'men').length})
@@ -224,9 +224,10 @@ function LoginForm({ onLogin }: { onLogin: (email: string, password: string) => 
   const [password, setPassword] = useState('');
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md">
-        <h1 className="text-2xl font-black text-white mb-6 text-center">NOVA-STYLE Admin</h1>
+    <div className="min-h-screen bg-[#37393D] flex items-center justify-center">
+      <div className="bg-[#26272B] p-8 w-full max-w-md border border-gray-700">
+        <h1 className="text-2xl text-white mb-2 text-center tracking-[0.1em]" style={{ fontFamily: "'Playfair Display', serif" }}>NOVA STYLE</h1>
+        <p className="text-gray-400 text-sm text-center mb-8 tracking-widest">ADMIN PANEL</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -239,23 +240,23 @@ function LoginForm({ onLogin }: { onLogin: (email: string, password: string) => 
             placeholder="Login"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded text-white"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
           />
           <input
             type="password"
             placeholder="Hasło"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded text-white"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
           />
           <button
             type="submit"
-            className="w-full p-3 bg-white text-black font-bold rounded hover:bg-gray-200"
+            className="w-full p-3 bg-white text-black font-medium hover:bg-gray-200 transition-colors tracking-widest text-sm"
           >
-            Zaloguj
+            ZALOGUJ
           </button>
         </form>
-        <p className="text-gray-500 text-sm mt-4 text-center">
+        <p className="text-gray-500 text-xs mt-6 text-center">
           Demo: admin123 / admin123
         </p>
       </div>
@@ -279,7 +280,7 @@ function ProductCard({
   const [showStock, setShowStock] = useState(false);
 
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden">
+    <div className="bg-[#26272B] overflow-hidden border border-gray-700">
       {/* Image */}
       <div className="relative">
         <img
@@ -287,23 +288,21 @@ function ProductCard({
           alt={product.name}
           className="w-full h-32 object-cover"
         />
-        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
-          product.is_active ? 'bg-green-600' : 'bg-gray-600'
+        <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium ${
+          product.is_active ? 'bg-white text-black' : 'bg-gray-600 text-white'
         }`}>
           {product.is_active ? 'Aktywny' : 'Ukryty'}
         </div>
-        <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold ${
-          product.category === 'women' ? 'bg-pink-600' : 'bg-blue-600'
-        }`}>
+        <div className="absolute top-2 left-2 px-2 py-1 bg-black/70 text-white text-xs font-medium">
           {product.category === 'women' ? 'K' : 'M'}
         </div>
       </div>
 
       {/* Info */}
       <div className="p-3">
-        <h3 className="font-bold text-sm truncate">{product.name}</h3>
+        <h3 className="font-medium text-sm truncate">{product.name}</h3>
         <p className="text-gray-400 text-xs">{product.color}</p>
-        <p className="text-green-400 font-bold text-sm mt-1">
+        <p className="text-white font-medium text-sm mt-1">
           {(product.price / 100).toFixed(0)} PLN
         </p>
 
@@ -311,28 +310,28 @@ function ProductCard({
         <div className="flex gap-1 mt-2">
           <button
             onClick={() => onToggleActive(product.id, product.is_active || false)}
-            className="flex-1 px-2 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+            className="flex-1 px-2 py-1.5 bg-[#37393D] hover:bg-gray-600 text-xs border border-gray-600"
           >
             {product.is_active ? 'Ukryj' : 'Pokaż'}
           </button>
           <button
             onClick={onEdit}
-            className="flex-1 px-2 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+            className="flex-1 px-2 py-1.5 bg-white text-black hover:bg-gray-200 text-xs"
           >
             Edytuj
           </button>
           <button
             onClick={() => onDelete(product.id)}
-            className="px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded text-xs"
+            className="px-2 py-1.5 bg-[#37393D] hover:bg-gray-500 text-xs border border-gray-600"
           >
-            X
+            ×
           </button>
         </div>
 
         {/* Stock toggle */}
         <button
           onClick={() => setShowStock(!showStock)}
-          className="w-full mt-2 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+          className="w-full mt-2 py-1.5 bg-[#37393D] hover:bg-gray-600 text-xs border border-gray-600"
         >
           {showStock ? 'Schowaj magazyn ▲' : 'Magazyn ▼'}
         </button>
@@ -388,7 +387,7 @@ function StockInput({
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         onBlur={handleBlur}
-        className="w-full p-1 bg-gray-700 rounded text-xs text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className="w-full p-1 bg-[#37393D] border border-gray-600 text-xs text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
     </div>
   );
@@ -516,15 +515,15 @@ function AddProductForm({
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Dodaj produkt</h2>
+      <div className="bg-[#26272B] p-6 border border-gray-700 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-medium mb-4 tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>Dodaj produkt</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             placeholder="Nazwa produktu"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             required
           />
           <input
@@ -532,13 +531,13 @@ function AddProductForm({
             placeholder="Cena (PLN)"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             step="0.01"
             required
           />
 
           {/* Category selection */}
-          <div className="bg-gray-700 p-4 rounded">
+          <div className="bg-[#37393D] p-4 border border-gray-600">
             <p className="text-sm text-gray-300 mb-2">Kategoria produktu:</p>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -548,7 +547,7 @@ function AddProductForm({
                   value="women"
                   checked={category === 'women'}
                   onChange={() => setCategory('women')}
-                  className="w-4 h-4"
+                  className="w-4 h-4 accent-white"
                 />
                 <span>Kobiety</span>
               </label>
@@ -559,7 +558,7 @@ function AddProductForm({
                   value="men"
                   checked={category === 'men'}
                   onChange={() => setCategory('men')}
-                  className="w-4 h-4"
+                  className="w-4 h-4 accent-white"
                 />
                 <span>Mężczyźni</span>
               </label>
@@ -567,13 +566,13 @@ function AddProductForm({
           </div>
 
           {/* Show on homepage */}
-          <div className="bg-gray-700 p-4 rounded">
+          <div className="bg-[#37393D] p-4 border border-gray-600">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={showOnHomepage}
                 onChange={(e) => setShowOnHomepage(e.target.checked)}
-                className="w-5 h-5"
+                className="w-5 h-5 accent-white"
               />
               <div>
                 <span className="font-medium">Pokaż na stronie głównej</span>
@@ -587,19 +586,19 @@ function AddProductForm({
             placeholder="Kolor"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             required
           />
 
           {/* Multi-image upload */}
-          <div className="bg-gray-700 p-4 rounded">
+          <div className="bg-[#37393D] p-4 border border-gray-600">
             <p className="text-sm text-gray-300 mb-2">Zdjęcia produktu (kliknij aby wybrać główne):</p>
             <input
               type="file"
               accept="image/*"
               multiple
               onChange={handleFilesChange}
-              className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-600 file:text-white hover:file:bg-gray-500"
+              className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:border file:border-gray-600 file:bg-[#26272B] file:text-white hover:file:bg-gray-600 file:cursor-pointer"
             />
             {images.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
@@ -609,19 +608,19 @@ function AddProductForm({
                       src={img.preview}
                       alt={`Preview ${idx + 1}`}
                       onClick={() => handleSetMain(idx)}
-                      className={`w-20 h-20 object-cover rounded cursor-pointer transition-all ${
-                        img.isMain ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-gray-700' : 'hover:opacity-80'
+                      className={`w-20 h-20 object-cover cursor-pointer transition-all ${
+                        img.isMain ? 'ring-2 ring-white ring-offset-2 ring-offset-[#37393D]' : 'hover:opacity-80'
                       }`}
                     />
                     {img.isMain && (
-                      <span className="absolute -top-1 -left-1 bg-green-500 text-[10px] px-1 rounded text-white">
+                      <span className="absolute -top-1 -left-1 bg-white text-black text-[10px] px-1 font-medium">
                         Główne
                       </span>
                     )}
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(idx)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-gray-600 hover:bg-gray-500 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       ×
                     </button>
@@ -638,14 +637,14 @@ function AddProductForm({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 p-3 bg-gray-600 rounded"
+              className="flex-1 p-3 bg-[#37393D] border border-gray-600 hover:border-white transition-colors"
             >
               Anuluj
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 p-3 bg-green-600 rounded font-bold"
+              className="flex-1 p-3 bg-white text-black font-medium hover:bg-gray-200 transition-colors"
             >
               {loading ? 'Dodawanie...' : 'Dodaj'}
             </button>
@@ -825,15 +824,15 @@ function EditProductForm({
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Edytuj produkt</h2>
+      <div className="bg-[#26272B] p-6 border border-gray-700 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-medium mb-4 tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>Edytuj produkt</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             placeholder="Nazwa produktu"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             required
           />
           <input
@@ -841,13 +840,13 @@ function EditProductForm({
             placeholder="Cena (PLN)"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             step="0.01"
             required
           />
 
           {/* Category selection */}
-          <div className="bg-gray-700 p-4 rounded">
+          <div className="bg-[#37393D] p-4 border border-gray-600">
             <p className="text-sm text-gray-300 mb-2">Kategoria produktu:</p>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -857,7 +856,7 @@ function EditProductForm({
                   value="women"
                   checked={category === 'women'}
                   onChange={() => setCategory('women')}
-                  className="w-4 h-4"
+                  className="w-4 h-4 accent-white"
                 />
                 <span>Kobiety</span>
               </label>
@@ -868,7 +867,7 @@ function EditProductForm({
                   value="men"
                   checked={category === 'men'}
                   onChange={() => setCategory('men')}
-                  className="w-4 h-4"
+                  className="w-4 h-4 accent-white"
                 />
                 <span>Mężczyźni</span>
               </label>
@@ -876,13 +875,13 @@ function EditProductForm({
           </div>
 
           {/* Show on homepage */}
-          <div className="bg-gray-700 p-4 rounded">
+          <div className="bg-[#37393D] p-4 border border-gray-600">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={showOnHomepage}
                 onChange={(e) => setShowOnHomepage(e.target.checked)}
-                className="w-5 h-5"
+                className="w-5 h-5 accent-white"
               />
               <div>
                 <span className="font-medium">Pokaż na stronie głównej</span>
@@ -896,12 +895,12 @@ function EditProductForm({
             placeholder="Kolor"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded"
+            className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             required
           />
 
           {/* Multi-image upload */}
-          <div className="bg-gray-700 p-4 rounded">
+          <div className="bg-[#37393D] p-4 border border-gray-600">
             <p className="text-sm text-gray-300 mb-2">Zdjęcia produktu (kliknij aby wybrać główne):</p>
 
             {/* Existing images */}
@@ -913,19 +912,19 @@ function EditProductForm({
                       src={img.url}
                       alt={`Existing ${idx + 1}`}
                       onClick={() => handleSetMainExisting(idx)}
-                      className={`w-20 h-20 object-cover rounded cursor-pointer transition-all ${
-                        img.isMain ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-gray-700' : 'hover:opacity-80'
+                      className={`w-20 h-20 object-cover cursor-pointer transition-all ${
+                        img.isMain ? 'ring-2 ring-white ring-offset-2 ring-offset-[#37393D]' : 'hover:opacity-80'
                       }`}
                     />
                     {img.isMain && (
-                      <span className="absolute -top-1 -left-1 bg-green-500 text-[10px] px-1 rounded text-white">
+                      <span className="absolute -top-1 -left-1 bg-white text-black text-[10px] px-1 font-medium">
                         Główne
                       </span>
                     )}
                     <button
                       type="button"
                       onClick={() => handleRemoveExisting(idx)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-gray-600 hover:bg-gray-500 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       ×
                     </button>
@@ -937,22 +936,22 @@ function EditProductForm({
                       src={img.preview}
                       alt={`New ${idx + 1}`}
                       onClick={() => handleSetMainNew(idx)}
-                      className={`w-20 h-20 object-cover rounded cursor-pointer transition-all ${
-                        img.isMain ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-gray-700' : 'hover:opacity-80'
+                      className={`w-20 h-20 object-cover cursor-pointer transition-all ${
+                        img.isMain ? 'ring-2 ring-white ring-offset-2 ring-offset-[#37393D]' : 'hover:opacity-80'
                       }`}
                     />
                     {img.isMain && (
-                      <span className="absolute -top-1 -left-1 bg-green-500 text-[10px] px-1 rounded text-white">
+                      <span className="absolute -top-1 -left-1 bg-white text-black text-[10px] px-1 font-medium">
                         Główne
                       </span>
                     )}
-                    <span className="absolute -bottom-1 -left-1 bg-blue-500 text-[10px] px-1 rounded text-white">
+                    <span className="absolute -bottom-1 -left-1 bg-gray-500 text-[10px] px-1 text-white">
                       Nowe
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRemoveNew(idx)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-gray-600 hover:bg-gray-500 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       ×
                     </button>
@@ -966,7 +965,7 @@ function EditProductForm({
               accept="image/*"
               multiple
               onChange={handleFilesChange}
-              className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-600 file:text-white hover:file:bg-gray-500"
+              className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:border file:border-gray-600 file:bg-[#26272B] file:text-white hover:file:bg-gray-600 file:cursor-pointer"
             />
           </div>
 
@@ -974,14 +973,14 @@ function EditProductForm({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 p-3 bg-gray-600 rounded"
+              className="flex-1 p-3 bg-[#37393D] border border-gray-600 hover:border-white transition-colors"
             >
               Anuluj
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 p-3 bg-blue-600 rounded font-bold"
+              className="flex-1 p-3 bg-white text-black font-medium hover:bg-gray-200 transition-colors"
             >
               {loading ? 'Zapisywanie...' : 'Zapisz'}
             </button>

@@ -164,7 +164,7 @@ function App() {
   const isCartView = currentView === 'cart';
 
   return (
-    <div className="min-h-screen bg-[#222222] text-white font-sans selection:bg-white selection:text-black flex flex-col">
+    <div className="min-h-screen bg-[#37393D] text-white font-sans selection:bg-white selection:text-black flex flex-col">
 
         <Sidebar
           isOpen={isMenuOpen}
@@ -222,6 +222,7 @@ function App() {
                   <ProductGrid
                     products={getVisibleProducts()}
                     onProductClick={handleProductClick}
+                    categoryTitle={currentView === 'men' ? 'MĘŻCZYŹNI' : currentView === 'women' ? 'KOBIETY' : undefined}
                   />
                 )}
               </div>

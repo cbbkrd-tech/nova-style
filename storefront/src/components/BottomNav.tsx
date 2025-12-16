@@ -1,41 +1,54 @@
 import React from 'react';
-import { HomeIcon, SearchIcon, ShoppingCartIcon, UserIcon } from './Icons';
 import { ViewState } from '../types/types';
 
 interface BottomNavProps {
   currentView: ViewState;
+  cartCount: number;
   onChangeView: (view: ViewState) => void;
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ currentView, onChangeView }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ currentView, cartCount, onChangeView }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-blk-900 border-t border-blk-700 pb-safe">
-      <div className="max-w-md mx-auto flex justify-between items-center px-8 py-4">
-        <button 
-          onClick={() => onChangeView('men')} 
-          className="flex flex-col items-center"
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#26272B] border-t border-gray-700">
+      <div className="flex justify-around items-center py-3">
+        <button
+          onClick={() => onChangeView('home')}
+          className={`flex flex-col items-center ${currentView === 'home' ? 'text-white' : 'text-gray-500'}`}
         >
-          <HomeIcon active={currentView === 'men' || currentView === 'women'} />
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
         </button>
-        
-        <button 
-          onClick={() => onChangeView('women')} /* Using search icon to switch to women for demo purposes */
-          className="flex flex-col items-center"
+
+        <button className="flex flex-col items-center text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+
+        <button
+          onClick={() => onChangeView('cart')}
+          className={`flex flex-col items-center relative ${currentView === 'cart' ? 'text-white' : 'text-gray-500'}`}
         >
-           <SearchIcon />
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              {cartCount}
+            </span>
+          )}
         </button>
-        
-        <button 
-          onClick={() => onChangeView('cart')} 
-          className="flex flex-col items-center"
-        >
-          <div className={`${currentView === 'cart' ? 'text-white' : 'text-[#666]'}`}>
-             <ShoppingCartIcon count={0} /> {/* Simplified for bottom nav */}
-          </div>
-        </button>
-        
-        <button className="flex flex-col items-center">
-          <UserIcon />
+
+        <button className="flex flex-col items-center text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
         </button>
       </div>
     </nav>

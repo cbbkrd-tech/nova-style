@@ -9,14 +9,16 @@ interface CartViewProps {
 }
 
 const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveItem }) => {
-  
+
   const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const shipping = items.length > 0 ? 19 : 0;
   const total = subtotal + shipping;
 
   return (
     <div className="flex flex-col h-full px-4 pt-4 pb-32 animate-fade-in">
-      <h2 className="text-3xl font-black uppercase tracking-wide text-white mb-6">Koszyk</h2>
+      <h2 className="text-2xl md:text-3xl font-normal tracking-[0.1em] text-white mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+        KOSZYK
+      </h2>
 
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500">
@@ -42,8 +44,8 @@ const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveIt
               {/* Details */}
               <div className="ml-4 flex flex-col justify-between flex-grow pr-6">
                 <div>
-                  <h3 className="text-sm font-bold text-white uppercase leading-tight mb-1">{item.subCategory}</h3>
-                  <p className="text-xs text-gray-400">Rozmiar: {item.selectedSize}, Kolor: {item.color}</p>
+                  <h3 className="text-sm font-medium text-white uppercase tracking-wide leading-tight mb-1">{item.name}</h3>
+                  <p className="text-xs text-gray-400 font-light">Rozmiar: {item.selectedSize}, Kolor: {item.color}</p>
                 </div>
                 
                 <div className="flex items-center justify-between mt-2">
@@ -64,31 +66,33 @@ const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveIt
                     </button>
                   </div>
                   
-                  <span className="text-sm font-bold text-white">{item.price * item.quantity} PLN</span>
+                  <span className="text-sm font-medium text-white">{item.price * item.quantity} PLN</span>
                 </div>
               </div>
             </div>
           ))}
 
           {/* Summary */}
-          <div className="mt-8 pt-6 border-t border-blk-700 space-y-2">
-            <div className="flex justify-between text-sm text-gray-400">
-              <span>Suma częściowa</span>
-              <span className="text-white font-bold">{subtotal} PLN</span>
+          <div className="mt-8 pt-6 border-t border-gray-700 space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400 font-light">Suma częściowa</span>
+              <span className="text-white font-medium">{subtotal} PLN</span>
             </div>
-            <div className="flex justify-between text-sm text-gray-400">
-              <span>Dostawa</span>
-              <span className="text-white font-bold">{shipping} PLN</span>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400 font-light">Dostawa</span>
+              <span className="text-white font-medium">{shipping} PLN</span>
             </div>
-            <div className="flex justify-between text-lg font-black text-white mt-4 pt-4">
-              <span className="uppercase">Do zapłaty</span>
-              <span>{total} PLN</span>
+            <div className="flex justify-between text-base text-white mt-4 pt-4 border-t border-gray-700">
+              <span className="font-medium">Do zapłaty</span>
+              <span className="font-medium">{total} PLN</span>
             </div>
           </div>
 
-          <button className="w-full bg-white text-black font-black uppercase tracking-wider py-4 mt-8 rounded hover:bg-gray-200 transition-colors">
-            Przejdź do płatności
-          </button>
+          <div className="flex justify-end mt-8">
+            <button className="w-full md:w-auto md:px-12 bg-white text-black font-medium uppercase tracking-widest text-sm py-4 hover:bg-gray-200 transition-colors">
+              Przejdź do płatności
+            </button>
+          </div>
         </div>
       )}
     </div>

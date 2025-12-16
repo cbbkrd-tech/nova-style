@@ -4,16 +4,31 @@ import OptimizedImage from './OptimizedImage';
 
 interface ProductGridProps {
   title?: string;
+  categoryTitle?: string;
   products: Product[];
   onProductClick: (product: Product) => void;
 }
 
-const ProductGrid: React.FC<ProductGridProps> = ({ title, products, onProductClick }) => {
+const ProductGrid: React.FC<ProductGridProps> = ({ title, categoryTitle, products, onProductClick }) => {
   return (
-    <div className="w-full px-4 md:px-6 py-6 max-w-[1400px] mx-auto animate-fade-in">
+    <div className="w-[90%] md:w-[75%] py-4 md:py-6 mx-auto animate-fade-in">
+      {/* Category Title for mobile */}
+      {categoryTitle && (
+        <h1 className="text-2xl md:text-3xl font-normal tracking-[0.1em] text-white mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          {categoryTitle}
+        </h1>
+      )}
+
+      {/* Filter Button for mobile */}
+      {categoryTitle && (
+        <button className="md:hidden w-full border border-gray-500 text-gray-300 uppercase tracking-widest text-xs font-medium py-3 mb-6 hover:border-white hover:text-white transition-colors">
+          Filtry / Sortuj
+        </button>
+      )}
+
       {title && <h2 className="text-3xl font-black uppercase tracking-wide text-white mb-6">{title}</h2>}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {products.map((product) => (
           <div
             key={product.id}
@@ -34,10 +49,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({ title, products, onProductCli
 
             {/* Product Info */}
             <div className="cursor-pointer" onClick={() => onProductClick(product)}>
-              <h3 className="text-[13px] font-bold text-gray-200 uppercase tracking-tight leading-tight mb-1 truncate">
+              <h3 className="text-[13px] font-normal text-gray-200 uppercase tracking-wide leading-tight mb-1 truncate">
                 {product.name}
               </h3>
-              <span className="text-[13px] font-bold text-white">
+              <span className="text-[13px] font-medium text-white">
                 {product.price} PLN
               </span>
             </div>

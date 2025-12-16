@@ -130,7 +130,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
           )}
 
           {/* Main Image */}
-          <div className="flex-1 aspect-[3/4] rounded-xl bg-blk-800">
+          <div className="flex-1 h-[75vh] max-h-[900px] rounded-xl bg-blk-800">
             <OptimizedImage
               src={currentImage}
               alt={product.name}
