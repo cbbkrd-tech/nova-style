@@ -24,10 +24,10 @@ export const LegalModals: React.FC<LegalModalsProps> = ({
             </div>
             <div className="text-gray-300 text-sm space-y-4">
               <h3 className="text-white font-bold">1. Postanowienia ogólne</h3>
-              <p>Sklep internetowy NOVA STYLE prowadzony jest przez [NAZWA FIRMY] z siedzibą: [ADRES]. Kontakt: [EMAIL].</p>
+              <p>Sklep internetowy NOVA STYLE prowadzony jest przez Nova Style Butik z siedzibą: Konstruktorów 6c/16, 67-100 Nowa Sól. Kontakt: novastylebutik@gmail.com.</p>
 
               <h3 className="text-white font-bold">2. Dane sprzedawcy</h3>
-              <p>[NAZWA FIRMY]<br/>[ADRES]<br/>E-mail: [EMAIL]<br/>NIP: [NIP]</p>
+              <p>Nova Style Butik<br/>Konstruktorów 6c/16, 67-100 Nowa Sól<br/>E-mail: novastylebutik@gmail.com<br/>NIP: 9252151803</p>
 
               <h3 className="text-white font-bold">3. Składanie zamówień</h3>
               <p>Zamówienia można składać przez stronę internetową 24/7. Potwierdzenie przyjęcia zamówienia zostanie wysłane na podany adres e-mail.</p>
@@ -42,7 +42,7 @@ export const LegalModals: React.FC<LegalModalsProps> = ({
               <p>Konsument ma prawo odstąpić od umowy w terminie 14 dni bez podania przyczyny. Aby skorzystać z tego prawa, należy poinformować Sprzedawcę drogą pisemną lub elektroniczną.</p>
 
               <h3 className="text-white font-bold">7. Reklamacje</h3>
-              <p>Reklamację można złożyć na adres [EMAIL] lub pisemnie. Reklamacje rozpatrywane są w ciągu 14 dni.</p>
+              <p>Reklamację można złożyć na adres novastylebutik@gmail.com lub pisemnie. Reklamacje rozpatrywane są w ciągu 14 dni.</p>
 
               <h3 className="text-white font-bold">8. Ochrona danych</h3>
               <p>Dane osobowe przetwarzane są zgodnie z RODO. Szczegóły w Polityce Prywatności.</p>
@@ -60,7 +60,7 @@ export const LegalModals: React.FC<LegalModalsProps> = ({
             </div>
             <div className="text-gray-300 text-sm space-y-4">
               <h3 className="text-white font-bold">1. Administrator danych</h3>
-              <p>Administratorem danych jest [NAZWA FIRMY], [ADRES]. Kontakt: [EMAIL].</p>
+              <p>Administratorem danych jest Nova Style Butik, Konstruktorów 6c/16, 67-100 Nowa Sól. Kontakt: novastylebutik@gmail.com.</p>
 
               <h3 className="text-white font-bold">2. Cele przetwarzania</h3>
               <ul className="list-disc ml-5 space-y-1">
