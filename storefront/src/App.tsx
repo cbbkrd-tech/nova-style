@@ -142,9 +142,7 @@ function App() {
       };
       setCartItems([...cartItems, newItem]);
     }
-    // Stay on product page, go back to previous view
-    setSelectedProduct(null);
-    setCurrentView(previousView);
+    // Only add to cart, don't navigate anywhere
   };
 
   const handleUpdateQuantity = (cartId: string, delta: number) => {

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CartItem } from '../types/types';
 import { MinusIcon, PlusIcon, XIcon } from './Icons';
+import LegalModals from './LegalModals';
 
 interface CartViewProps {
   items: CartItem[];
@@ -9,6 +10,9 @@ interface CartViewProps {
 }
 
 const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveItem }) => {
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showRegulamin, setShowRegulamin] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const shipping = items.length > 0 ? 19 : 0;
@@ -88,13 +92,55 @@ const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveIt
             </div>
           </div>
 
+          {/* Terms acceptance checkbox */}
+          <label className="flex items-start gap-3 mt-6 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 w-4 h-4 rounded border-gray-600 bg-transparent text-white focus:ring-white focus:ring-offset-0 cursor-pointer"
+            />
+            <span className="text-xs text-gray-400 leading-relaxed">
+              Akceptuję{' '}
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowRegulamin(true); }}
+                className="text-white underline hover:text-gray-300"
+              >
+                Regulamin
+              </button>{' '}
+              oraz{' '}
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowPrivacy(true); }}
+                className="text-white underline hover:text-gray-300"
+              >
+                Politykę prywatności
+              </button>
+            </span>
+          </label>
+
           <div className="flex justify-end mt-8">
-            <button className="w-full md:w-auto md:px-12 bg-white text-black font-medium uppercase tracking-widest text-sm py-4 hover:bg-gray-200 transition-colors">
+            <button
+              disabled={!termsAccepted}
+              className={`w-full md:w-auto md:px-12 font-medium uppercase tracking-widest text-sm py-4 transition-colors ${
+                termsAccepted
+                  ? 'bg-white text-black hover:bg-gray-200 cursor-pointer'
+                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              }`}
+            >
               Przejdź do płatności
             </button>
           </div>
         </div>
       )}
+
+      <LegalModals
+        showRegulamin={showRegulamin}
+        showPrivacy={showPrivacy}
+        onCloseRegulamin={() => setShowRegulamin(false)}
+        onClosePrivacy={() => setShowPrivacy(false)}
+      />
     </div>
   );
 };
