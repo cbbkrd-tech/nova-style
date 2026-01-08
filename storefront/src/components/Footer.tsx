@@ -54,21 +54,13 @@ const Footer = () => {
             <div className="text-gray-300 space-y-4">
               <div>
                 <p className="text-white font-bold mb-1">E-mail</p>
-                <p>kontakt@nova-style.pl</p>
-              </div>
-              <div>
-                <p className="text-white font-bold mb-1">Telefon</p>
-                <p>+48 123 456 789</p>
+                <p>novastylebutik@gmail.com</p>
               </div>
               <div>
                 <p className="text-white font-bold mb-1">Adres</p>
-                <p>NOVA STYLE Sp. z o.o.</p>
-                <p>ul. Modowa 15</p>
-                <p>00-001 Warszawa</p>
-              </div>
-              <div>
-                <p className="text-white font-bold mb-1">Godziny pracy</p>
-                <p>Pon-Pt: 9:00 - 17:00</p>
+                <p>Nova Style Butik</p>
+                <p>Konstruktorów 6c/16</p>
+                <p>67-100 Nowa Sól</p>
               </div>
             </div>
           </div>
