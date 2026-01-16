@@ -53,14 +53,16 @@ const Footer = () => {
             </div>
             <div className="text-gray-300 space-y-4">
               <div>
-                <p className="text-white font-bold mb-1">E-mail</p>
-                <p>novastylebutik@gmail.com</p>
+                <p className="text-white font-bold mb-1">Dane firmy</p>
+                <p>Nova Style Karolina Syczewska</p>
+                <p>ul. Konstruktorów 6c lok. 16</p>
+                <p>67-100 Nowa Sól</p>
+                <p className="mt-2">NIP: 9252151803</p>
+                <p>REGON: 543111905</p>
               </div>
               <div>
-                <p className="text-white font-bold mb-1">Adres</p>
-                <p>Nova Style Butik</p>
-                <p>Konstruktorów 6c/16</p>
-                <p>67-100 Nowa Sól</p>
+                <p className="text-white font-bold mb-1">E-mail</p>
+                <p>novastylebutik@gmail.com</p>
               </div>
             </div>
           </div>
