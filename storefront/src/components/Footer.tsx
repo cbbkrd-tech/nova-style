@@ -64,6 +64,10 @@ const Footer = () => {
                 <p className="text-white font-bold mb-1">E-mail</p>
                 <p>novastylebutik@gmail.com</p>
               </div>
+              <div>
+                <p className="text-white font-bold mb-1">Telefon</p>
+                <p>608 846 414</p>
+              </div>
             </div>
           </div>
         </div>
