@@ -409,10 +409,26 @@ function AddProductForm({
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState<'women' | 'men'>('women');
+  const [subcategoryId, setSubcategoryId] = useState('');
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [color, setColor] = useState('');
   const [images, setImages] = useState<ImageItem[]>([]);
   const [showOnHomepage, setShowOnHomepage] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    async function fetchSubcategories() {
+      const { data } = await supabase
+        .from('subcategories')
+        .select('id, name')
+        .eq('parent_category', category)
+        .order('sort_order');
+      setSubcategories(data || []);
+      setSubcategoryId(''); // Reset on category change
+    }
+    fetchSubcategories();
+  }, [category]);
 
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -443,6 +459,12 @@ function AddProductForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!subcategoryId) {
+      alert('Wybierz podkategorię produktu');
+      return;
+    }
+
     setLoading(true);
 
     // Upload all images
@@ -475,6 +497,7 @@ function AddProductForm({
         slug,
         price: Math.round(parseFloat(price) * 100),
         category,
+        subcategory_id: subcategoryId,
         color,
         image_url: mainImage,
         is_active: true,
@@ -563,6 +586,24 @@ function AddProductForm({
                 <span>Mężczyźni</span>
               </label>
             </div>
+          </div>
+
+          {/* Subcategory selection */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Podkategoria: <span className="text-red-400">*</span></p>
+            <select
+              value={subcategoryId}
+              onChange={(e) => setSubcategoryId(e.target.value)}
+              className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
+              required
+            >
+              <option value="">-- Wybierz podkategorię --</option>
+              {subcategories.map((sub) => (
+                <option key={sub.id} value={sub.id}>
+                  {sub.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Show on homepage */}
@@ -679,9 +720,28 @@ function EditProductForm({
   const [name, setName] = useState(product.name);
   const [price, setPrice] = useState((product.price / 100).toString());
   const [category, setCategory] = useState<'women' | 'men'>(product.category);
+  const [subcategoryId, setSubcategoryId] = useState((product as any).subcategory_id || '');
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [color, setColor] = useState(product.color);
   const [showOnHomepage, setShowOnHomepage] = useState((product as any).show_on_homepage ?? true);
   const [loading, setLoading] = useState(false);
+
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    async function fetchSubcategories() {
+      const { data } = await supabase
+        .from('subcategories')
+        .select('id, name')
+        .eq('parent_category', category)
+        .order('sort_order');
+      setSubcategories(data || []);
+      // Only reset if category actually changed from original
+      if (category !== product.category) {
+        setSubcategoryId('');
+      }
+    }
+    fetchSubcategories();
+  }, [category, product.category]);
 
   // Multi-image state
   const [existingImages, setExistingImages] = useState<ExistingImage[]>(() => {
@@ -751,6 +811,12 @@ function EditProductForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!subcategoryId) {
+      alert('Wybierz podkategorię produktu');
+      return;
+    }
+
     setLoading(true);
 
     // Upload new images
@@ -808,6 +874,7 @@ function EditProductForm({
         name,
         price: Math.round(parseFloat(price) * 100),
         category,
+        subcategory_id: subcategoryId,
         color,
         image_url: mainImageUrl,
         show_on_homepage: showOnHomepage,
@@ -872,6 +939,24 @@ function EditProductForm({
                 <span>Mężczyźni</span>
               </label>
             </div>
+          </div>
+
+          {/* Subcategory selection */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Podkategoria: <span className="text-red-400">*</span></p>
+            <select
+              value={subcategoryId}
+              onChange={(e) => setSubcategoryId(e.target.value)}
+              className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
+              required
+            >
+              <option value="">-- Wybierz podkategorię --</option>
+              {subcategories.map((sub) => (
+                <option key={sub.id} value={sub.id}>
+                  {sub.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Show on homepage */}

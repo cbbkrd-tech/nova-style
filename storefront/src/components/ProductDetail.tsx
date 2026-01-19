@@ -147,7 +147,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
           </h1>
 
           <p className="text-gray-400 text-sm uppercase tracking-wide mb-4">
-            {product.subCategory}
+            {product.subcategoryName || (product.category === 'women' ? 'KOBIETY' : 'MĘŻCZYŹNI')}
           </p>
 
           <p className="text-3xl font-bold text-white mb-8">

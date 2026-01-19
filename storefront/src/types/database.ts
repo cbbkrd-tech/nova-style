@@ -496,6 +496,7 @@ export type Database = {
           price: number
           show_on_homepage: boolean | null
           slug: string
+          subcategory_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -510,6 +511,7 @@ export type Database = {
           price: number
           show_on_homepage?: boolean | null
           slug: string
+          subcategory_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -524,7 +526,43 @@ export type Database = {
           price?: number
           show_on_homepage?: boolean | null
           slug?: string
+          subcategory_id?: string | null
           updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subcategories: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          parent_category: Database["public"]["Enums"]["product_category"]
+          sort_order: number | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          parent_category: Database["public"]["Enums"]["product_category"]
+          sort_order?: number | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          parent_category?: Database["public"]["Enums"]["product_category"]
+          sort_order?: number | null
+          created_at?: string | null
         }
         Relationships: []
       }

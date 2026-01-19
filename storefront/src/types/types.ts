@@ -4,6 +4,14 @@ export interface ProductImage {
   isMain: boolean;
 }
 
+export interface Subcategory {
+  id: string;
+  slug: string;
+  name: string;
+  parentCategory: 'men' | 'women';
+  sortOrder: number;
+}
+
 export interface Product {
   id: number;
   supabaseId?: string; // Original Supabase UUID
@@ -12,7 +20,9 @@ export interface Product {
   image: string;
   images?: ProductImage[]; // Multiple images support
   category: 'men' | 'women';
-  subCategory: string; // e.g., "BLUZA OVERSIZE", "SPODNIE CARGO"
+  subcategoryId?: string;
+  subcategorySlug?: string;
+  subcategoryName?: string;
   color: string;
   description?: string;
 }
