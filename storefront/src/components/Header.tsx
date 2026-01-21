@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MenuIcon, ShoppingCartIcon, ChevronDownIcon } from './Icons';
+import { MenuIcon, ShoppingCartIcon, ChevronDownIcon, HeartIcon, UserIcon, FacebookIcon, InstagramIcon } from './Icons';
 import { getSubcategoriesByCategory } from '../constants/subcategories';
 
 interface HeaderProps {
@@ -24,11 +24,24 @@ const Header: React.FC<HeaderProps> = ({
   onLogoClick
 }) => {
   const [openDropdown, setOpenDropdown] = useState<'women' | 'men' | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const desktopNavRef = useRef<HTMLDivElement>(null);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const isInsideDesktop = desktopNavRef.current?.contains(target);
+      const isInsideMobile = mobileNavRef.current?.contains(target);
+      if (!isInsideDesktop && !isInsideMobile) {
         setOpenDropdown(null);
       }
     };
@@ -39,108 +52,234 @@ const Header: React.FC<HeaderProps> = ({
   const womenSubcategories = getSubcategoriesByCategory('women');
   const menSubcategories = getSubcategoriesByCategory('men');
 
-  const renderCategoryDropdown = (
-    category: 'women' | 'men',
-    label: string,
-    subcategories: typeof womenSubcategories
-  ) => (
-    <div className="relative">
-      <button
-        onClick={() => onCategoryClick(category)}
-        onMouseEnter={() => setOpenDropdown(category)}
-        className={`flex items-center gap-1 transition-colors duration-200 ${
-          currentCategory === category ? 'text-white' : 'hover:text-white'
-        }`}
-      >
-        {label}
-        <ChevronDownIcon className="w-3 h-3" />
-      </button>
+  const navItems = [
+    { label: 'NOWOŚCI', action: () => onLogoClick() },
+    { label: 'DAMSKIE', action: () => onCategoryClick('women'), dropdown: 'women' as const, subcategories: womenSubcategories },
+    { label: 'MĘSKIE', action: () => onCategoryClick('men'), dropdown: 'men' as const, subcategories: menSubcategories },
+    { label: 'BESTSELLERY', action: () => onLogoClick() },
+    { label: 'WYPRZEDAŻ', action: () => onLogoClick() },
+  ];
 
-      {openDropdown === category && (
-        <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-56 bg-[#26272B] border border-gray-700 shadow-xl z-50"
-          onMouseLeave={() => setOpenDropdown(null)}
-        >
+  const renderNavItem = (item: typeof navItems[0], index: number) => {
+    if (item.dropdown && item.subcategories) {
+      return (
+        <div key={index} className="relative">
           <button
-            onClick={() => {
-              onCategoryClick(category);
-              setOpenDropdown(null);
-            }}
-            className="w-full px-4 py-3 text-left text-sm text-white hover:bg-gray-700 border-b border-gray-700 font-medium"
+            onClick={() => setOpenDropdown(openDropdown === item.dropdown ? null : item.dropdown!)}
+            onMouseEnter={() => setOpenDropdown(item.dropdown!)}
+            className={`nav-link text-charcoal hover:text-charcoal/70 ${
+              currentCategory === item.dropdown ? 'font-medium' : ''
+            }`}
           >
-            Wszystkie {label}
+            {item.label}
           </button>
-          <div className="max-h-80 overflow-y-auto">
-            {subcategories.map((sub) => (
+
+          {openDropdown === item.dropdown && (
+            <div
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-56 bg-white border border-light-grey shadow-lg z-50"
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
               <button
-                key={sub.slug}
                 onClick={() => {
-                  onSubcategoryClick(category, sub.slug);
+                  item.action();
                   setOpenDropdown(null);
                 }}
-                className={`w-full px-4 py-2.5 text-left text-sm hover:bg-gray-700 transition-colors ${
-                  currentSubcategory === sub.slug ? 'text-white bg-gray-700' : 'text-gray-300'
-                }`}
+                className="w-full px-4 py-3 text-left text-sm text-charcoal hover:bg-off-white border-b border-light-grey font-medium"
               >
-                {sub.name}
+                Wszystkie {item.label.toLowerCase()}
               </button>
-            ))}
-          </div>
+              <div className="max-h-80 overflow-y-auto">
+                {item.subcategories.map((sub) => (
+                  <button
+                    key={sub.slug}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSubcategoryClick(item.dropdown!, sub.slug);
+                      setOpenDropdown(null);
+                    }}
+                    className={`w-full px-4 py-2.5 text-left text-sm hover:bg-off-white transition-colors ${
+                      currentSubcategory === sub.slug ? 'text-charcoal bg-off-white font-medium' : 'text-charcoal/70'
+                    }`}
+                  >
+                    {sub.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  );
+      );
+    }
+
+    return (
+      <button
+        key={index}
+        onClick={item.action}
+        className="nav-link text-charcoal hover:text-charcoal/70"
+      >
+        {item.label}
+      </button>
+    );
+  };
 
   return (
-    <div className="sticky top-0 z-50 bg-[#26272B] shadow-lg">
-      <div className="max-w-[1400px] mx-auto">
-        {/* Top Bar */}
-        <header className="px-6 py-5 flex items-center justify-between">
-          <button onClick={onMenuClick} className="text-white hover:text-gray-300">
-            <MenuIcon />
-          </button>
-
-          <div className="absolute left-1/2 transform -translate-x-1/2 cursor-pointer text-center" onClick={onLogoClick}>
-            <h1 className="text-2xl tracking-[0.15em] text-white leading-none" style={{ fontFamily: "'Playfair Display', serif" }}>
-              NOVA STYLE
-            </h1>
-            <p className="text-[10px] tracking-[0.3em] text-gray-400 mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-              FASHION BOUTIQUE
-            </p>
-          </div>
-
-          <div className="flex items-center">
-            <button onClick={onCartClick} className="text-white hover:text-gray-300 relative">
-              <ShoppingCartIcon count={cartCount} />
-            </button>
-          </div>
-        </header>
+    <div className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'header-scrolled' : ''}`}>
+      {/* Top Bar - Beige */}
+      <div className="bg-warm-beige py-2 text-center">
+        <span className="text-xs md:text-sm text-charcoal tracking-wide">
+          Darmowy odbiór osobisty na terenie Nowej Soli
+        </span>
       </div>
 
-      {/* Full-width separator line */}
-      <div className="w-full h-px bg-gray-700"></div>
+      {/* Main Header - Off White */}
+      <div className="bg-off-white">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+          {/* Top Row: Menu (mobile) | Logo | Icons */}
+          <header className="py-3 md:py-3 flex items-center justify-between relative min-h-[80px] md:min-h-[100px]">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={onMenuClick}
+              className="md:hidden text-charcoal hover:text-charcoal/70 p-1"
+            >
+              <MenuIcon />
+            </button>
 
-      <div className="max-w-[1400px] mx-auto" ref={dropdownRef}>
-        {/* Sub Navigation with dropdowns */}
-        <nav className="hidden md:flex justify-center space-x-16 py-4 text-[13px] font-medium tracking-widest uppercase text-gray-300">
-          {renderCategoryDropdown('women', 'Kobiety', womenSubcategories)}
-          {renderCategoryDropdown('men', 'Mężczyźni', menSubcategories)}
-        </nav>
-        {/* Mobile - simple buttons without dropdown */}
-        <nav className="flex md:hidden justify-center space-x-16 py-4 text-[13px] font-medium tracking-widest uppercase text-gray-300">
-          <button
-            onClick={() => onCategoryClick('women')}
-            className={`transition-colors duration-200 ${currentCategory === 'women' ? 'text-white' : 'hover:text-white'}`}
-          >
-            Kobiety
-          </button>
-          <button
-            onClick={() => onCategoryClick('men')}
-            className={`transition-colors duration-200 ${currentCategory === 'men' ? 'text-white' : 'hover:text-white'}`}
-          >
-            Mężczyźni
-          </button>
-        </nav>
+            {/* Spacer for desktop */}
+            <div className="hidden md:block w-32"></div>
+
+            {/* Centered Logo */}
+            <div
+              className="absolute left-1/2 transform -translate-x-1/2 cursor-pointer text-center"
+              onClick={onLogoClick}
+            >
+              <img
+                src="/images/logo/Logo-no-bg.png"
+                alt="NS"
+                className="h-16 md:h-16 w-auto mx-auto"
+              />
+              <h1 className="text-base md:text-lg tracking-[0.15em] text-charcoal leading-none -mt-3 font-serif">
+                NOVA STYLE
+              </h1>
+              <p className="text-[7px] md:text-[8px] tracking-[0.2em] text-charcoal/50 font-serif">
+                FASHION BOUTIQUE
+              </p>
+            </div>
+
+            {/* Right Side Icons */}
+            <div className="flex items-center gap-3 md:gap-4">
+              <button className="hidden md:block text-charcoal hover:text-charcoal/70 transition-transform hover:scale-110">
+                <UserIcon />
+              </button>
+              <button className="hidden md:block text-charcoal hover:text-charcoal/70 transition-transform hover:scale-110">
+                <HeartIcon />
+              </button>
+              <button
+                onClick={onCartClick}
+                className="text-charcoal hover:text-charcoal/70 transition-transform hover:scale-110"
+              >
+                <ShoppingCartIcon count={cartCount} />
+              </button>
+              <div className="hidden md:flex items-center gap-2 ml-2 pl-4 border-l border-light-grey">
+                <a
+                  href="https://www.facebook.com/NovaStyleButik"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-charcoal hover:text-charcoal/70 transition-transform hover:scale-110"
+                >
+                  <FacebookIcon />
+                </a>
+                <a
+                  href="https://www.instagram.com/novastylebutik/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-charcoal hover:text-charcoal/70 transition-transform hover:scale-110"
+                >
+                  <InstagramIcon />
+                </a>
+              </div>
+            </div>
+          </header>
+        </div>
+
+        {/* Separator Line */}
+        <div className="w-full h-px bg-light-grey"></div>
+
+        {/* Navigation Menu - Desktop Only */}
+        <div className="max-w-[1400px] mx-auto px-6 hidden md:block" ref={desktopNavRef}>
+          <nav className="flex justify-center items-center gap-8 lg:gap-12 py-4 text-[11px] lg:text-[12px] font-medium tracking-[0.15em]">
+            {navItems.map((item, index) => renderNavItem(item, index))}
+          </nav>
+        </div>
+
+        {/* Mobile Navigation - Category Buttons with Dropdowns */}
+        <div className="md:hidden px-4 py-3 border-t border-light-grey" ref={mobileNavRef}>
+          <nav className="flex justify-center gap-8 text-[11px] font-medium tracking-[0.15em]">
+            <div className="relative">
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'women' ? null : 'women')}
+                className={`transition-colors flex items-center gap-1 ${currentCategory === 'women' ? 'text-charcoal font-semibold' : 'text-charcoal/60 hover:text-charcoal'}`}
+              >
+                DAMSKIE
+                <ChevronDownIcon />
+              </button>
+              {openDropdown === 'women' && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white border border-light-grey shadow-lg z-50">
+                  <button
+                    onClick={() => { onCategoryClick('women'); setOpenDropdown(null); }}
+                    className="w-full px-4 py-3 text-left text-sm text-charcoal hover:bg-off-white border-b border-light-grey font-medium"
+                  >
+                    Wszystkie damskie
+                  </button>
+                  <div className="max-h-60 overflow-y-auto">
+                    {womenSubcategories.map((sub) => (
+                      <button
+                        key={sub.slug}
+                        onClick={(e) => { e.stopPropagation(); onSubcategoryClick('women', sub.slug); setOpenDropdown(null); }}
+                        className={`w-full px-4 py-2.5 text-left text-sm hover:bg-off-white transition-colors ${
+                          currentSubcategory === sub.slug ? 'text-charcoal bg-off-white font-medium' : 'text-charcoal/70'
+                        }`}
+                      >
+                        {sub.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'men' ? null : 'men')}
+                className={`transition-colors flex items-center gap-1 ${currentCategory === 'men' ? 'text-charcoal font-semibold' : 'text-charcoal/60 hover:text-charcoal'}`}
+              >
+                MĘSKIE
+                <ChevronDownIcon />
+              </button>
+              {openDropdown === 'men' && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white border border-light-grey shadow-lg z-50">
+                  <button
+                    onClick={() => { onCategoryClick('men'); setOpenDropdown(null); }}
+                    className="w-full px-4 py-3 text-left text-sm text-charcoal hover:bg-off-white border-b border-light-grey font-medium"
+                  >
+                    Wszystkie męskie
+                  </button>
+                  <div className="max-h-60 overflow-y-auto">
+                    {menSubcategories.map((sub) => (
+                      <button
+                        key={sub.slug}
+                        onClick={(e) => { e.stopPropagation(); onSubcategoryClick('men', sub.slug); setOpenDropdown(null); }}
+                        className={`w-full px-4 py-2.5 text-left text-sm hover:bg-off-white transition-colors ${
+                          currentSubcategory === sub.slug ? 'text-charcoal bg-off-white font-medium' : 'text-charcoal/70'
+                        }`}
+                      >
+                        {sub.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </nav>
+        </div>
       </div>
     </div>
   );

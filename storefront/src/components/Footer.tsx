@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import LegalModals from './LegalModals';
+import { FacebookIcon, InstagramIcon } from './Icons';
 
 const Footer = () => {
   const [showRegulamin, setShowRegulamin] = useState(false);
@@ -8,29 +9,29 @@ const Footer = () => {
 
   return (
     <>
-      <footer className="bg-[#26272B] border-t border-gray-700 py-12 mt-12">
+      <footer className="bg-off-white border-t border-light-grey py-12 mt-12">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start">
 
             {/* Links Section */}
             <div className="flex flex-wrap gap-4 md:gap-8 mb-8 md:mb-0">
-              <button onClick={() => setShowKontakt(true)} className="text-gray-400 hover:text-white text-sm">Kontakt</button>
-              <button onClick={() => setShowRegulamin(true)} className="text-gray-400 hover:text-white text-sm">Regulamin</button>
-              <button onClick={() => setShowPrivacy(true)} className="text-gray-400 hover:text-white text-sm">Polityka prywatności</button>
+              <button onClick={() => setShowKontakt(true)} className="text-charcoal/60 hover:text-charcoal text-sm transition-colors">Kontakt</button>
+              <button onClick={() => setShowRegulamin(true)} className="text-charcoal/60 hover:text-charcoal text-sm transition-colors">Regulamin</button>
+              <button onClick={() => setShowPrivacy(true)} className="text-charcoal/60 hover:text-charcoal text-sm transition-colors">Polityka prywatności</button>
             </div>
 
-            {/* Social Icons - Facebook & Instagram only */}
-            <div className="flex space-x-6">
-              <a href="#" className="text-gray-400 hover:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+            {/* Social Icons */}
+            <div className="flex space-x-4">
+              <a href="https://www.facebook.com/NovaStyleButik" target="_blank" rel="noopener noreferrer" className="text-charcoal/60 hover:text-charcoal transition-colors">
+                <FacebookIcon />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              <a href="https://www.instagram.com/novastylebutik/" target="_blank" rel="noopener noreferrer" className="text-charcoal/60 hover:text-charcoal transition-colors">
+                <InstagramIcon />
               </a>
             </div>
           </div>
 
-          <div className="mt-8 text-xs text-gray-600">
+          <div className="mt-8 text-xs text-charcoal/40">
              &copy; 2026 NOVA STYLE. All rights reserved.
           </div>
         </div>
@@ -45,15 +46,15 @@ const Footer = () => {
 
       {/* Kontakt Modal */}
       {showKontakt && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowKontakt(false)}>
-          <div className="bg-[#1a1a1a] rounded-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowKontakt(false)}>
+          <div className="bg-white border border-light-grey max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Kontakt</h2>
-              <button onClick={() => setShowKontakt(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+              <h2 className="text-2xl font-serif text-charcoal">Kontakt</h2>
+              <button onClick={() => setShowKontakt(false)} className="text-charcoal/40 hover:text-charcoal text-2xl">&times;</button>
             </div>
-            <div className="text-gray-300 space-y-4">
+            <div className="text-charcoal/70 space-y-4">
               <div>
-                <p className="text-white font-bold mb-1">Dane firmy</p>
+                <p className="text-charcoal font-semibold mb-1">Dane firmy</p>
                 <p>Nova Style Karolina Syczewska</p>
                 <p>ul. Konstruktorów 6c lok. 16</p>
                 <p>67-100 Nowa Sól</p>
@@ -61,11 +62,11 @@ const Footer = () => {
                 <p>REGON: 543111905</p>
               </div>
               <div>
-                <p className="text-white font-bold mb-1">E-mail</p>
+                <p className="text-charcoal font-semibold mb-1">E-mail</p>
                 <p>novastylebutik@gmail.com</p>
               </div>
               <div>
-                <p className="text-white font-bold mb-1">Telefon</p>
+                <p className="text-charcoal font-semibold mb-1">Telefon</p>
                 <p>608 846 414</p>
               </div>
             </div>

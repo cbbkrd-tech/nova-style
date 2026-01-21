@@ -6,6 +6,9 @@ import ProductDetail from './components/ProductDetail';
 import Footer from './components/Footer';
 import CartView from './components/CartView';
 import Sidebar from './components/Sidebar';
+import BenefitsBar from './components/BenefitsBar';
+import BottomNav from './components/BottomNav';
+import CategoryGrid from './components/CategoryGrid';
 import { Product, CartItem, ViewState } from './types/types';
 import { supabase } from './lib/medusa';
 import { getSubcategoryBySlug } from './constants/subcategories';
@@ -42,6 +45,12 @@ function App() {
       setPendingProductId(productId);
     } else if (hash === '#cart') {
       setCurrentView('cart');
+    } else if (hash === '#women-categories') {
+      setCurrentView('women-categories');
+      setCurrentSubcategory(null);
+    } else if (hash === '#men-categories') {
+      setCurrentView('men-categories');
+      setCurrentSubcategory(null);
     } else if (hash.startsWith('#women/')) {
       const subSlug = hash.replace('#women/', '');
       setCurrentView('women');
@@ -137,6 +146,16 @@ function App() {
     return filtered;
   };
 
+  // Show category grid (from Hero click)
+  const handleCategoryGridShow = (category: 'men' | 'women') => {
+    setCurrentView(category === 'women' ? 'women-categories' : 'men-categories');
+    setCurrentSubcategory(null);
+    setIsMenuOpen(false);
+    window.location.hash = `${category}-categories`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Show all products in category (from header "Wszystkie damskie/męskie")
   const handleCategoryChange = (category: 'men' | 'women') => {
     setCurrentView(category);
     setCurrentSubcategory(null);
@@ -206,6 +225,18 @@ function App() {
     setCartItems(prev => prev.filter(item => item.cartId !== cartId));
   };
 
+  const handleViewChange = (view: ViewState) => {
+    setCurrentView(view);
+    if (view === 'home') {
+      setCurrentSubcategory(null);
+      setSelectedProduct(null);
+      window.location.hash = '';
+    } else if (view === 'cart') {
+      window.location.hash = 'cart';
+    }
+    window.scrollTo(0, 0);
+  };
+
   const isCartView = currentView === 'cart';
 
   // Get category title with optional subcategory
@@ -228,7 +259,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#37393D] text-white font-sans selection:bg-white selection:text-black flex flex-col">
+    <div className="min-h-screen bg-off-white text-charcoal font-sans flex flex-col">
 
         <Sidebar
           isOpen={isMenuOpen}
@@ -250,19 +281,24 @@ function App() {
             window.location.hash = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          currentCategory={currentView !== 'cart' && currentView !== 'home' && currentView !== 'product' ? currentView : ''}
+          currentCategory={
+            currentView === 'women' || currentView === 'women-categories' ? 'women' :
+            currentView === 'men' || currentView === 'men-categories' ? 'men' : ''
+          }
           currentSubcategory={currentSubcategory || undefined}
         />
 
-        <main className="flex-grow">
+        <main className="flex-grow pb-16 md:pb-0">
           {isCartView ? (
-             <div className="max-w-[1400px] mx-auto w-full">
-              <button
-                onClick={() => setCurrentView('home')}
-                className="mt-6 ml-6 text-sm text-gray-400 hover:text-white"
-              >
-                &larr; Powrót do sklepu
-              </button>
+             <div className="w-full">
+              <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+                <button
+                  onClick={() => handleViewChange('home')}
+                  className="mt-6 text-sm text-charcoal/60 hover:text-charcoal transition-colors"
+                >
+                  &larr; Powrót do sklepu
+                </button>
+              </div>
               <CartView
                 items={cartItems}
                 onUpdateQuantity={handleUpdateQuantity}
@@ -278,27 +314,86 @@ function App() {
           ) : (
             <>
               {currentView === 'home' && (
-                <Hero onCategoryClick={handleCategoryChange} />
+                <>
+                  <Hero onCategoryClick={handleCategoryGridShow} />
+                  <ProductGrid
+                    products={getVisibleProducts().slice(0, 6)}
+                    onProductClick={handleProductClick}
+                  />
+                  <BenefitsBar />
+                </>
               )}
 
-              <div id="product-grid">
-                {loading ? (
-                  <div className="flex justify-center items-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-                  </div>
-                ) : (
-                  <ProductGrid
-                    products={getVisibleProducts()}
-                    onProductClick={handleProductClick}
-                    categoryTitle={getCategoryTitle()}
+              {(currentView === 'women-categories' || currentView === 'men-categories') && (
+                <>
+                  <CategoryGrid
+                    category={currentView === 'women-categories' ? 'women' : 'men'}
+                    onSubcategoryClick={(slug) => handleSubcategoryChange(
+                      currentView === 'women-categories' ? 'women' : 'men',
+                      slug
+                    )}
+                    onBackClick={() => handleViewChange('home')}
                   />
-                )}
-              </div>
+                  <BenefitsBar />
+                </>
+              )}
+
+              {(currentView === 'men' || currentView === 'women') && (
+                <div id="product-grid">
+                  {/* Breadcrumb Navigation */}
+                  <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-6 md:pt-8">
+                    <div className="mb-4 md:mb-6">
+                      <button
+                        onClick={() => handleViewChange('home')}
+                        className="text-sm text-charcoal/60 hover:text-charcoal transition-colors"
+                      >
+                        &larr; Strona główna
+                      </button>
+                      <span className="text-sm text-charcoal/40 mx-2">/</span>
+                      {currentSubcategory ? (
+                        <>
+                          <button
+                            onClick={() => handleCategoryGridShow(currentView as 'men' | 'women')}
+                            className="text-sm text-charcoal/60 hover:text-charcoal transition-colors"
+                          >
+                            {currentView === 'women' ? 'Damskie' : 'Męskie'}
+                          </button>
+                          <span className="text-sm text-charcoal/40 mx-2">/</span>
+                          <span className="text-sm text-charcoal font-medium">
+                            {getSubcategoryBySlug(currentSubcategory)?.name || currentSubcategory}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-sm text-charcoal font-medium">
+                          {currentView === 'women' ? 'Damskie' : 'Męskie'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {loading ? (
+                    <div className="flex justify-center items-center py-20">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-charcoal"></div>
+                    </div>
+                  ) : (
+                    <ProductGrid
+                      products={getVisibleProducts()}
+                      onProductClick={handleProductClick}
+                      categoryTitle={getCategoryTitle()}
+                    />
+                  )}
+                </div>
+              )}
             </>
           )}
         </main>
 
         <Footer />
+
+        <BottomNav
+          currentView={currentView}
+          cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+          onChangeView={handleViewChange}
+        />
     </div>
   );
 }

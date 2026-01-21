@@ -24,10 +24,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     const isExpanded = expandedCategory === category;
 
     return (
-      <div className="border-b border-gray-700">
+      <div className="border-b border-light-grey">
         <button
           onClick={() => setExpandedCategory(isExpanded ? null : category)}
-          className="w-full flex items-center justify-between py-4 text-xl font-medium uppercase tracking-widest text-white hover:text-gray-400 transition-colors"
+          className="w-full flex items-center justify-between py-4 text-lg font-medium uppercase tracking-widest text-charcoal hover:text-charcoal/70 transition-colors"
         >
           {label}
           <ChevronDownIcon
@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onCategorySelect(category);
                 onClose();
               }}
-              className="block w-full text-left text-sm text-white hover:text-gray-300 py-2 font-medium"
+              className="block w-full text-left text-sm text-charcoal hover:text-charcoal/70 py-2 font-medium"
             >
               Wszystkie {label}
             </button>
@@ -53,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onSubcategorySelect(category, sub.slug);
                   onClose();
                 }}
-                className="block w-full text-left text-sm text-gray-400 hover:text-white py-2 transition-colors"
+                className="block w-full text-left text-sm text-charcoal/60 hover:text-charcoal py-2 transition-colors"
               >
                 {sub.name}
               </button>
@@ -68,15 +68,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className="fixed inset-0 z-[60] flex">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Menu Content */}
-      <div className="relative w-[80%] max-w-xs bg-[#26272B] h-full shadow-2xl flex flex-col border-r border-gray-700 overflow-y-auto">
-        <div className="p-6 flex justify-between items-center border-b border-gray-700">
-          <h2 className="text-xl tracking-[0.1em] text-white" style={{ fontFamily: "'Playfair Display', serif" }}>MENU</h2>
-          <button onClick={onClose} className="text-white hover:text-gray-300">
+      <div className="relative w-[80%] max-w-xs bg-off-white h-full shadow-2xl flex flex-col border-r border-light-grey overflow-y-auto animate-slide-in">
+        <div className="p-6 flex justify-between items-center border-b border-light-grey">
+          <h2 className="text-xl tracking-[0.1em] text-charcoal font-serif">MENU</h2>
+          <button onClick={onClose} className="text-charcoal hover:text-charcoal/70">
             <XIcon />
           </button>
         </div>
@@ -86,7 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           {renderCategory('men', 'Mężczyźni')}
         </nav>
 
-        <div className="mt-auto p-6 text-xs text-gray-500" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="mt-auto p-6 text-xs text-charcoal/40 font-serif">
           &copy; 2026 NOVA STYLE
         </div>
       </div>

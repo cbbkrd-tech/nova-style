@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Product, ProductVariant, ProductImage } from '../types/types';
 import { supabase } from '../lib/medusa';
 import OptimizedImage from './OptimizedImage';
+import { ChevronLeftIcon } from './Icons';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
@@ -95,11 +96,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
       {/* Back Button */}
       <button
         onClick={onBack}
-        className="mb-6 text-sm text-gray-400 hover:text-white flex items-center gap-2"
+        className="mb-6 text-sm text-charcoal/60 hover:text-charcoal flex items-center gap-1 transition-colors"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeftIcon />
         Powrót
       </button>
 
@@ -113,10 +112,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 <button
                   key={img.id}
                   onClick={() => setCurrentImage(img.url)}
-                  className={`aspect-square rounded-lg overflow-hidden transition-all ${
+                  className={`aspect-square overflow-hidden transition-all border ${
                     currentImage === img.url
-                      ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900'
-                      : 'opacity-60 hover:opacity-100'
+                      ? 'border-charcoal'
+                      : 'border-light-grey opacity-60 hover:opacity-100'
                   }`}
                 >
                   <img
@@ -130,11 +129,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
           )}
 
           {/* Main Image */}
-          <div className="flex-1 h-[75vh] max-h-[900px] rounded-xl bg-blk-800">
+          <div className="flex-1 h-[60vh] md:h-[75vh] max-h-[900px] bg-product-bg">
             <OptimizedImage
               src={currentImage}
               alt={product.name}
-              containerClassName="w-full h-full rounded-xl"
+              containerClassName="w-full h-full"
               className="w-full h-full object-cover"
             />
           </div>
@@ -142,34 +141,34 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
 
         {/* Product Info */}
         <div className="flex flex-col">
-          <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white mb-2">
+          <h1 className="text-2xl md:text-3xl font-serif tracking-wide text-charcoal mb-2">
             {product.name}
           </h1>
 
-          <p className="text-gray-400 text-sm uppercase tracking-wide mb-4">
+          <p className="text-charcoal/60 text-sm uppercase tracking-wide mb-4">
             {product.subcategoryName || (product.category === 'women' ? 'KOBIETY' : 'MĘŻCZYŹNI')}
           </p>
 
-          <p className="text-3xl font-bold text-white mb-8">
+          <p className="text-2xl font-medium text-charcoal mb-8">
             {product.price} PLN
           </p>
 
           {product.description && (
-            <p className="text-gray-300 mb-6">
+            <p className="text-charcoal/70 mb-6 leading-relaxed">
               {product.description}
             </p>
           )}
 
           {/* Size Selection */}
           <div className="mb-6">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-gray-400 mb-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-charcoal/60 mb-3">
               Wybierz rozmiar
             </h3>
 
             {loading ? (
               <div className="flex gap-2">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-14 h-14 bg-gray-700 rounded animate-pulse" />
+                  <div key={i} className="w-14 h-14 bg-light-grey animate-pulse" />
                 ))}
               </div>
             ) : variants.length > 0 ? (
@@ -184,12 +183,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                       onClick={() => !outOfStock && setSelectedSize(variant.size)}
                       disabled={outOfStock}
                       className={`
-                        w-14 h-14 rounded border text-sm font-bold uppercase transition-all
+                        w-14 h-14 border text-sm font-medium uppercase transition-all btn-press
                         ${isSelected
-                          ? 'bg-white text-black border-white'
+                          ? 'bg-warm-beige text-charcoal border-warm-beige'
                           : outOfStock
-                            ? 'bg-gray-800 text-gray-600 border-gray-700 cursor-not-allowed line-through'
-                            : 'bg-transparent text-white border-gray-600 hover:border-white'
+                            ? 'bg-light-grey/50 text-charcoal/30 border-light-grey cursor-not-allowed line-through'
+                            : 'bg-transparent text-charcoal border-light-grey hover:border-charcoal'
                         }
                       `}
                     >
@@ -199,14 +198,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 })}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">Brak dostępnych rozmiarów</p>
+              <p className="text-charcoal/50 text-sm">Brak dostępnych rozmiarów</p>
             )}
           </div>
 
           {/* Stock Info */}
           {selectedVariant && (
             <div className="mb-6">
-              <p className={`text-sm ${selectedVariant.stock <= 3 ? 'text-orange-400' : 'text-green-400'}`}>
+              <p className={`text-sm ${selectedVariant.stock <= 3 ? 'text-orange-600' : 'text-green-600'}`}>
                 {selectedVariant.stock <= 3 && selectedVariant.stock > 0
                   ? `Ostatnie ${selectedVariant.stock} sztuki!`
                   : selectedVariant.stock === 0
@@ -220,20 +219,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
           {/* Quantity Selector */}
           {selectedSize && !isOutOfStock && (
             <div className="mb-8">
-              <h3 className="text-sm font-bold uppercase tracking-wide text-gray-400 mb-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-charcoal/60 mb-3">
                 Ilość
               </h3>
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-10 h-10 border border-gray-600 rounded text-white hover:bg-white hover:text-black transition-all"
+                  className="w-10 h-10 border border-light-grey text-charcoal hover:border-charcoal hover:bg-charcoal hover:text-white transition-all btn-press"
                 >
                   -
                 </button>
-                <span className="text-xl font-bold w-8 text-center">{quantity}</span>
+                <span className="text-lg font-medium w-8 text-center text-charcoal">{quantity}</span>
                 <button
                   onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
-                  className="w-10 h-10 border border-gray-600 rounded text-white hover:bg-white hover:text-black transition-all"
+                  className="w-10 h-10 border border-light-grey text-charcoal hover:border-charcoal hover:bg-charcoal hover:text-white transition-all btn-press"
                 >
                   +
                 </button>
@@ -246,10 +245,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
             onClick={handleAddToCart}
             disabled={!selectedSize || isOutOfStock}
             className={`
-              w-full py-4 rounded font-bold uppercase tracking-widest text-sm transition-all
+              w-full py-4 font-semibold uppercase tracking-widest text-sm transition-all btn-press
               ${!selectedSize || isOutOfStock
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-white text-black hover:bg-gray-200'
+                ? 'bg-light-grey text-charcoal/40 cursor-not-allowed'
+                : 'bg-warm-beige text-charcoal hover:bg-warm-beige-hover'
               }
             `}
           >
@@ -262,11 +261,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
           </button>
 
           {/* Product Details */}
-          <div className="mt-8 pt-8 border-t border-gray-700">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-gray-400 mb-3">
+          <div className="mt-8 pt-8 border-t border-light-grey">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-charcoal/60 mb-3">
               Szczegóły produktu
             </h3>
-            <ul className="text-gray-300 text-sm space-y-2">
+            <ul className="text-charcoal/70 text-sm space-y-2">
               <li>Kolor: {product.color}</li>
               <li>Kategoria: {product.category === 'women' ? 'Kobiety' : 'Mężczyźni'}</li>
             </ul>

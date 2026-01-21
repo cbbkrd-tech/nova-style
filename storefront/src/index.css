@@ -1,12 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #37393D;
-  color: white;
+html {
+  scroll-behavior: smooth;
 }
 
+body {
+  background-color: #FBF6F3;
+  color: #333333;
+}
+
+/* Smooth transitions for interactive elements */
+a, button {
+  transition: all 0.3s ease;
+}
+
+/* Animated underline for menu links */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background-color: #333333;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Product card hover effects */
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.product-card .product-image {
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Sticky header effects */
+.header-scrolled {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Scrollbar hiding utility */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -14,4 +71,28 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Button active state */
+.btn-press:active {
+  transform: scale(0.98);
+}
+
+/* Hero overlay animation */
+.hero-panel {
+  transition: all 0.5s ease;
+}
+
+.hero-panel:hover .hero-overlay {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.hero-panel:hover .hero-image {
+  transform: scale(1.05);
+}
+
+/* Selection styling */
+::selection {
+  background-color: #D4C4A8;
+  color: #333333;
 }

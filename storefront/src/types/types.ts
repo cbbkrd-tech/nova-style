@@ -39,4 +39,4 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
-export type ViewState = 'home' | 'men' | 'women' | 'cart' | 'product';
+export type ViewState = 'home' | 'men' | 'women' | 'men-categories' | 'women-categories' | 'cart' | 'product';
