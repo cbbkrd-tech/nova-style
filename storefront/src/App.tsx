@@ -111,6 +111,7 @@ function App() {
             subcategoryName: (p.subcategory as any)?.name || null,
             color: p.color,
             description: p.description,
+            sizeGuide: (p as any).size_guide,
             showOnHomepage: p.show_on_homepage ?? true,
           }));
           setProducts(mappedProducts as any);

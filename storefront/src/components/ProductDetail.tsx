@@ -270,6 +270,18 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <li>Kategoria: {product.category === 'women' ? 'Kobiety' : 'Mężczyźni'}</li>
             </ul>
           </div>
+
+          {/* Size Guide */}
+          {product.sizeGuide && (
+            <div className="mt-6 pt-6 border-t border-light-grey">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-charcoal/60 mb-3">
+                Tabela rozmiarów
+              </h3>
+              <p className="text-charcoal/70 text-sm whitespace-pre-line">
+                {product.sizeGuide}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

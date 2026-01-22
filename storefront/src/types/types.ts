@@ -25,6 +25,7 @@ export interface Product {
   subcategoryName?: string;
   color: string;
   description?: string;
+  sizeGuide?: string;
 }
 
 export interface ProductVariant {

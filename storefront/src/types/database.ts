@@ -495,6 +495,7 @@ export type Database = {
           name: string
           price: number
           show_on_homepage: boolean | null
+          size_guide: string | null
           slug: string
           subcategory_id: string | null
           updated_at: string | null
@@ -510,6 +511,7 @@ export type Database = {
           name: string
           price: number
           show_on_homepage?: boolean | null
+          size_guide?: string | null
           slug: string
           subcategory_id?: string | null
           updated_at?: string | null
@@ -525,6 +527,7 @@ export type Database = {
           name?: string
           price?: number
           show_on_homepage?: boolean | null
+          size_guide?: string | null
           slug?: string
           subcategory_id?: string | null
           updated_at?: string | null

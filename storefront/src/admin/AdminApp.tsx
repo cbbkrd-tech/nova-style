@@ -412,6 +412,8 @@ function AddProductForm({
   const [subcategoryId, setSubcategoryId] = useState('');
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [color, setColor] = useState('');
+  const [description, setDescription] = useState('');
+  const [sizeGuide, setSizeGuide] = useState('');
   const [images, setImages] = useState<ImageItem[]>([]);
   const [showOnHomepage, setShowOnHomepage] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -499,6 +501,8 @@ function AddProductForm({
         category,
         subcategory_id: subcategoryId,
         color,
+        description: description || null,
+        size_guide: sizeGuide || null,
         image_url: mainImage,
         is_active: true,
         show_on_homepage: showOnHomepage,
@@ -631,6 +635,30 @@ function AddProductForm({
             required
           />
 
+          {/* Description */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Opis produktu:</p>
+            <textarea
+              placeholder="Elegancka bluza wykonana z wysokiej jakości bawełny..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full p-3 bg-[#26272B] border border-gray-600 text-white focus:border-white outline-none transition-colors resize-none"
+            />
+          </div>
+
+          {/* Size Guide */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Tabela rozmiarów:</p>
+            <textarea
+              placeholder={"XS: klatka 82-86, talia 62-66\nS: klatka 86-90, talia 66-70\nM: klatka 90-94, talia 70-74\nModel: 175cm, rozmiar M"}
+              value={sizeGuide}
+              onChange={(e) => setSizeGuide(e.target.value)}
+              rows={4}
+              className="w-full p-3 bg-[#26272B] border border-gray-600 text-white focus:border-white outline-none transition-colors resize-none"
+            />
+          </div>
+
           {/* Multi-image upload */}
           <div className="bg-[#37393D] p-4 border border-gray-600">
             <p className="text-sm text-gray-300 mb-2">Zdjęcia produktu (kliknij aby wybrać główne):</p>
@@ -723,6 +751,8 @@ function EditProductForm({
   const [subcategoryId, setSubcategoryId] = useState((product as any).subcategory_id || '');
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [color, setColor] = useState(product.color);
+  const [description, setDescription] = useState(product.description || '');
+  const [sizeGuide, setSizeGuide] = useState((product as any).size_guide || '');
   const [showOnHomepage, setShowOnHomepage] = useState((product as any).show_on_homepage ?? true);
   const [loading, setLoading] = useState(false);
 
@@ -876,6 +906,8 @@ function EditProductForm({
         category,
         subcategory_id: subcategoryId,
         color,
+        description: description || null,
+        size_guide: sizeGuide || null,
         image_url: mainImageUrl,
         show_on_homepage: showOnHomepage,
       })
@@ -983,6 +1015,30 @@ function EditProductForm({
             className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             required
           />
+
+          {/* Description */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Opis produktu:</p>
+            <textarea
+              placeholder="Elegancka bluza wykonana z wysokiej jakości bawełny..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full p-3 bg-[#26272B] border border-gray-600 text-white focus:border-white outline-none transition-colors resize-none"
+            />
+          </div>
+
+          {/* Size Guide */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Tabela rozmiarów:</p>
+            <textarea
+              placeholder={"XS: klatka 82-86, talia 62-66\nS: klatka 86-90, talia 66-70\nM: klatka 90-94, talia 70-74\nModel: 175cm, rozmiar M"}
+              value={sizeGuide}
+              onChange={(e) => setSizeGuide(e.target.value)}
+              rows={4}
+              className="w-full p-3 bg-[#26272B] border border-gray-600 text-white focus:border-white outline-none transition-colors resize-none"
+            />
+          </div>
 
           {/* Multi-image upload */}
           <div className="bg-[#37393D] p-4 border border-gray-600">
