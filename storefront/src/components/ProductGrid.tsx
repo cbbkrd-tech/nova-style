@@ -1,6 +1,7 @@
 import React from 'react';
 import { Product } from '../types/types';
 import OptimizedImage from './OptimizedImage';
+import { prefetchProduct } from '../lib/productCache';
 
 interface ProductGridProps {
   title?: string;
@@ -36,6 +37,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ title, categoryTitle, product
             key={product.id}
             className="product-card group flex flex-col cursor-pointer"
             onClick={() => onProductClick(product)}
+            onMouseEnter={() => product.supabaseId && prefetchProduct(product.supabaseId)}
           >
             {/* Image Container with grey background */}
             <div className="relative aspect-[3/4] bg-product-bg mb-3 overflow-hidden">

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
-import ProductDetail from './components/ProductDetail';
+const ProductDetail = lazy(() => import('./components/ProductDetail'));
 import Footer from './components/Footer';
-import CartView from './components/CartView';
+const CartView = lazy(() => import('./components/CartView'));
 import Sidebar from './components/Sidebar';
 import BenefitsBar from './components/BenefitsBar';
 import BottomNav from './components/BottomNav';
@@ -28,7 +28,14 @@ const FALLBACK_PRODUCTS: Product[] = [
 function App() {
   const [currentView, setCurrentView] = useState<ViewState>('home');
   const [currentSubcategory, setCurrentSubcategory] = useState<string | null>(null);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('nova-cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>(FALLBACK_PRODUCTS);
   const [loading, setLoading] = useState(true);
@@ -125,6 +132,11 @@ function App() {
 
     fetchProducts();
   }, []);
+
+  // Persist cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('nova-cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   // Helper to filter products based on category and subcategory selection
   const getVisibleProducts = () => {
@@ -300,18 +312,22 @@ function App() {
                   &larr; Powrót do sklepu
                 </button>
               </div>
-              <CartView
-                items={cartItems}
-                onUpdateQuantity={handleUpdateQuantity}
-                onRemoveItem={handleRemoveItem}
-              />
+              <Suspense fallback={<div className="flex justify-center items-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-charcoal"></div></div>}>
+                <CartView
+                  items={cartItems}
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onRemoveItem={handleRemoveItem}
+                />
+              </Suspense>
             </div>
           ) : currentView === 'product' && selectedProduct ? (
-            <ProductDetail
-              product={selectedProduct}
-              onBack={handleBackFromProduct}
-              onAddToCart={handleAddToCart}
-            />
+            <Suspense fallback={<div className="flex justify-center items-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-charcoal"></div></div>}>
+              <ProductDetail
+                product={selectedProduct}
+                onBack={handleBackFromProduct}
+                onAddToCart={handleAddToCart}
+              />
+            </Suspense>
           ) : (
             <>
               {currentView === 'home' && (

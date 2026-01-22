@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Product, ProductVariant, ProductImage } from '../types/types';
 import { supabase } from '../lib/medusa';
+import { getCachedProduct } from '../lib/productCache';
 import OptimizedImage from './OptimizedImage';
 import { ChevronLeftIcon } from './Icons';
 
@@ -36,6 +37,26 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
           { id: '5', size: 'XL', stock: 3 },
           { id: '6', size: 'XXL', stock: 2 },
         ]);
+        setLoading(false);
+        return;
+      }
+
+      // Check cache first (populated by hover prefetch)
+      const cached = getCachedProduct(product.supabaseId);
+      if (cached) {
+        setVariants(cached.variants);
+        if (cached.images.length > 0) {
+          const productImages = cached.images.map(img => ({
+            id: img.id,
+            url: img.image_url,
+            isMain: img.is_main ?? false,
+          }));
+          setImages(productImages);
+          const mainImg = productImages.find(img => img.isMain);
+          if (mainImg) {
+            setCurrentImage(mainImg.url);
+          }
+        }
         setLoading(false);
         return;
       }
