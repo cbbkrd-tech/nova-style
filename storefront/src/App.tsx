@@ -278,10 +278,8 @@ function App() {
   const isCheckoutView = currentView === 'checkout';
   const isPaymentStatusView = currentView === 'payment-success' || currentView === 'payment-cancelled' || currentView === 'payment-error';
 
-  // Calculate cart totals for checkout
+  // Calculate cart subtotal for checkout
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const shippingCost = cartItems.length > 0 ? (subtotal >= 400 ? 0 : 8) : 0;
-  const totalAmount = subtotal + shippingCost;
 
   // Get category title with optional subcategory
   const getCategoryTitle = () => {
@@ -346,8 +344,6 @@ function App() {
               <CheckoutForm
                 items={cartItems}
                 subtotal={subtotal}
-                shippingCost={shippingCost}
-                total={totalAmount}
                 onBack={() => handleViewChange('cart')}
                 onSuccess={handlePaymentSuccess}
               />

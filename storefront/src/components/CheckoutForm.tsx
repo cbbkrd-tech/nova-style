@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { CartItem } from '../types/types';
 
+type ShippingMethod = 'inpost' | 'pickup';
+
 interface CheckoutFormProps {
   items: CartItem[];
   subtotal: number;
-  shippingCost: number;
-  total: number;
   onBack: () => void;
   onSuccess: (sessionId: string) => void;
 }
@@ -19,14 +19,18 @@ interface FormData {
   postalCode: string;
 }
 
+const SHIPPING_OPTIONS = {
+  inpost: { label: 'Kurier InPost', price: 8, description: 'Dostawa w 1-2 dni robocze' },
+  pickup: { label: 'Odbiór osobisty', price: 0, description: 'Nowa Sól - darmowy odbiór' },
+};
+
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   items,
   subtotal,
-  shippingCost,
-  total,
   onBack,
   onSuccess,
 }) => {
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>('inpost');
   const [formData, setFormData] = useState<FormData>({
     email: '',
     name: '',
@@ -37,6 +41,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const shippingCost = SHIPPING_OPTIONS[shippingMethod].price;
+  const total = subtotal + shippingCost;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -53,17 +60,20 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       setError('Wprowadź imię i nazwisko');
       return false;
     }
-    if (!formData.street) {
-      setError('Wprowadź adres dostawy');
-      return false;
-    }
-    if (!formData.city) {
-      setError('Wprowadź miasto');
-      return false;
-    }
-    if (!formData.postalCode || !/^\d{2}-\d{3}$/.test(formData.postalCode)) {
-      setError('Wprowadź poprawny kod pocztowy (XX-XXX)');
-      return false;
+    // Address validation only for delivery, not pickup
+    if (shippingMethod === 'inpost') {
+      if (!formData.street) {
+        setError('Wprowadź adres dostawy');
+        return false;
+      }
+      if (!formData.city) {
+        setError('Wprowadź miasto');
+        return false;
+      }
+      if (!formData.postalCode || !/^\d{2}-\d{3}$/.test(formData.postalCode)) {
+        setError('Wprowadź poprawny kod pocztowy (XX-XXX)');
+        return false;
+      }
     }
     return true;
   };
@@ -87,9 +97,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           email: formData.email,
           name: formData.name,
           phone: formData.phone || undefined,
-          street: formData.street,
-          city: formData.city,
-          postalCode: formData.postalCode,
+          street: shippingMethod === 'inpost' ? formData.street : 'Odbiór osobisty - Nowa Sól',
+          city: shippingMethod === 'inpost' ? formData.city : 'Nowa Sól',
+          postalCode: shippingMethod === 'inpost' ? formData.postalCode : '67-100',
+          shippingMethod: shippingMethod,
           items: items.map(item => ({
             id: item.id,
             name: item.name,
@@ -195,62 +206,102 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </div>
         </div>
 
-        {/* Shipping Address */}
+        {/* Shipping Method */}
         <div className="space-y-4 pt-4 border-t border-light-grey">
           <h3 className="text-sm font-medium text-charcoal uppercase tracking-wider">
-            Adres dostawy
+            Metoda dostawy
           </h3>
 
-          <div>
-            <label htmlFor="street" className="block text-xs text-charcoal/70 mb-1">
-              Ulica i numer *
-            </label>
-            <input
-              type="text"
-              id="street"
-              name="street"
-              value={formData.street}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
-              placeholder="ul. Przykładowa 123/4"
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label htmlFor="postalCode" className="block text-xs text-charcoal/70 mb-1">
-                Kod pocztowy *
+          <div className="space-y-2">
+            {(Object.entries(SHIPPING_OPTIONS) as [ShippingMethod, typeof SHIPPING_OPTIONS.inpost][]).map(([key, option]) => (
+              <label
+                key={key}
+                className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${
+                  shippingMethod === key
+                    ? 'border-charcoal bg-warm-beige/20'
+                    : 'border-light-grey hover:border-charcoal/30'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="shippingMethod"
+                    value={key}
+                    checked={shippingMethod === key}
+                    onChange={() => setShippingMethod(key)}
+                    className="w-4 h-4 accent-charcoal"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-charcoal">{option.label}</span>
+                    <p className="text-xs text-charcoal/60">{option.description}</p>
+                  </div>
+                </div>
+                <span className="text-sm font-medium text-charcoal">
+                  {option.price === 0 ? 'Gratis' : `${option.price} PLN`}
+                </span>
               </label>
-              <input
-                type="text"
-                id="postalCode"
-                name="postalCode"
-                value={formData.postalCode}
-                onChange={handleChange}
-                required
-                maxLength={6}
-                className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
-                placeholder="00-000"
-              />
-            </div>
-            <div className="col-span-2">
-              <label htmlFor="city" className="block text-xs text-charcoal/70 mb-1">
-                Miasto *
-              </label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
-                placeholder="Warszawa"
-              />
-            </div>
+            ))}
           </div>
         </div>
+
+        {/* Shipping Address - only for delivery */}
+        {shippingMethod === 'inpost' && (
+          <div className="space-y-4 pt-4 border-t border-light-grey">
+            <h3 className="text-sm font-medium text-charcoal uppercase tracking-wider">
+              Adres dostawy
+            </h3>
+
+            <div>
+              <label htmlFor="street" className="block text-xs text-charcoal/70 mb-1">
+                Ulica i numer *
+              </label>
+              <input
+                type="text"
+                id="street"
+                name="street"
+                value={formData.street}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
+                placeholder="ul. Przykładowa 123/4"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label htmlFor="postalCode" className="block text-xs text-charcoal/70 mb-1">
+                  Kod pocztowy *
+                </label>
+                <input
+                  type="text"
+                  id="postalCode"
+                  name="postalCode"
+                  value={formData.postalCode}
+                  onChange={handleChange}
+                  required
+                  maxLength={6}
+                  className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
+                  placeholder="00-000"
+                />
+              </div>
+              <div className="col-span-2">
+                <label htmlFor="city" className="block text-xs text-charcoal/70 mb-1">
+                  Miasto *
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
+                  placeholder="Warszawa"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Order Summary */}
         <div className="pt-4 border-t border-light-grey space-y-2">
