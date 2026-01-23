@@ -21,6 +21,9 @@ interface CheckoutRequest {
   city: string;
   postalCode: string;
 
+  // Shipping method
+  shippingMethod?: 'inpost' | 'pickup';
+
   // Cart items
   items: Array<{
     id: number;
@@ -121,6 +124,7 @@ Deno.serve(async (req) => {
         shipping_street: body.street,
         shipping_city: body.city,
         shipping_postal_code: body.postalCode,
+        shipping_method: body.shippingMethod || 'inpost',
         items: body.items,
         subtotal: subtotalInGrosze,
         shipping_cost: shippingInGrosze,

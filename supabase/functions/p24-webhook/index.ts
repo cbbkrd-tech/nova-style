@@ -7,6 +7,7 @@ import {
   generateP24Sign,
   P24Credentials,
 } from '../_shared/p24.ts';
+import { sendOrderEmails, OrderEmailData } from '../_shared/email.ts';
 
 interface P24WebhookPayload {
   merchantId: number;
@@ -144,6 +145,40 @@ Deno.serve(async (req) => {
         .eq('id', order.id);
 
       console.log(`Order ${order.id} verified successfully`);
+
+      // Send confirmation emails
+      try {
+        const emailData: OrderEmailData = {
+          orderId: order.id.toString(),
+          sessionId: order.session_id,
+          customerName: order.customer_name,
+          customerEmail: order.customer_email,
+          customerPhone: order.customer_phone || undefined,
+          shippingStreet: order.shipping_street,
+          shippingCity: order.shipping_city,
+          shippingPostalCode: order.shipping_postal_code,
+          shippingMethod: order.shipping_method || 'inpost',
+          items: order.items || [],
+          subtotal: order.subtotal,
+          shippingCost: order.shipping_cost,
+          totalAmount: order.total_amount,
+        };
+
+        const emailResults = await sendOrderEmails(emailData);
+        console.log('Email notifications sent:', emailResults);
+
+        // Update order with email status
+        await supabase
+          .from('orders')
+          .update({
+            customer_email_sent: emailResults.customer,
+            owner_email_sent: emailResults.owner,
+          })
+          .eq('id', order.id);
+      } catch (emailError) {
+        console.error('Failed to send emails:', emailError);
+        // Don't fail the webhook if emails fail - payment is still processed
+      }
     } else {
       console.error('Transaction verification failed:', verifyResult.error);
       // Keep status as 'paid' - manual verification may be needed

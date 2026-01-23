@@ -16,8 +16,6 @@ const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveIt
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const shipping = items.length > 0 ? (subtotal >= 400 ? 0 : 8) : 0;
-  const total = subtotal + shipping;
 
   return (
     <div className="flex flex-col h-full px-4 md:px-6 pt-4 pb-32 max-w-[1400px] mx-auto animate-fade-in">
@@ -84,16 +82,16 @@ const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveIt
           {/* Summary */}
           <div className="py-6 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-charcoal/70">Suma częściowa:</span>
+              <span className="text-charcoal/70">Produkty:</span>
               <span className="text-charcoal font-medium">{subtotal} PLN</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-charcoal/70">Dostawa:</span>
-              <span className="text-charcoal font-medium">{shipping} PLN</span>
+              <span className="text-charcoal/60 text-xs italic">liczona przy zamówieniu</span>
             </div>
-            <div className="flex justify-between text-base text-charcoal pt-2">
-              <span className="font-semibold">Do zapłaty:</span>
-              <span className="font-semibold">{total} PLN</span>
+            <div className="flex justify-between text-base text-charcoal pt-2 border-t border-light-grey mt-2">
+              <span className="font-semibold">Suma:</span>
+              <span className="font-semibold">{subtotal} PLN</span>
             </div>
           </div>
 
