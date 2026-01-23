@@ -8,6 +8,7 @@ export interface EmailOptions {
   subject: string;
   html: string;
   replyTo?: string;
+  headers?: Record<string, string>;
 }
 
 export interface OrderEmailData {
@@ -58,6 +59,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
         subject: options.subject,
         html: options.html,
         reply_to: options.replyTo,
+        headers: options.headers,
       }),
     });
 
@@ -313,6 +315,26 @@ export function generateOwnerEmailHtml(order: OrderEmailData): string {
 }
 
 /**
+ * Generate a unique reference ID for email threading prevention
+ */
+function generateEmailRefId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+}
+
+/**
+ * Format current date for email subject (Polish format)
+ */
+function formatDateForSubject(): string {
+  const now = new Date();
+  const day = now.getDate().toString().padStart(2, '0');
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const year = now.getFullYear();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
+}
+
+/**
  * Send order confirmation emails to customer and store owner(s)
  */
 export async function sendOrderEmails(order: OrderEmailData): Promise<{ customer: boolean; owner: boolean }> {
@@ -325,21 +347,37 @@ export async function sendOrderEmails(order: OrderEmailData): Promise<{ customer
     owner: false,
   };
 
+  // Generate unique reference IDs to prevent email threading
+  const customerRefId = generateEmailRefId();
+  const ownerRefId = generateEmailRefId();
+  const orderDate = formatDateForSubject();
+
+  // Use full session ID for better uniqueness
+  const orderRef = order.sessionId.substring(0, 8).toUpperCase();
+
   // Send customer confirmation email
+  // Clean subject for customer - just order number, no timestamp clutter
   const customerResult = await sendEmail({
     to: order.customerEmail,
-    subject: `Potwierdzenie zamówienia - Nova Style #${order.sessionId.substring(0, 12)}`,
+    subject: `Twoje zamówienie #${orderRef} - Nova Style`,
     html: generateCustomerEmailHtml(order),
     replyTo: storeOwnerEmails[0],
+    headers: {
+      'X-Entity-Ref-ID': customerRefId,
+    },
   });
   results.customer = customerResult.success;
 
   // Send owner notification email to all owners
+  // More details for owner including amount and timestamp
   const ownerResult = await sendEmail({
     to: storeOwnerEmails,
-    subject: `🛒 Nowe zamówienie #${order.sessionId.substring(0, 12)} - ${formatPrice(order.totalAmount)}`,
+    subject: `Zamówienie #${orderRef} | ${formatPrice(order.totalAmount)} | ${orderDate}`,
     html: generateOwnerEmailHtml(order),
     replyTo: order.customerEmail,
+    headers: {
+      'X-Entity-Ref-ID': ownerRefId,
+    },
   });
   results.owner = ownerResult.success;
 
