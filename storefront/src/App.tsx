@@ -5,6 +5,8 @@ import ProductGrid from './components/ProductGrid';
 const ProductDetail = lazy(() => import('./components/ProductDetail'));
 import Footer from './components/Footer';
 const CartView = lazy(() => import('./components/CartView'));
+const CheckoutForm = lazy(() => import('./components/CheckoutForm'));
+const PaymentStatus = lazy(() => import('./components/PaymentStatus'));
 import Sidebar from './components/Sidebar';
 import BenefitsBar from './components/BenefitsBar';
 import BottomNav from './components/BottomNav';
@@ -52,6 +54,14 @@ function App() {
       setPendingProductId(productId);
     } else if (hash === '#cart') {
       setCurrentView('cart');
+    } else if (hash === '#checkout') {
+      setCurrentView('checkout');
+    } else if (hash.startsWith('#payment-success')) {
+      setCurrentView('payment-success');
+    } else if (hash === '#payment-cancelled') {
+      setCurrentView('payment-cancelled');
+    } else if (hash === '#payment-error') {
+      setCurrentView('payment-error');
     } else if (hash === '#women-categories') {
       setCurrentView('women-categories');
       setCurrentSubcategory(null);
@@ -246,11 +256,32 @@ function App() {
       window.location.hash = '';
     } else if (view === 'cart') {
       window.location.hash = 'cart';
+    } else if (view === 'checkout') {
+      window.location.hash = 'checkout';
     }
     window.scrollTo(0, 0);
   };
 
+  const handleCheckout = () => {
+    setCurrentView('checkout');
+    window.location.hash = 'checkout';
+    window.scrollTo(0, 0);
+  };
+
+  const handlePaymentSuccess = (sessionId: string) => {
+    // Clear cart on successful payment
+    setCartItems([]);
+    console.log('Payment initiated for session:', sessionId);
+  };
+
   const isCartView = currentView === 'cart';
+  const isCheckoutView = currentView === 'checkout';
+  const isPaymentStatusView = currentView === 'payment-success' || currentView === 'payment-cancelled' || currentView === 'payment-error';
+
+  // Calculate cart totals for checkout
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const shippingCost = cartItems.length > 0 ? (subtotal >= 400 ? 0 : 8) : 0;
+  const totalAmount = subtotal + shippingCost;
 
   // Get category title with optional subcategory
   const getCategoryTitle = () => {
@@ -302,7 +333,26 @@ function App() {
         />
 
         <main className="flex-grow pb-16 md:pb-0">
-          {isCartView ? (
+          {isPaymentStatusView ? (
+            <Suspense fallback={<div className="flex justify-center items-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-charcoal"></div></div>}>
+              <PaymentStatus
+                status={currentView === 'payment-success' ? 'success' : currentView === 'payment-cancelled' ? 'cancelled' : 'error'}
+                sessionId={localStorage.getItem('nova-pending-order') || undefined}
+                onBackToShop={() => handleViewChange('home')}
+              />
+            </Suspense>
+          ) : isCheckoutView ? (
+            <Suspense fallback={<div className="flex justify-center items-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-charcoal"></div></div>}>
+              <CheckoutForm
+                items={cartItems}
+                subtotal={subtotal}
+                shippingCost={shippingCost}
+                total={totalAmount}
+                onBack={() => handleViewChange('cart')}
+                onSuccess={handlePaymentSuccess}
+              />
+            </Suspense>
+          ) : isCartView ? (
              <div className="w-full">
               <div className="max-w-[1400px] mx-auto px-4 md:px-6">
                 <button
@@ -317,6 +367,7 @@ function App() {
                   items={cartItems}
                   onUpdateQuantity={handleUpdateQuantity}
                   onRemoveItem={handleRemoveItem}
+                  onCheckout={handleCheckout}
                 />
               </Suspense>
             </div>

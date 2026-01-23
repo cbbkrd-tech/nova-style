@@ -7,9 +7,10 @@ interface CartViewProps {
   items: CartItem[];
   onUpdateQuantity: (id: string, delta: number) => void;
   onRemoveItem: (id: string) => void;
+  onCheckout: () => void;
 }
 
-const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveItem }) => {
+const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveItem, onCheckout }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showRegulamin, setShowRegulamin] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -127,6 +128,7 @@ const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveIt
           {/* Checkout Button */}
           <button
             disabled={!termsAccepted}
+            onClick={onCheckout}
             className={`w-full font-semibold uppercase tracking-widest text-sm py-4 transition-all btn-press ${
               termsAccepted
                 ? 'bg-warm-beige text-charcoal hover:bg-warm-beige-hover cursor-pointer'

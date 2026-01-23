@@ -40,4 +40,4 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
-export type ViewState = 'home' | 'men' | 'women' | 'men-categories' | 'women-categories' | 'cart' | 'product';
+export type ViewState = 'home' | 'men' | 'women' | 'men-categories' | 'women-categories' | 'cart' | 'product' | 'checkout' | 'payment-success' | 'payment-cancelled' | 'payment-error';
