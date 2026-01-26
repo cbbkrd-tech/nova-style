@@ -411,12 +411,26 @@ function AddProductForm({
   const [category, setCategory] = useState<'women' | 'men'>('women');
   const [subcategoryId, setSubcategoryId] = useState('');
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
+  const [brandId, setBrandId] = useState('');
+  const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
   const [color, setColor] = useState('');
   const [description, setDescription] = useState('');
   const [sizeGuide, setSizeGuide] = useState('');
   const [images, setImages] = useState<ImageItem[]>([]);
   const [showOnHomepage, setShowOnHomepage] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  // Fetch brands on mount
+  useEffect(() => {
+    async function fetchBrands() {
+      const { data } = await (supabase as any)
+        .from('brands')
+        .select('id, name')
+        .order('sort_order');
+      setBrands(data || []);
+    }
+    fetchBrands();
+  }, []);
 
   // Fetch subcategories when category changes
   useEffect(() => {
@@ -500,6 +514,7 @@ function AddProductForm({
         price: Math.round(parseFloat(price) * 100),
         category,
         subcategory_id: subcategoryId,
+        brand_id: brandId || null,
         color,
         description: description || null,
         size_guide: sizeGuide || null,
@@ -605,6 +620,23 @@ function AddProductForm({
               {subcategories.map((sub) => (
                 <option key={sub.id} value={sub.id}>
                   {sub.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Brand selection */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Marka:</p>
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
+            >
+              <option value="">-- Bez marki --</option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.name}
                 </option>
               ))}
             </select>
@@ -750,11 +782,25 @@ function EditProductForm({
   const [category, setCategory] = useState<'women' | 'men'>(product.category);
   const [subcategoryId, setSubcategoryId] = useState((product as any).subcategory_id || '');
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
+  const [brandId, setBrandId] = useState((product as any).brand_id || '');
+  const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
   const [color, setColor] = useState(product.color);
   const [description, setDescription] = useState(product.description || '');
   const [sizeGuide, setSizeGuide] = useState((product as any).size_guide || '');
   const [showOnHomepage, setShowOnHomepage] = useState((product as any).show_on_homepage ?? true);
   const [loading, setLoading] = useState(false);
+
+  // Fetch brands on mount
+  useEffect(() => {
+    async function fetchBrands() {
+      const { data } = await (supabase as any)
+        .from('brands')
+        .select('id, name')
+        .order('sort_order');
+      setBrands(data || []);
+    }
+    fetchBrands();
+  }, []);
 
   // Fetch subcategories when category changes
   useEffect(() => {
@@ -905,6 +951,7 @@ function EditProductForm({
         price: Math.round(parseFloat(price) * 100),
         category,
         subcategory_id: subcategoryId,
+        brand_id: brandId || null,
         color,
         description: description || null,
         size_guide: sizeGuide || null,
@@ -986,6 +1033,23 @@ function EditProductForm({
               {subcategories.map((sub) => (
                 <option key={sub.id} value={sub.id}>
                   {sub.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Brand selection */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Marka:</p>
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
+            >
+              <option value="">-- Bez marki --</option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.name}
                 </option>
               ))}
             </select>

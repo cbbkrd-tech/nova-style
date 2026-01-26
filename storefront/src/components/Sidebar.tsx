@@ -2,20 +2,29 @@ import React, { useState } from 'react';
 import { XIcon, ChevronDownIcon } from './Icons';
 import { getSubcategoriesByCategory } from '../constants/subcategories';
 
+// Hardcoded brands - same as in database
+const BRANDS = [
+  { slug: 'olavoga', name: 'OLAVOGA' },
+  { slug: 'bg', name: 'BG' },
+  { slug: 'la-manuel', name: 'La Manuel' },
+];
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onCategorySelect: (category: 'men' | 'women') => void;
   onSubcategorySelect: (category: 'men' | 'women', subSlug: string) => void;
+  onBrandSelect?: (brandSlug: string) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onClose,
   onCategorySelect,
-  onSubcategorySelect
+  onSubcategorySelect,
+  onBrandSelect
 }) => {
-  const [expandedCategory, setExpandedCategory] = useState<'women' | 'men' | null>(null);
+  const [expandedCategory, setExpandedCategory] = useState<'women' | 'men' | 'brands' | null>(null);
 
   if (!isOpen) return null;
 
@@ -64,6 +73,41 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
+  const renderBrands = () => {
+    const isExpanded = expandedCategory === 'brands';
+
+    return (
+      <div className="border-b border-light-grey">
+        <button
+          onClick={() => setExpandedCategory(isExpanded ? null : 'brands')}
+          className="w-full flex items-center justify-between py-4 text-lg font-medium uppercase tracking-widest text-charcoal hover:text-charcoal/70 transition-colors"
+        >
+          Marki
+          <ChevronDownIcon
+            className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {isExpanded && (
+          <div className="pb-4 pl-4 space-y-1">
+            {BRANDS.map((brand) => (
+              <button
+                key={brand.slug}
+                onClick={() => {
+                  onBrandSelect?.(brand.slug);
+                  onClose();
+                }}
+                className="block w-full text-left text-sm text-charcoal/60 hover:text-charcoal py-2 transition-colors"
+              >
+                {brand.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-[60] flex">
       {/* Backdrop */}
@@ -84,6 +128,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <nav className="flex flex-col p-6">
           {renderCategory('women', 'Kobiety')}
           {renderCategory('men', 'Mężczyźni')}
+          {renderBrands()}
         </nav>
 
         <div className="mt-auto p-6 text-xs text-charcoal/40 font-serif">

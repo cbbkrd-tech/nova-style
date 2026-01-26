@@ -27,9 +27,17 @@ const FALLBACK_PRODUCTS: Product[] = [
   { id: 8, name: "BLUZA KHAKI", price: 279, category: 'men', color: "KHAKI", image: "/images/products/bluza-khaki-mezczyzna.jpg" },
 ];
 
+// Brand name mapping for display
+const BRAND_NAMES: Record<string, string> = {
+  'olavoga': 'OLAVOGA',
+  'bg': 'BG',
+  'la-manuel': 'La Manuel',
+};
+
 function App() {
   const [currentView, setCurrentView] = useState<ViewState>('home');
   const [currentSubcategory, setCurrentSubcategory] = useState<string | null>(null);
+  const [currentBrand, setCurrentBrand] = useState<string | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('nova-cart');
@@ -82,6 +90,10 @@ function App() {
     } else if (hash === '#men') {
       setCurrentView('men');
       setCurrentSubcategory(null);
+    } else if (hash.startsWith('#brand/')) {
+      const brandSlug = hash.replace('#brand/', '');
+      setCurrentView('brand');
+      setCurrentBrand(brandSlug);
     }
   }, []);
 
@@ -97,7 +109,7 @@ function App() {
     }
   }, [pendingProductId, products, loading]);
 
-  // Fetch products from Supabase with subcategory join
+  // Fetch products from Supabase with subcategory and brand join
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -105,7 +117,8 @@ function App() {
           .from('products')
           .select(`
             *,
-            subcategory:subcategories(id, slug, name)
+            subcategory:subcategories(id, slug, name),
+            brand:brands(id, slug, name)
           `)
           .eq('is_active', true);
 
@@ -126,6 +139,9 @@ function App() {
             subcategoryId: p.subcategory_id,
             subcategorySlug: (p.subcategory as any)?.slug || null,
             subcategoryName: (p.subcategory as any)?.name || null,
+            brandId: (p as any).brand_id,
+            brandSlug: (p.brand as any)?.slug || null,
+            brandName: (p.brand as any)?.name || null,
             color: p.color,
             description: p.description,
             sizeGuide: (p as any).size_guide,
@@ -148,11 +164,15 @@ function App() {
     localStorage.setItem('nova-cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Helper to filter products based on category and subcategory selection
+  // Helper to filter products based on category, subcategory, and brand selection
   const getVisibleProducts = () => {
     let filtered = products;
 
-    if (currentView === 'men') {
+    if (currentView === 'brand' && currentBrand) {
+      // Filter by brand
+      filtered = filtered.filter(p => p.brandSlug === currentBrand);
+      return filtered;
+    } else if (currentView === 'men') {
       filtered = filtered.filter(p => p.category === 'men');
     } else if (currentView === 'women') {
       filtered = filtered.filter(p => p.category === 'women');
@@ -190,8 +210,18 @@ function App() {
   const handleSubcategoryChange = (category: 'men' | 'women', subSlug: string) => {
     setCurrentView(category);
     setCurrentSubcategory(subSlug);
+    setCurrentBrand(null);
     setIsMenuOpen(false);
     window.location.hash = `${category}/${subSlug}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBrandSelect = (brandSlug: string) => {
+    setCurrentView('brand');
+    setCurrentBrand(brandSlug);
+    setCurrentSubcategory(null);
+    setIsMenuOpen(false);
+    window.location.hash = `brand/${brandSlug}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -281,8 +311,11 @@ function App() {
   // Calculate cart subtotal for checkout
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  // Get category title with optional subcategory
+  // Get category title with optional subcategory or brand
   const getCategoryTitle = () => {
+    if (currentView === 'brand' && currentBrand) {
+      return BRAND_NAMES[currentBrand] || currentBrand.toUpperCase();
+    }
     if (currentView === 'men') {
       if (currentSubcategory) {
         const sub = getSubcategoryBySlug(currentSubcategory);
@@ -308,6 +341,7 @@ function App() {
           onClose={() => setIsMenuOpen(false)}
           onCategorySelect={handleCategoryChange}
           onSubcategorySelect={handleSubcategoryChange}
+          onBrandSelect={handleBrandSelect}
         />
 
         <Header
@@ -316,9 +350,11 @@ function App() {
           onMenuClick={() => setIsMenuOpen(true)}
           onCategoryClick={handleCategoryChange}
           onSubcategoryClick={handleSubcategoryChange}
+          onBrandClick={handleBrandSelect}
           onLogoClick={() => {
             setCurrentView('home');
             setCurrentSubcategory(null);
+            setCurrentBrand(null);
             setSelectedProduct(null);
             window.location.hash = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -328,6 +364,7 @@ function App() {
             currentView === 'men' || currentView === 'men-categories' ? 'men' : ''
           }
           currentSubcategory={currentSubcategory || undefined}
+          currentBrand={currentBrand || undefined}
         />
 
         <main className="flex-grow pb-16 md:pb-0">
@@ -432,6 +469,37 @@ function App() {
                           {currentView === 'women' ? 'Damskie' : 'Męskie'}
                         </span>
                       )}
+                    </div>
+                  </div>
+                  {loading ? (
+                    <div className="flex justify-center items-center py-20">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-charcoal"></div>
+                    </div>
+                  ) : (
+                    <ProductGrid
+                      products={getVisibleProducts()}
+                      onProductClick={handleProductClick}
+                      categoryTitle={getCategoryTitle()}
+                    />
+                  )}
+                </div>
+              )}
+
+              {currentView === 'brand' && currentBrand && (
+                <div id="product-grid">
+                  {/* Breadcrumb Navigation for Brand */}
+                  <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-6 md:pt-8">
+                    <div className="mb-4 md:mb-6">
+                      <button
+                        onClick={() => handleViewChange('home')}
+                        className="text-sm text-charcoal/60 hover:text-charcoal transition-colors"
+                      >
+                        &larr; Strona główna
+                      </button>
+                      <span className="text-sm text-charcoal/40 mx-2">/</span>
+                      <span className="text-sm text-charcoal font-medium">
+                        {BRAND_NAMES[currentBrand] || currentBrand}
+                      </span>
                     </div>
                   </div>
                   {loading ? (

@@ -23,6 +23,9 @@ export interface Product {
   subcategoryId?: string;
   subcategorySlug?: string;
   subcategoryName?: string;
+  brandId?: string;
+  brandSlug?: string;
+  brandName?: string;
   color: string;
   description?: string;
   sizeGuide?: string;
@@ -40,4 +43,4 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
-export type ViewState = 'home' | 'men' | 'women' | 'men-categories' | 'women-categories' | 'cart' | 'product' | 'checkout' | 'payment-success' | 'payment-cancelled' | 'payment-error';
+export type ViewState = 'home' | 'men' | 'women' | 'men-categories' | 'women-categories' | 'brand' | 'cart' | 'product' | 'checkout' | 'payment-success' | 'payment-cancelled' | 'payment-error';

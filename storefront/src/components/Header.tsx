@@ -2,14 +2,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MenuIcon, ShoppingCartIcon, ChevronDownIcon, HeartIcon, UserIcon, FacebookIcon, InstagramIcon } from './Icons';
 import { getSubcategoriesByCategory } from '../constants/subcategories';
 
+// Hardcoded brands - same as in database
+const BRANDS = [
+  { slug: 'olavoga', name: 'OLAVOGA' },
+  { slug: 'bg', name: 'BG' },
+  { slug: 'la-manuel', name: 'La Manuel' },
+];
+
 interface HeaderProps {
   cartCount: number;
   onCartClick: () => void;
   onMenuClick: () => void;
   currentCategory: string;
   currentSubcategory?: string;
+  currentBrand?: string;
   onCategoryClick: (cat: 'men' | 'women') => void;
   onSubcategoryClick: (cat: 'men' | 'women', subSlug: string) => void;
+  onBrandClick?: (brandSlug: string) => void;
   onLogoClick: () => void;
 }
 
@@ -19,11 +28,13 @@ const Header: React.FC<HeaderProps> = ({
   onMenuClick,
   onCategoryClick,
   onSubcategoryClick,
+  onBrandClick,
   currentCategory,
   currentSubcategory,
+  currentBrand,
   onLogoClick
 }) => {
-  const [openDropdown, setOpenDropdown] = useState<'women' | 'men' | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<'women' | 'men' | 'brands' | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const desktopNavRef = useRef<HTMLDivElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
@@ -56,11 +67,52 @@ const Header: React.FC<HeaderProps> = ({
     { label: 'NOWOŚCI', action: () => onLogoClick() },
     { label: 'DAMSKIE', action: () => onCategoryClick('women'), dropdown: 'women' as const, subcategories: womenSubcategories },
     { label: 'MĘSKIE', action: () => onCategoryClick('men'), dropdown: 'men' as const, subcategories: menSubcategories },
-    { label: 'BESTSELLERY', action: () => onLogoClick() },
+    { label: 'MARKI', action: () => {}, dropdown: 'brands' as const, brands: BRANDS },
     { label: 'WYPRZEDAŻ', action: () => onLogoClick() },
   ];
 
   const renderNavItem = (item: typeof navItems[0], index: number) => {
+    // Handle brands dropdown
+    if (item.dropdown === 'brands' && item.brands) {
+      return (
+        <div key={index} className="relative">
+          <button
+            onClick={() => setOpenDropdown(openDropdown === 'brands' ? null : 'brands')}
+            onMouseEnter={() => setOpenDropdown('brands')}
+            className={`nav-link text-charcoal hover:text-charcoal/70 ${
+              currentBrand ? 'font-medium' : ''
+            }`}
+          >
+            {item.label}
+          </button>
+
+          {openDropdown === 'brands' && (
+            <div
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white border border-light-grey shadow-lg z-50"
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              {item.brands.map((brand) => (
+                <button
+                  key={brand.slug}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onBrandClick?.(brand.slug);
+                    setOpenDropdown(null);
+                  }}
+                  className={`w-full px-4 py-2.5 text-left text-sm hover:bg-off-white transition-colors ${
+                    currentBrand === brand.slug ? 'text-charcoal bg-off-white font-medium' : 'text-charcoal/70'
+                  }`}
+                >
+                  {brand.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Handle category dropdowns (women/men)
     if (item.dropdown && item.subcategories) {
       return (
         <div key={index} className="relative">
@@ -94,7 +146,7 @@ const Header: React.FC<HeaderProps> = ({
                     key={sub.slug}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSubcategoryClick(item.dropdown!, sub.slug);
+                      onSubcategoryClick(item.dropdown as 'women' | 'men', sub.slug);
                       setOpenDropdown(null);
                     }}
                     className={`w-full px-4 py-2.5 text-left text-sm hover:bg-off-white transition-colors ${
