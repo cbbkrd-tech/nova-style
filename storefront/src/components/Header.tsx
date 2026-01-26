@@ -321,6 +321,32 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </div>
+            <div className="relative">
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'brands' ? null : 'brands')}
+                className={`transition-colors flex items-center gap-1 ${currentBrand ? 'text-charcoal font-semibold' : 'text-charcoal/60 hover:text-charcoal'}`}
+              >
+                MARKI
+                <ChevronDownIcon />
+              </button>
+              {openDropdown === 'brands' && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white border border-light-grey shadow-lg z-50">
+                  <div className="max-h-60 overflow-y-auto">
+                    {BRANDS.map((brand) => (
+                      <button
+                        key={brand.slug}
+                        onClick={(e) => { e.stopPropagation(); onBrandClick?.(brand.slug); setOpenDropdown(null); }}
+                        className={`w-full px-4 py-2.5 text-left text-sm hover:bg-off-white transition-colors ${
+                          currentBrand === brand.slug ? 'text-charcoal bg-off-white font-medium' : 'text-charcoal/70'
+                        }`}
+                      >
+                        {brand.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
         </div>
       </div>
