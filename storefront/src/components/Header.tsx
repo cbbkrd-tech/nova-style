@@ -64,11 +64,9 @@ const Header: React.FC<HeaderProps> = ({
   const menSubcategories = getSubcategoriesByCategory('men');
 
   const navItems = [
-    { label: 'NOWOŚCI', action: () => onLogoClick() },
     { label: 'DAMSKIE', action: () => onCategoryClick('women'), dropdown: 'women' as const, subcategories: womenSubcategories },
     { label: 'MĘSKIE', action: () => onCategoryClick('men'), dropdown: 'men' as const, subcategories: menSubcategories },
     { label: 'MARKI', action: () => {}, dropdown: 'brands' as const, brands: BRANDS },
-    { label: 'WYPRZEDAŻ', action: () => onLogoClick() },
   ];
 
   const renderNavItem = (item: typeof navItems[0], index: number) => {
@@ -163,15 +161,8 @@ const Header: React.FC<HeaderProps> = ({
       );
     }
 
-    return (
-      <button
-        key={index}
-        onClick={item.action}
-        className="nav-link text-charcoal hover:text-charcoal/70"
-      >
-        {item.label}
-      </button>
-    );
+    // All nav items have dropdowns now, this fallback shouldn't be reached
+    return null;
   };
 
   return (
