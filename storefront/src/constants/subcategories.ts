@@ -6,10 +6,11 @@ export interface SubcategoryDefinition {
 }
 
 export const SUBCATEGORIES: SubcategoryDefinition[] = [
-  // Women (15)
+  // Women (16)
   { slug: 't-shirty-topy', name: 'T-shirty i topy', parentCategory: 'women', image: '/images/categories/tshirty-topy.webp' },
   { slug: 'bluzki-body', name: 'Bluzki i body', parentCategory: 'women', image: '/images/categories/bluzki-body.webp' },
   { slug: 'swetry-women', name: 'Swetry', parentCategory: 'women', image: '/images/categories/swetry.webp' },
+  { slug: 'bluzy-women', name: 'Bluzy', parentCategory: 'women', image: '/images/categories/bluzy-women.webp' },
   { slug: 'koszule-women', name: 'Koszule', parentCategory: 'women', image: '/images/categories/koszule.webp' },
   { slug: 'komplety', name: 'Komplety', parentCategory: 'women', image: '/images/categories/komplety.webp' },
   { slug: 'sukienki', name: 'Sukienki', parentCategory: 'women', image: '/images/categories/sukienki.webp' },
