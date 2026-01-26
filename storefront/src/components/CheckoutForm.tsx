@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CartItem } from '../types/types';
 
-type ShippingMethod = 'inpost' | 'pickup';
+type ShippingMethod = 'paczkomat' | 'pickup';
+// Future: | 'courier'
 
 interface CheckoutFormProps {
   items: CartItem[];
@@ -14,14 +15,18 @@ interface FormData {
   email: string;
   name: string;
   phone: string;
+  paczkomatCode: string;
+  // Courier fields (for future use)
   street: string;
   city: string;
   postalCode: string;
 }
 
 const SHIPPING_OPTIONS = {
-  inpost: { label: 'Kurier InPost', price: 8, description: 'Dostawa w 1-2 dni robocze' },
+  paczkomat: { label: 'Paczkomat InPost', price: 18, description: 'Dostawa w 1-2 dni robocze' },
   pickup: { label: 'Odbiór osobisty', price: 0, description: 'Nowa Sól - darmowy odbiór' },
+  // Future shipping options:
+  // courier: { label: 'Kurier InPost', price: 22, description: 'Dostawa pod drzwi w 1-2 dni robocze' },
 };
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
@@ -30,11 +35,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   onBack,
   onSuccess,
 }) => {
-  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>('inpost');
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>('paczkomat');
   const [formData, setFormData] = useState<FormData>({
     email: '',
     name: '',
     phone: '',
+    paczkomatCode: '',
     street: '',
     city: '',
     postalCode: '',
@@ -60,21 +66,21 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       setError('Wprowadź imię i nazwisko');
       return false;
     }
-    // Address validation only for delivery, not pickup
-    if (shippingMethod === 'inpost') {
-      if (!formData.street) {
-        setError('Wprowadź adres dostawy');
-        return false;
-      }
-      if (!formData.city) {
-        setError('Wprowadź miasto');
-        return false;
-      }
-      if (!formData.postalCode || !/^\d{2}-\d{3}$/.test(formData.postalCode)) {
-        setError('Wprowadź poprawny kod pocztowy (XX-XXX)');
+    // Paczkomat validation
+    if (shippingMethod === 'paczkomat') {
+      if (!formData.paczkomatCode || formData.paczkomatCode.length < 3) {
+        setError('Wprowadź numer paczkomatu');
         return false;
       }
     }
+    // Future: Courier address validation
+    // if (shippingMethod === 'courier') {
+    //   if (!formData.street) { setError('Wprowadź adres dostawy'); return false; }
+    //   if (!formData.city) { setError('Wprowadź miasto'); return false; }
+    //   if (!formData.postalCode || !/^\d{2}-\d{3}$/.test(formData.postalCode)) {
+    //     setError('Wprowadź poprawny kod pocztowy (XX-XXX)'); return false;
+    //   }
+    // }
     return true;
   };
 
@@ -99,10 +105,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           email: formData.email,
           name: formData.name,
           phone: formData.phone || undefined,
-          street: shippingMethod === 'inpost' ? formData.street : 'Odbiór osobisty - Nowa Sól',
-          city: shippingMethod === 'inpost' ? formData.city : 'Nowa Sól',
-          postalCode: shippingMethod === 'inpost' ? formData.postalCode : '67-100',
+          street: shippingMethod === 'paczkomat'
+            ? `Paczkomat: ${formData.paczkomatCode}`
+            : shippingMethod === 'pickup'
+              ? 'Odbiór osobisty - Nowa Sól'
+              : formData.street,
+          city: shippingMethod === 'pickup' ? 'Nowa Sól' : (formData.city || '-'),
+          postalCode: shippingMethod === 'pickup' ? '67-100' : (formData.postalCode || '-'),
           shippingMethod: shippingMethod,
+          paczkomatCode: shippingMethod === 'paczkomat' ? formData.paczkomatCode : undefined,
           items: items.map(item => ({
             id: item.id,
             name: item.name,
@@ -215,7 +226,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </h3>
 
           <div className="space-y-2">
-            {(Object.entries(SHIPPING_OPTIONS) as [ShippingMethod, typeof SHIPPING_OPTIONS.inpost][]).map(([key, option]) => (
+            {(Object.entries(SHIPPING_OPTIONS) as [ShippingMethod, typeof SHIPPING_OPTIONS.paczkomat][]).map(([key, option]) => (
               <label
                 key={key}
                 className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${
@@ -246,64 +257,62 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </div>
         </div>
 
-        {/* Shipping Address - only for delivery */}
-        {shippingMethod === 'inpost' && (
+        {/* Paczkomat number field */}
+        {shippingMethod === 'paczkomat' && (
+          <div className="space-y-4 pt-4 border-t border-light-grey">
+            <h3 className="text-sm font-medium text-charcoal uppercase tracking-wider">
+              Paczkomat
+            </h3>
+
+            <div>
+              <label htmlFor="paczkomatCode" className="block text-xs text-charcoal/70 mb-1">
+                Numer paczkomatu *
+              </label>
+              <input
+                type="text"
+                id="paczkomatCode"
+                name="paczkomatCode"
+                value={formData.paczkomatCode}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors uppercase"
+                placeholder="np. WAW123M"
+              />
+              <p className="text-xs text-charcoal/50 mt-1">
+                Znajdź swój paczkomat na <a href="https://inpost.pl/znajdz-paczkomat" target="_blank" rel="noopener noreferrer" className="underline hover:text-charcoal">inpost.pl</a>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Future: Courier address fields */}
+        {/* shippingMethod === 'courier' && (
           <div className="space-y-4 pt-4 border-t border-light-grey">
             <h3 className="text-sm font-medium text-charcoal uppercase tracking-wider">
               Adres dostawy
             </h3>
-
             <div>
-              <label htmlFor="street" className="block text-xs text-charcoal/70 mb-1">
-                Ulica i numer *
-              </label>
-              <input
-                type="text"
-                id="street"
-                name="street"
-                value={formData.street}
-                onChange={handleChange}
-                required
+              <label htmlFor="street" className="block text-xs text-charcoal/70 mb-1">Ulica i numer *</label>
+              <input type="text" id="street" name="street" value={formData.street} onChange={handleChange} required
                 className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
-                placeholder="ul. Przykładowa 123/4"
-              />
+                placeholder="ul. Przykładowa 123/4" />
             </div>
-
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label htmlFor="postalCode" className="block text-xs text-charcoal/70 mb-1">
-                  Kod pocztowy *
-                </label>
-                <input
-                  type="text"
-                  id="postalCode"
-                  name="postalCode"
-                  value={formData.postalCode}
-                  onChange={handleChange}
-                  required
-                  maxLength={6}
+                <label htmlFor="postalCode" className="block text-xs text-charcoal/70 mb-1">Kod pocztowy *</label>
+                <input type="text" id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleChange} required maxLength={6}
                   className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
-                  placeholder="00-000"
-                />
+                  placeholder="00-000" />
               </div>
               <div className="col-span-2">
-                <label htmlFor="city" className="block text-xs text-charcoal/70 mb-1">
-                  Miasto *
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
+                <label htmlFor="city" className="block text-xs text-charcoal/70 mb-1">Miasto *</label>
+                <input type="text" id="city" name="city" value={formData.city} onChange={handleChange} required
                   className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
-                  placeholder="Warszawa"
-                />
+                  placeholder="Warszawa" />
               </div>
             </div>
           </div>
-        )}
+        ) */}
 
         {/* Order Summary */}
         <div className="pt-4 border-t border-light-grey space-y-2">
