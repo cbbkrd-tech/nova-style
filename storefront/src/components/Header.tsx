@@ -5,7 +5,7 @@ import { getSubcategoriesByCategory } from '../constants/subcategories';
 // Hardcoded brands - same as in database
 const BRANDS = [
   { slug: 'olavoga', name: 'OLAVOGA' },
-  { slug: 'bg', name: 'BG' },
+  { slug: 'bg', name: 'Brandenburg BG' },
   { slug: 'la-manuel', name: 'La Manuel' },
 ];
 

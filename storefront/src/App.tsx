@@ -30,7 +30,7 @@ const FALLBACK_PRODUCTS: Product[] = [
 // Brand name mapping for display
 const BRAND_NAMES: Record<string, string> = {
   'olavoga': 'OLAVOGA',
-  'bg': 'BG',
+  'bg': 'Brandenburg BG',
   'la-manuel': 'La Manuel',
 };
 

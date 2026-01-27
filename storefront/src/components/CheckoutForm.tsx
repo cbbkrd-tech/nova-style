@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { CartItem } from '../types/types';
 
-type ShippingMethod = 'paczkomat' | 'pickup';
-// Future: | 'courier'
+type ShippingMethod = 'paczkomat' | 'courier' | 'pickup';
 
 interface CheckoutFormProps {
   items: CartItem[];
@@ -24,9 +23,8 @@ interface FormData {
 
 const SHIPPING_OPTIONS = {
   paczkomat: { label: 'Paczkomat InPost', price: 18, description: 'Dostawa w 1-2 dni robocze' },
+  courier: { label: 'Kurier InPost', price: 20, description: 'Dostawa pod drzwi w 1-2 dni robocze' },
   pickup: { label: 'Odbiór osobisty', price: 0, description: 'Nowa Sól - darmowy odbiór' },
-  // Future shipping options:
-  // courier: { label: 'Kurier InPost', price: 22, description: 'Dostawa pod drzwi w 1-2 dni robocze' },
 };
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
@@ -66,6 +64,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       setError('Wprowadź imię i nazwisko');
       return false;
     }
+    if (!formData.phone || formData.phone.length < 9) {
+      setError('Wprowadź numer telefonu');
+      return false;
+    }
     // Paczkomat validation
     if (shippingMethod === 'paczkomat') {
       if (!formData.paczkomatCode || formData.paczkomatCode.length < 3) {
@@ -73,14 +75,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         return false;
       }
     }
-    // Future: Courier address validation
-    // if (shippingMethod === 'courier') {
-    //   if (!formData.street) { setError('Wprowadź adres dostawy'); return false; }
-    //   if (!formData.city) { setError('Wprowadź miasto'); return false; }
-    //   if (!formData.postalCode || !/^\d{2}-\d{3}$/.test(formData.postalCode)) {
-    //     setError('Wprowadź poprawny kod pocztowy (XX-XXX)'); return false;
-    //   }
-    // }
+    // Courier address validation
+    if (shippingMethod === 'courier') {
+      if (!formData.street) { setError('Wprowadź adres dostawy'); return false; }
+      if (!formData.city) { setError('Wprowadź miasto'); return false; }
+      if (!formData.postalCode || !/^\d{2}-\d{3}$/.test(formData.postalCode)) {
+        setError('Wprowadź poprawny kod pocztowy (XX-XXX)'); return false;
+      }
+    }
     return true;
   };
 
@@ -104,7 +106,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         body: JSON.stringify({
           email: formData.email,
           name: formData.name,
-          phone: formData.phone || undefined,
+          phone: formData.phone,
           street: shippingMethod === 'paczkomat'
             ? `Paczkomat: ${formData.paczkomatCode}`
             : shippingMethod === 'pickup'
@@ -205,7 +207,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
           <div>
             <label htmlFor="phone" className="block text-xs text-charcoal/70 mb-1">
-              Telefon (opcjonalnie)
+              Telefon *
             </label>
             <input
               type="tel"
@@ -213,6 +215,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
               name="phone"
               value={formData.phone}
               onChange={handleChange}
+              required
               className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors"
               placeholder="+48 123 456 789"
             />
@@ -285,8 +288,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </div>
         )}
 
-        {/* Future: Courier address fields */}
-        {/* shippingMethod === 'courier' && (
+        {/* Courier address fields */}
+        {shippingMethod === 'courier' && (
           <div className="space-y-4 pt-4 border-t border-light-grey">
             <h3 className="text-sm font-medium text-charcoal uppercase tracking-wider">
               Adres dostawy
@@ -312,7 +315,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
               </div>
             </div>
           </div>
-        ) */}
+        )}
 
         {/* Order Summary */}
         <div className="pt-4 border-t border-light-grey space-y-2">
