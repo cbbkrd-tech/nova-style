@@ -7,6 +7,11 @@ const BRANDS = [
   { slug: 'olavoga', name: 'OLAVOGA' },
   { slug: 'bg', name: 'Brandenburg BG' },
   { slug: 'la-manuel', name: 'La Manuel' },
+  { slug: 'la-monne', name: 'La Monne' },
+  { slug: 'la-mania', name: 'LA Mania' },
+  { slug: 'mia-maison', name: 'Mia Maison' },
+  { slug: 'millagro', name: 'Millagro' },
+  { slug: 'lil-glam', name: 'Lil Glam' },
 ];
 
 interface SidebarProps {

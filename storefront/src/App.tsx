@@ -32,6 +32,11 @@ const BRAND_NAMES: Record<string, string> = {
   'olavoga': 'OLAVOGA',
   'bg': 'Brandenburg BG',
   'la-manuel': 'La Manuel',
+  'la-monne': 'La Monne',
+  'la-mania': 'LA Mania',
+  'mia-maison': 'Mia Maison',
+  'millagro': 'Millagro',
+  'lil-glam': 'Lil Glam',
 };
 
 function App() {
