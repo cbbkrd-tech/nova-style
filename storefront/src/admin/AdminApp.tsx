@@ -117,6 +117,20 @@ export default function AdminApp() {
     }
   };
 
+  const handleDeleteOrder = async (orderId: number) => {
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', orderId as unknown as string);
+
+    if (error) {
+      throw new Error('Nie udało się usunąć zamówienia');
+    }
+
+    // Update local state
+    setOrders(prev => prev.filter(o => o.id !== orderId));
+  };
+
   const handleUpdateStock = async (variantId: string, newStock: number) => {
     // Update local state immediately (optimistic update)
     setProducts(prev => prev.map(product => ({
@@ -265,7 +279,7 @@ export default function AdminApp() {
             )}
           </>
         ) : (
-          <OrdersView orders={orders} onRefresh={fetchOrders} />
+          <OrdersView orders={orders} onRefresh={fetchOrders} onDeleteOrder={handleDeleteOrder} />
         )}
 
         {showAddForm && (
@@ -1271,9 +1285,10 @@ function EditProductForm({
 }
 
 // Orders View Component
-function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => void }) {
+function OrdersView({ orders, onRefresh, onDeleteOrder }: { orders: Order[]; onRefresh: () => void; onDeleteOrder: (orderId: number) => Promise<void> }) {
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'shipped'>('paid');
   const [creatingShipment, setCreatingShipment] = useState<number | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState<number | null>(null);
   const [selectedSize, setSelectedSize] = useState<'small' | 'medium' | 'large'>('small');
   const [shipmentStatus, setShipmentStatus] = useState<{ orderId: number; message: string; type: 'success' | 'error' } | null>(null);
 
@@ -1363,8 +1378,10 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
         type: 'success'
       });
 
-      // Refresh orders list
-      onRefresh();
+      // Wait a bit for database to update, then refresh and switch to shipped tab
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await onRefresh();
+      setStatusFilter('shipped');
 
       // Auto-hide success message after 5 seconds
       setTimeout(() => setShipmentStatus(null), 5000);
@@ -1385,6 +1402,19 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
     const success = await downloadLabel(shipmentId);
     if (!success) {
       alert('Nie można pobrać etykiety - spróbuj ponownie za chwilę');
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: number) => {
+    if (!confirm('Czy na pewno chcesz usunąć to zamówienie? Ta operacja jest nieodwracalna.')) return;
+
+    setDeletingOrder(orderId);
+    try {
+      await onDeleteOrder(orderId);
+    } catch (err) {
+      alert('Błąd przy usuwaniu zamówienia: ' + (err instanceof Error ? err.message : 'Nieznany błąd'));
+    } finally {
+      setDeletingOrder(null);
     }
   };
 
@@ -1553,7 +1583,7 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
               )}
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {(order.status === 'paid' || order.status === 'verified') && !order.inpost_shipment_id && (order.shipping_method === 'paczkomat' || order.shipping_method === 'courier') && (
                   <button
                     onClick={() => handleCreateShipmentAndDownload(order.id)}
@@ -1571,6 +1601,13 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
                     Pobierz etykietę
                   </button>
                 )}
+                <button
+                  onClick={() => handleDeleteOrder(order.id)}
+                  disabled={deletingOrder === order.id}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm transition-colors disabled:opacity-50"
+                >
+                  {deletingOrder === order.id ? 'Usuwanie...' : 'Usuń'}
+                </button>
               </div>
             </div>
           ))}
