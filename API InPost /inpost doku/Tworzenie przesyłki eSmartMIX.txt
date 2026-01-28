@@ -1,0 +1,438 @@
+eSmartMIX - usługa łącząca dostawę towarów z elektronicznym obiegiem dokumentów. Usługa dedykowana dostawom towarów wymagających doręczenia osobistego z potwierdzeniem danych odbiorcy. Proces doręczenia wymaga weryfikacji adresata za pomocą takich danych jak imię, nazwisko, pełnoletność, a w przypadku, gdy doręczenie danej kategorii towarów wymaga trzeźwości odbiorcy przesyłki, zostanie to również zweryfikowane. Dokument potwierdzający dokonanie czynności wraz z potwierdzeniem doręczenia zwracany jest w formie dokumentu PDF po zakończeniu procesu doręczenia.
+
+ 
+
+Do utworzenia przesyłki wymagana jest dedykowana umowa, jeśli jej nie posiadasz, skontaktuj się z adresem smartcourier@inpost.pl.
+
+Wymiary i waga przesyłki
+
+waga do 25 kg
+
+suma wymiarów mniejsza niż 180cm
+
+wymiar najdłuższego boku mniejszy lub równy 80 cm
+
+Na tej stronie
+
+Uwierzytelnianie
+Środowisko produkcyjne
+Środowisko testowe
+Struktura
+Przykładowe zapytanie
+Informacje o błędach
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+Środowisko produkcyjne
+Adres środowiska produkcyjnego  https://api-shipx-pl.easypack24.net
+
+Generowanie danych autoryzacyjnych
+
+Pobierz poradnik wyjaśniający jak szybko we własnym zakresie utworzyć dostęp do API ShipX,  Instrukcja konfiguracji konta API
+
+Środowisko testowe
+Adres środowiska testowego: https://sandbox-api-shipx-pl.easypack24.net
+
+Adres środowiska testowego Managera Paczek: https://sandbox-manager.paczkomaty.pl/ 
+
+Generowanie danych autoryzacyjnych
+
+https://sandbox-manager.paczkomaty.pl/  > zakładka Moje konto > API. 
+
+Aby wygenerować Token i ID organizacji należy uzupełnić wszystkie dane, łącznie z danymi do faktury w zakładce Moje konto > Dane. Do utworzenia przesyłki Paczkomat® niezbędne są środki na koncie, konto doładujesz wirtualnie w zakładce Płatności.
+
+
+W przypadku braku serwisu na swojej organizacji inpost_courier_alcohol skontaktuj się z nami za pomocą formularza https://inpost.pl/formularz-wsparcie. Po wejściu w formularz wystarczy z listy wybrać opcję "Wsparcie Klienta”, w kategorii wybrać “API ShipX”.
+
+ 
+
+Struktura
+Zasób Shipment dla przesyłek eSmartMIX posiada takie same atrybuty jak w trybie uproszczonym. Jedyną różnicą jest to, że nie wszystkie są obsługiwane. Poniżej lista parametrów, których można użyć.
+
+
+Atrybuty zasobu Shipment
+
+Atrybut
+
+Typ
+
+Opis
+
+receiver
+
+Peer
+
+Dane odbiorcy
+
+parcels
+
+Array[Parcel]
+
+Lista paczek w ramach przesyłki
+
+service
+
+String
+
+inpost_courier_alcohol
+
+reference
+
+String
+
+Dodatkowy opis dla przesyłki, np. numer zamówienia lub ID klienta
+
+comments
+
+String
+
+Dowolny komentarz
+
+ 
+
+Atrybuty obiektu receiver
+
+Atrybut
+
+Typ
+
+Walidacja
+
+name
+
+String
+
+Atrybut nie jest wymagany, (podana wartość nie jest widoczna na etykiecie)
+
+Maksimum 255 znaków
+
+company_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut first_name, last_name
+
+Maksimum 255 znaków
+
+first_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut company_name
+Maksimum 255 znaków
+
+last_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut company_name
+Maksimum 255 znaków
+
+email
+
+String
+
+Atrybut jest wymagany
+
+phone
+
+String
+
+Atrybut jest wymagany. Tylko 9 cyfr (333222111)
+
+address
+
+Address Form
+
+Atrybut jest wymagany
+
+Atrybuty obiektu adress
+
+Atrybut
+
+Typ
+
+Walidacja
+
+city
+
+String
+
+Atrybut jest wymagany
+
+Maksimum 255 znaków
+
+building_number
+
+String
+
+Atrybut jest wymagany
+
+Maksimum 255 znaków
+
+country_code
+
+String
+
+Atrybut nie jest wymagany
+
+street
+
+String
+
+Atrybut jest wymagany
+Maksimum 255 znaków
+
+post_code
+
+String
+
+Atrybut jest wymagany
+Format "00-000"
+
+ 
+
+Atrybuty obiektu Parcel
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+Unikalny identyfikator danej paczki w ramach przesyłki, który pozwala zwrócić użytkownikowi informację o błędach walidacji przypisanych do konkretnej paczki. Id nie jest zapisywany w bazie danych i nie jest zwracany jak atrybut utworzonej paczki.
+
+dimensions
+
+Object
+
+Wymiary paczki.
+
+length - długość
+
+width - szerokość
+
+height - wysokość
+
+unit - jednostka, w której podane są wymiary. Aktualnie tylko mm (millimetry)
+
+weight
+
+Object
+
+Waga paczki
+
+amount - waga
+
+unit - jednostka, w której podana jest waga paczki. Aktualnie tylko kg (kilogramy)
+
+ 
+
+Przykładowe zapytanie
+
+
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer token' \
+--data-raw '{
+    "receiver": {
+        "name": "InPost",
+        "company_name": "InPost",
+        "first_name": "test",
+        "last_name": "test",
+        "email": "testi@inpost.pl",
+        "phone": "885887738",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "parcels": {
+        "dimensions": {
+            "length": "10",
+            "width": "10",
+            "height": "10",
+            "unit": "mm"
+        },
+        "weight": {
+            "amount": "10",
+            "unit": "kg"
+        }
+    },
+    "service": "inpost_courier_alcohol",
+    "reference": "numer_zamówienia",
+    "comments": "komentarz"
+}'
+ 
+
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/12345",
+    "id": 12345,
+    "status": "confirmed",
+    "tracking_number": "999106411340100000011272",
+    "return_tracking_number": null,
+    "service": "inpost_courier_alcohol",
+    "reference": "numer_zamówienia",
+    "is_return": false,
+    "application_id": 12,
+    "created_by_id": 12,
+    "external_customer_id": null,
+    "sending_method": null,
+    "end_of_week_collection": null,
+    "comments": "komentarz",
+    "mpk": null,
+    "additional_services": null,
+    "custom_attributes": {},
+    "cod": {
+        "amount": null,
+        "currency": null
+    },
+    "insurance": {
+        "amount": null,
+        "currency": null
+    },
+    "sender": {
+        "id": 123,
+        "name": null,
+        "company_name": "sender",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "inpost@example.com",
+        "phone": "321321321",
+        "address": {
+            "id": 123,
+            "street": "Zawiła",
+            "building_number": "65 L",
+            "line1": null,
+            "line2": null,
+            "city": "Kraków",
+            "post_code": "30-390",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 123,
+        "name": "InPost",
+        "company_name": "InPost",
+        "first_name": "test",
+        "last_name": "test",
+        "email": "test@inpost.pl",
+        "phone": "885887738",
+        "address": {
+            "id": 123,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "selected_offer": {
+        "id": 123,
+        "status": "bought",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": null,
+        "carrier": {
+            "id": "inpost_courier",
+            "name": "InPost Kurier",
+            "description": "InPost Express - Przesyłki kurierskie"
+        },
+        "service": {
+            "id": "inpost_courier_alcohol",
+            "name": "eSmartMIX",
+            "description": "Przesyłka kurierska eSmartMix z elektronicznym obiegiem dokumentów i potwierdzeniem danych odbiorcy"
+        },
+        "unavailability_reasons": null
+    },
+    "offers": [
+        {
+            "id": 123,
+            "status": "bought",
+            "expires_at": null,
+            "rate": null,
+            "currency": null,
+            "additional_services": null,
+            "carrier": {
+                "id": "inpost_courier",
+                "name": "InPost Kurier",
+                "description": "InPost Express - Przesyłki kurierskie"
+            },
+            "service": {
+                "id": "inpost_courier_alcohol",
+                "name": "eSmartMIX",
+                "description": "Przesyłka kurierska eSmartMix z elektronicznym obiegiem dokumentów i potwierdzeniem danych odbiorcy"
+            },
+            "unavailability_reasons": null
+        }
+    ],
+    "transactions": [
+        {
+            "id": 123,
+            "status": "success",
+            "offer_id": 123,
+            "details": null,
+            "created_at": "2024-04-15T11:34:46.247+02:00",
+            "updated_at": "2024-04-15T11:34:46.247+02:00"
+        }
+    ],
+    "parcels": [
+        {
+            "id": 712403579,
+            "identify_number": null,
+            "tracking_number": "999106411340100000011272",
+            "is_non_standard": false,
+            "template": null,
+            "dimensions": {
+                "length": 10.0,
+                "width": 10.0,
+                "height": 10.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 10.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2024-04-15T11:34:46.210+02:00",
+    "updated_at": "2024-04-15T11:34:46.262+02:00"
+}
+ 
+
+Informacje o błędach
+Błędy, jakie mogą wystąpić podczas tworzenia przesyłki (poniższe błędy są wysyłane do aplikacji która wysłała żądanie, nie na webhook):
+
+"service":"unavailable" - Błąd wystąpi w przypadku gdy organizacja nie ma dostępnej usługi na swoim koncie. 
+
+"carrier": "carrier_inpost_courier_unavailable" - Błąd wystąpi w przypadku gdy organizacja nie ma dostępnych usług kurierskich.
+
+company_data_missing - Błąd wystąpi w przypadku gdy organizacja nie ma podpisanej umowy na usługę eSmartMIX
+
+"dimensions": "invalid" - Błąd zostanie zwrócony w przypadku podania błędnych wymiarów / przekroczenia dopuszczalnych wartości.
+
+"weight": "invalid" - Błąd zostanie zwrócony w przypadku przekroczenia maksymalnej wagi
+
+validation_failed - przesyłane parametry są niepoprawne. Szczegóły zawarte w polu details
+
+ 

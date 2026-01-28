@@ -1,0 +1,251 @@
+ 
+
+
+Tworzenie przesyłki
+ 
+
+Dostępne tryby tworzenia przesyłki:
+
+Tworzenie przesyłki w trybie uproszczonym 
+
+Tworzenie przesyłki w trybie ofertowym
+ 
+
+Tworzenie i podgląd wielu przesyłek
+ 
+
+ 
+
+Przesyłki utworzone w panelu manager.paczkomaty.pl, kurier.inpost.pl nie są widoczne w API.
+
+ 
+
+Proces tworzenia przesyłki w trybie ofertowym:
+
+Utworzenie przesyłki > Wybór oferty (ręczny lub za pomocą webhook) > Opłacenie przesyłki (dla konta prepaid oznacza automatyczne pobranie środków, dla konta postpaid oznacza potwierdzenie przesyłki)
+
+W trybie uproszczonym wskazujemy serwis i następuje automatyczny wybór oferty oraz opłacenie przesyłki na wskazany serwis. W trybie ofertowym nie wskazuje się serwisu, należy wybrać jedną ze zwróconych ofert i opłacić ją. 
+
+Tworzenie i podgląd wielu przesyłek 
+Tworzenie i podgląd wielu przesyłek
+ 
+
+
+Nie ma możliwości anulowania przesyłki w statusie confirmed. Można utworzyć przesyłkę z użyciem parametru  "only_choice_of_offer": true i zatrzymać ją na statusie "status": "offer_selected" następnie anulować 
+Anulowanie przesyłki
+  lub opłacić  
+Opłacanie przesyłki
+ 
+
+Przesyłki wielopaczkowe można tworzyć wyłącznie w ramach serwisów kurierskich objętych umową kurierską. Przesyłki Paczkomat® nie obsługują opcji wielopaczkowości; w ich przypadku zawsze istnieje możliwość wygenerowania wielu przesyłek dla jednego zamówienia, korzystając z tych samych danych.
+Usługi które nie obsługują wielopaczkowości:
+Przesyłka Paczkomat® - standardowa
+Przesyłka Paczkomat® - Allegro Paczkomat® InPost
+Przesyłka Paczkomat® - Podaj Dalej
+Przesyłka kurierska - Allegro MiniKurier24 InPost
+Przesyłka kurierska - Allegro Kurier24 InPost
+Przesyłka kurierska - InPost Kurier C2C (usługa dla klienta detalicznego - prepaid)
+Przesyłka kurierska -eSmartMIX
+
+ 
+
+W przypadku podania paczkopunktu jako punktu odbioru (target_point": "POP-WAW364") zostanie podmieniony serwis z "service": "inpost_locker_standard" na "service": "inpost_locker_customer_service_point".
+
+Dostępne serwisy dla konta prepaid
+
+inpost_locker_standard
+
+Przesyłka Paczkomat® - standardowa
+
+inpost_locker_allegro
+
+Przesyłka Paczkomat® - Allegro Paczkomat® InPost
+
+inpost_locker_pass_thru
+
+Przesyłka Paczkomat® - Podaj Dalej
+
+inpost_letter_allegro
+
+Przesyłka kurierska - Allegro MiniKurier24 InPost
+
+inpost_courier_allegro
+
+Przesyłka kurierska - Allegro Kurier24 InPost
+
+inpost_courier_c2c
+
+Przesyłka kurierska InPost Kurier C2C (usługa dla klienta detalicznego - prepaid)
+
+Dostępne serwisy dla konta postpaid
+
+inpost_locker_standard
+
+Przesyłka Paczkomat® - standardowa
+
+inpost_locker_allegro
+
+Przesyłka Paczkomat® - Allegro Paczkomat® InPost
+
+inpost_locker_pass_thru
+
+Przesyłka Paczkomat® - Podaj Dalej
+
+inpost_letter_allegro
+
+Przesyłka kurierska - Allegro MiniKurier24 InPost
+
+inpost_courier_allegro
+
+Przesyłka kurierska - Allegro Kurier24 InPost
+
+inpost_courier_c2c
+
+Przesyłka kurierska InPost Kurier C2C (usługa dla klienta detalicznego - prepaid)
+
+inpost_courier_standard
+
+Przesyłka kurierska standardowa
+
+inpost_courier_express_1000
+
+Przesyłka kurierska z doręczeniem do 10:00
+
+inpost_courier_express_1200
+
+Przesyłka kurierska z doręczeniem do 12:00
+
+inpost_courier_express_1700
+
+Przesyłka kurierska z doręczeniem do 17:00
+
+inpost_courier_palette
+
+Przesyłka kurierska Paleta Standard
+
+Na tej stronie
+
+Tworzenie przesyłki
+Sprawdzenie statusu przesyłki
+Pobranie etykiety
+Zamówienie kuriera
+Wygenerowanie potwierdzenia nadania
+Tracking przesyłki
+ 
+
+Sprawdzenie statusu przesyłki
+
+Ponieważ zakup przesyłki działa asynchronicznie, serwer w odpowiedzi zwróci informacje o przesyłce nieuwzględniające zmian wywołanych przez zakup (zmiana statusu, nadanie numeru trackingowego, gdyż informacje te będą dostępne dopiero po pewnym czasie).
+
+Aby sprawdzić status przesyłki lub pobrać numer tracking należy odpytać przesyłkę za pomocą jej ID, lub skorzystać z powiadomień webhook. 
+
+ 
+
+Przykładowe zapytanie
+
+
+
+GET /v1/shipments/ID_Shipments HTTP/1.1
+Host: api-shipx-pl.easypack24.net
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...
+Odpowiedź
+
+
+Click here to expand...
+
+Przykładowe powiadomienie webhook:
+
+
+
+{
+"event_ts": "2018-07-17 12:57:29 +0200",
+"event": "shipment_confirmed",
+"organization_id": 35,
+"created_by_id": null,
+"payload": {
+"shipment_id": 87235,
+"tracking_number": "633300208831612315289193"
+}
+ 
+
+Pobranie etykiety
+ 
+
+Dostępne są 2 metody:
+
+Pobranie jednej etykiety 
+Pobieranie etykiet
+ 
+
+Pobranie wielu etykiet 
+Pobieranie etykiet | Pobieranie wielu etykiet
+ 
+
+
+Ważne informacje
+
+Etykiety można pobrać dla przesyłek opłaconych - w statusie confirmed lub późniejszym
+
+Maksymalnie można pobrać etykiety dla 100 przesyłek
+
+W przypadku jednej przesyłki zwracany jest pojedynczy plik .pdf, .epl/.epl2, .zpl
+
+W przypadku wielu przesyłek:
+- jeżeli przesyłki są tego samego serwisu, zwracany jest pojedynczy plik z wszystkimi przesyłkami
+- jeżeli przesyłki są dla różnych serwisów, zwracany jest plik .zip z plikami .epl/.epl2, .zpl, .pdf oddzielnie dla każdego serwisu
+
+ 
+
+Zamówienie kuriera
+ 
+
+Kuriera należy zamawiać na adres wtedy gdy nie posiada się stałego zlecenia odbioru lub gdy odbiór ma nastąpić z innego miejsca. 
+
+Szczegółowe informacje na stronie:  
+Zlecenie odbioru (Zamawianie kuriera) | Tworzenie zlecenia odbioru
+ 
+
+ 
+
+Wygenerowanie potwierdzenia nadania
+ 
+
+Funkcjonalność umożliwia generowanie potwierdzenia nadania dla przesyłek posiadających zlecenie odbioru, oraz przesyłek nieposiadających zleceń odbioru. 
+
+Szczegółowe informacje na stronie: 
+Drukowanie potwierdzenia nadania
+ 
+
+Dostępne są 2 metody:
+
+Metoda generująca manifest dla zlecenia odbioru (printout)
+
+Metoda generująca manifest dla wskazanych numerów paczek (printouts)
+
+Ważne informacje
+
+W przypadku jednej przesyłki zwracany jest pojedynczy plik *.pdf
+
+W przypadku wielu przesyłek:
+- jeżeli przesyłki są tego samego serwisu, zwracany jest pojedynczy plik *.pdf z wszystkimi przesyłkami
+- jeżeli przesyłki są dla różnych serwisów, zwracany jest plik *.zip z plikami *.pdf (oddzielnie dla każdego serwisu).
+
+Maksymalnie można pobrać manifest dla 100 przesyłek
+
+ 
+
+Tracking przesyłki
+ 
+
+Poniżej prezentujemy dostępne sposoby pobierania informacji o aktualnym stanie przesyłki w procesie logistycznym. Za ich pomocą można uzyskać informacje o utworzeniu przesyłki, ostatniej zmianie statusu czy też historii statusów.
+
+
+Zasób Tracking https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731050
+ 
+
+Powiadomienia webhook https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/18153630
+ 
+
+ 
+
+ 

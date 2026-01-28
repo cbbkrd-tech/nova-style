@@ -1,0 +1,220 @@
+Geowidget v5 to lokalizator i selektor punktów zaprojektowany przez InPost.
+
+Jego główne zadania to:
+
+ Wyświetlanie mapy z punktami o różnych typach (np. Paczkomat®, paczkopunkty)
+
+ Dostarczenie informacji o tych punktach i umożliwienie integracji z zewnętrznymi systemami Klientów
+
+Jest to oprogramowanie typu widget. Oznacza to, że cały kod i przetwarzanie odbywa się na serwerach InPost. Klienci zewnętrzni dołączają tylko link do tego kodu i określają konfigurację, która będzie używana w ich systemach.
+
+Na tej stronie
+
+Środowisko Produkcyjne
+Środowisko Testowe
+Przykłady integracji
+Integracja
+Podstawowa integracja
+Pełna integracja
+Opcje konfiguracyjne
+Środowisko Produkcyjne
+
+Adres środowiska produkcyjnego: https://geowidget.inpost.pl 
+
+ 
+
+Generowanie dostępu
+
+ Wejdź na stronę Managera Paczek https://manager.paczkomaty.pl
+
+W oknie logowania wpisz swój login i kliknij: Zaloguj
+
+Po zalogowaniu na konto przejdź do zakładki Moje Konto
+
+W zakładce Dane sprawdzić, czy wszystkie dane firmy są prawidłowo uzupełnione
+
+Pamiętaj, aby możliwe było wygenerowanie dostępu do API uzupełnione muszą być zarówno dane adresowe firmy, jak i dane do faktury.
+
+ 5. Po weryfikacji przejdź do nowej zakładki API
+
+ 6. Aby wygenerować nowy dostęp do Geowidget, rozwiń zakładkę Geowidget i kliknij Generuj
+
+ 
+
+Środowisko Testowe
+ 
+
+Adres środowiska testowego: https://sandbox-easy-geowidget-sdk.easypack24.net 
+
+ 
+
+Generowanie dostępu
+
+ Wejdź na stronę Managera Paczek https://sandbox-manager.paczkomaty.pl
+
+W oknie logowania wpisz swój login i kliknij: Zaloguj 
+
+Jeśli nie masz konta, musisz je zarejestrować na stronie: https://sandbox-manager.paczkomaty.pl/auth/register .
+
+Po zalogowaniu na konto przejdź do zakładki Moje Konto
+
+W zakładce Dane sprawdzić, czy wszystkie dane firmy są prawidłowo uzupełnione
+
+Pamiętaj, aby możliwe było wygenerowanie dostępu do API uzupełnione muszą być zarówno dane adresowe firmy, jak i dane do faktury.
+
+ 5. Po weryfikacji przejdź do nowej zakładki API
+
+ 6. Aby wygenerować nowy dostęp do Geowidget, rozwiń zakładkę Geowidget i kliknij Generuj
+
+Dla środowiska sandbox w przypadku korzystania z localhost nie należy wskazywać domeny podczas generowania tokenu.
+
+ 
+
+Przykłady integracji
+
+Środowisko produkcyjne: https://geowidget.inpost.pl/examples/index.html
+
+Środowisko testowe: https://sandbox-easy-geowidget-sdk.easypack24.net/examples/index.html 
+
+ 
+
+Integracja
+
+
+Podstawowa integracja
+Aby skorzystać z nowej wersji geowidgetu, dodaj poniższe linie do nagłówków stron.
+
+
+
+<link rel="stylesheet" href="https://geowidget.inpost.pl/inpost-geowidget.css"/>
+<script src='https://geowidget.inpost.pl/inpost-geowidget.js' defer></script>
+<script> 
+  function afterPointSelected(point) { alert('Selected point: ' + point.name); } 
+</script>
+A następnie osadź niestandardowy element w wybranym miejscu
+
+
+
+<inpost-geowidget token='token-for-geo' language='pl' config='parcelcollect'></inpost-geowidget>
+Parametry są opisane tutaj
+
+Pełna integracja
+Aby skorzystać z nowej wersji geowidgetu, dodaj poniższe linie do nagłówków stron.
+
+
+
+<link rel="stylesheet" href="https://geowidget.inpost.pl/inpost-geowidget.css"/>
+<script src='https://geowidget.inpost.pl/inpost-geowidget.js' defer></script>
+<script>
+  document.addEventListener('onpointselect', (event) => alert(event.details.name));
+</script>
+A następnie osadź niestandardowy element w wybranym miejscu
+
+
+
+<inpost-geowidget onpoint="onpointselect" token='token-for-geo' language='pl' config='parcelcollect'></inpost-geowidget>
+Parametry są opisane tutaj
+
+Przykład wywołania metody API
+
+
+
+<inpost-geowidget id="geowidget" onpoint="handlePointSelection" token='myTokenHere' language='pl' config='parcelCollect'></inpost-geowidget>
+<script>
+  const geowidget = document.getElementById('geowidget');
+  // Listener to Geowidget init event
+  geowidget.addEventListener('inpost.geowidget.init', (event) => {
+    // Reference to api object
+    const api = event.detail.api;
+    // Call api method. Check ApiInterface for more details.
+    api.changePosition({ longitude: 20.318968, latitude: 49.731131 }, 16);
+  });
+</script>
+ 
+
+Na stronie https://www.npmjs.com/package/inpost-geowidget-angular  pakiet zawiera prosty komponent Angular dla Inpost Geowidget v5.
+
+ 
+
+Wszystkie metody API opisano na https://geowidget.inpost.pl/docs/interfaces/ApiInterface.html 
+
+Opis poszczególnych parametrów:
+
+Parametr
+
+Opis 
+
+onpoint
+
+Parametr przyjmuje funkcje/nazwę jaka ma zostać wykonana po wybraniu punktu na mapie.
+
+token
+
+Parametr do którego należy przekazać PUBLICZNY token wygenerowany w aplikacji manager paczek:
+
+Środowisko produkcyjne
+
+Środowisko sandbox 
+
+language
+
+Parametr pozwalający określić domyślny język widgetu - opcjonalny.
+Dostępne opcje:
+
+language='pl'
+
+language='en'
+
+language='uk'
+
+Jeśli użytkownik już skorzystał z nowej wersji geowidget - interfejs zostanie wyświetlony w języku, którego używał poprzednio.
+
+config
+
+Parametr określający jakie funkcje/rodzaje mają posiadać punkty wyświetlone na mapie.
+
+
+Opcje konfiguracyjne
+Opis
+
+Opcja
+
+functions
+
+Typ prezentowanych punktów
+
+Prezentowanie punktów odbioru dla zamówień opłaconych z góry
+
+config='parcelCollect'
+
+parcel_collect
+
+Paczkomat®, PaczkoPunkt
+
+Prezentowanie punktów odbioru dla zamówień pobraniowych
+
+config='parcelCollectPayment'
+
+parcel_collect
+
+Paczkomat®, PaczkoPunkt
+
+Prezentowanie punktów odbioru dla zamówień Paczka w Weekend
+
+config='parcelCollect247'
+
+parcel_collect
+
+Paczkomat® oraz PaczkoPunkty dostępne 24/7
+
+Prezentowanie punktów nadań
+
+config='parcelSend'
+
+parcel_send
+
+Paczkomat®, PaczkoPunkt
+
+ 
+
+ 

@@ -1,0 +1,215 @@
+Informacje ogólne
+
+
+
+Podstawowe cechy usługi:
+
+Usługa będzie dostępna w określonym oknie czasowym, np. od czwartku od godziny 20:00 do piątku do godziny 18:00. Nie uwzględniamy świąt ani dni wolnych
+
+Usługa nie jest dostępna dla Punktów Obsługi Przesyłek (POP) oraz Paczkomat® z parametrem "location_247":false
+
+Usługa dostępna jest dla klientów postpaid/prepaid
+
+Usługa jest obsługiwana przez Paczkomat® dostępne 24/7
+
+Na tej stronie
+
+Informacje ogólne
+Implementacja usługi
+Modyfikację obiektu przesyłki
+Pobieranie listy punktów dostępnych dla usługi
+Informacje o błędach
+Przykładowe zapytanie dla tworzenia przesyłki w trybie uproszczonym
+Modyfikacja wyszukiwania przesyłek
+Modyfikacja usług 
+Modyfikacja przeliczania cen przesyłki
+ 
+
+Implementacja usługi
+Możliwość wyboru usługi dostępna tylko w określonym przedziale czasowym opisanym w informacjach ogólnych usługi
+
+Parametry
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+end_of_week_collection
+
+Boolean
+
+Ustawienie parametru na true będzie oznaczać, że wybieramy usługę dodatkową.
+
+Atrybut nie jest wymagany.
+
+Defaultowa wartośćfalse
+
+ 
+
+ 
+
+Modyfikację obiektu przesyłki
+ 
+
+Zmiana powinna zostać zaimplementowana w:
+
+Tworzeniu przesyłki w trybie uproszczonym https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731061
+ 
+
+Tworzeniu przesyłek w trybie ofertowym https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731068
+ 
+
+Tworzeniu wielu przesyłek https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731065
+ 
+
+Aktualizacji przesyłki https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731067
+ 
+
+ 
+
+Pobieranie listy punktów dostępnych dla usługi
+Aby pobrać listę punktów obsługujących usługę, należy wywołać metodę do pobierania maszyn z parametrem type=parcel_locker_only np.: https://api-shipx-pl.easypack24.net/v1/points?type=parcel_locker_only  następnie należy odfiltrować maszyny które nie są dostępne 24/7 za pomocą parametr location_247 ustawionym na true (location_247": true) lub użyć https://api-shipx-pl.easypack24.net/v1/points?location_247=true. 
+
+ 
+
+Informacje o błędach
+ 
+
+Błędy, jakie mogą wystąpić podczas tworzenia przesyłki:
+
+invalid_end_of_week_collection - w przypadku wybrania usługi dodatkowej poza wskazanym przedziałem czasowym spowoduje zwrócenie wyjątku przez aplikację
+
+invalid_target_point_for_end_of_week_collection - w przypadku wybrania Punktu Obsługi Przesyłek który nie jest dostępny 24/7 jako sposobu odbioru przesyłki zostanie zwrócony wyjątek. Tylko maszyny filtrowane za pomocą parametru type=parcel_locker_only obsługują Dostawy Weekendowe
+
+invalid_target_point_247_for_end_of_week_collection - w przypadku wybrania  Paczkomat® który nie jest dostępny 24/7 jako sposobu odbioru przesyłki zostanie zwrócony wyjątek. Tylko maszyny filtrowane za pomocą parametru type=parcel_locker_only dostępne 24/7 obsługują Dostawy Weekendowe
+
+invalid_allegro_for_end_of_week_collection - dla przesyłek allegro usługa nie jest dostępna. Próba utworzenia przesyłki allegro z usługą Dostawy Weekendowej spowoduje zwrócenie wyjątku przez aplikację
+
+ 
+
+Przykładowe zapytanie dla tworzenia przesyłki w trybie uproszczonym
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1Ni...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender": {
+        "name": "Name",
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "name": "Name",
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "test@inpost.pl",
+        "phone": "111222333"
+    },
+    "parcels": {
+        "template": "small"
+    },
+    "insurance": {
+        "amount": 25,
+        "currency": "PLN"
+    },
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+    },
+    "custom_attributes": {
+        "sending_method": "dispatch_order",
+        "target_point": "KRA012"
+    },
+    "service": "inpost_locker_standard",
+    "reference": "Test",
+    "end_of_week_collection": true
+}'
+ 
+
+Modyfikacja wyszukiwania przesyłek
+Usługę Dostaw Weekendowych będzie można wyszukać poprzez wywołanie w filtrze parametru end_of_week_collection, który będzie przyjmował wartości true/false
+
+W przypadku, gdy parametr będzie ustawiony na end_of_week_collection=true, będą zwracane tylko przesyłki, w których została wybrana opcja Dostaw Weekendowych
+
+W przypadku braku parametru end_of_week_collection w filtrze będą zwracane wszystkie przesyłki
+
+Szczegółowe informacje na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731073
+ 
+
+ 
+
+Modyfikacja usług 
+ 
+
+Obiekt serwisu zostanie zaktualizowany o usługę dodatkową Dostaw Weekendowych,
+
+Dla serwisu inpost_locker_standard zostanie zwrócona usługa dodatkowa o identyfikatorze
+
+      id: end_of_week_collection
+
+Szczegółowe informacje na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731067
+ 
+
+ 
+
+Modyfikacja przeliczania cen przesyłki
+ 
+
+Analogicznie jak przy tworzeniu przesyłki w metodzie post będzie można podać parametr end_of_week_collection z wartością true lub false,
+
+Parametr nie jest wymagany
+
+W odpowiedzi zostanie zwrócony cennik zaktualizowany o parametr end_of_week_collection_charge_amount
+
+Szczegółowe informacje na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731069
+ 
+
+ 
+
+Przykład odpowiedzi:
+
+ 
+
+
+
+[
+      {
+             "id":"SHIPMENT1",
+             "calculated_charge_amount":"27.20",
+             "fuel_charge_amount":"0.00",
+             "notification_charge_amount":"0.00",
+             "cod_charge_amount":"0.00",
+             "insurance_charge_amount":"20.00",
+             "calculated_charge_amount_non_commission":"7.20",
+             "end_of_week_collection_charge_amount":"4.99",
+      },
+      {
+             "id":"SHIPMENT2",
+             "calculated_charge_amount":"18.00",
+             "fuel_charge_amount":null,
+             "notification_charge_amount":null,
+             "cod_charge_amount":null,
+             "insurance_charge_amount":null,
+             "calculated_charge_amount_non_commission":null,
+             "end_of_week_collection_charge_amount":"4.99"
+ 
+
+ 
+
+ 

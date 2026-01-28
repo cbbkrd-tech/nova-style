@@ -1,0 +1,197 @@
+Dodanie możliwości przekazywania serwisów SMART przy tworzeniu przesyłek inpost_locker_allegro_smart
+
+Na tej stronie
+
+Uwierzytelnianie
+Dotychczasowe paczki allegro
+Tworzenie paczek SMART
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Dotychczasowe paczki allegro
+ 
+
+W przypadku przesyłek allegro nie ma już wymagania wysyłania w custom_attributes parametrów allegro_transaction_id oraz allegro_user_id, wystarczy wysłać kompletny zamaskowany email allegro,  e-mail będzie mieć postać stałykodnadawcy+identyfikatortransakcji@allegromail.com, na przykład 8awgqyk6a5+cub31c122@allegromail.com.
+
+ 
+
+Tworzenie paczek SMART
+ 
+
+Paczki z serwisami SMART można tworzyć jedynie na email z domeny allegro:
+
+allegromail.pl
+
+user.allegromail.pl
+
+user.allegrogroup.pl
+
+W przypadku gdy na dany email został już wykorzystany limit SMART, serwis zostanie automatycznie zmieniony na jego odpowiednik bez _smart.
+
+W przypadku podania emaila z domeny allegro i serwisu  inpost_locker_allegro, gdy na dany email przysługuje klientowi limit SMART, serwis zostanie automatycznie zmieniony na jego odpowiednik ze _smart
+
+
+
+
+Poniżej przedstawiamy jakich serwisów należy użyć dla dostępnych metod dostawy:
+
+
+Metoda dostawy - Allegro Paczkomat® 24/7 InPost:
+
+bez Allegro Smart   -   używamy serwisu inpost_locker_allegro
+
+z Allegro Smart  -   używamy serwisu inpost_locker_allegro serwis zostanie zmieniony na inpost_locker_allegro_smart gdy na dany email przysługuje klientowi limit SMART w przypadku tworzenia przesyłki w trybie uproszczonym. W trybie ofertowym należy wybrać ofertę z usługą inpost_locker_allegro_smart
+
+ 
+
+Błędny serwis dla metody dostawy
+
+W przypadku podania nieodpowiedniego serwisu dla metody dostawy (np. serwisu inpost_locker_standard dla metody dostawy Allegro Paczkomat® 24/7), usługa SMART nie będzie dostępna.
+
+
+
+
+Przykładowe zapytania dostępne są na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731061
+.
+
+
+
+
+Przykładowe zapytanie do tworzenia paczki dla metody dostawy - Allegro Paczkomat® 24/7 InPost:
+
+ 
+
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/115/shipments' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI...' \
+--data-raw '{
+    "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "company_name": "company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "kz9576590l+378a831e0@user.allegrogroup.pl",
+        "phone": "888000000"       
+    },
+    "parcels": [
+        {
+            "template": "medium"
+        }
+    ],
+    "custom_attributes": {
+        "sending_method": "dispatch_order",
+        "target_point": "KRA012"
+    },
+    "service": "inpost_locker_allegro",
+    "reference": "Numer_zamówienia"
+}'
+W odpowiedzi serwer zwróci status 201
+
+
+
+
+HTTP/1.1 201 CREATED
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments/12280001",
+    "id": 12280001,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_locker_allegro_smart",
+    "reference": "Numer_zamówienia",
+    "is_return": false,
+    "application_id": 1070,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": "dispatch_order",
+    "end_of_week_collection": false,
+    "comments": null,
+    "mpk": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "target_point": "KRA012",
+        "sending_method": "dispatch_order"
+    },
+    "cod": {
+        "amount": null,
+        "currency": null
+    },
+    "insurance": {
+        "amount": 5000,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": 24563418,
+        "name": null,
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 23260657,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 24563417,
+        "name": null,
+        "company_name": "company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "kz9576590l+378a831e0@user.allegrogroup.pl",
+        "phone": "888000000",
+        "address": null
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 13041562,
+            "identify_number": null,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": "medium",
+            "dimensions": {
+                "length": 380.0,
+                "width": 640.0,
+                "height": 190.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-10-25T15:13:40.761+02:00",
+    "updated_at": "2023-10-25T15:13:40.761+02:00"
+}
+ 

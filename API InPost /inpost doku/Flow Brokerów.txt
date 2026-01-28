@@ -1,0 +1,69 @@
+Tworzenie przesyłek przez klientów Brokerów w obrębie Organizacji (Brokera) dokonywane jest za pomocą pola external_customer_id w momencie tworzenia przesyłki.
+
+Na tej stronie
+
+Uwierzytelnianie
+Tworzenie Przesyłki przez Brokera Organizacji
+Lista przesyłek Brokera
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Tworzenie Przesyłki przez Brokera Organizacji
+Aby utworzyć przesyłkę Brokera, wystarczy w danych nadawcy (pole sender) podać dane klienta Brokera (email, telefon, dane adresowe) oraz w polu external_customer_id podać identyfikator klienta Brokera w systemie wewnętrznym Brokera. Tak stworzona przesyłka będzie miała dane klienta Brokera na etykiecie nadawczej, ale płatność zostanie pobrana z konta Brokera.
+
+
+
+POST /v1/organizations/:organization_id/shipments 
+Przykładowe zapytanie
+
+
+
+curl -X POST https://api-shipx-pl.easypack24.net/v1/organizations/1/batches -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+	"external_customer_id": "6531",
+    "sender": 
+    { 
+    	"email": "kowal@example.com",
+    	"phone": "111222111",
+    	"first_name": "Adrian",
+    	"last_name": "Kowalski",
+    	"address":{
+        	"street":"Ulica",
+        	"building_number":"2",
+        	"city":"Szczecin",
+        	"post_code":"22-100",
+        	"country_code":"PL"
+        }
+    },
+    "receiver": 
+    { 
+    	"email": "receiverrro39901172490841@example.com",
+    	"phone": "399011724",
+    	"first_name": "John",
+    	"last_name": "Wayne",
+    	"address":{
+        	"street":"Ulica",
+        	"building_number":"2",
+        	"city":"Łódź",
+        	"post_code":"25-140",
+        	"country_code":"PL"
+        }
+    },
+    "parcels": { "template": "medium" },
+    "service": "inpost_courier_standard"
+}'
+ 
+
+Lista przesyłek Brokera
+
+
+GET /v1/organizations/:organization_id/shipments?external_customer_id=34123
+Przykładowe zapytanie
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments?external_customer_id=34123 -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+ 
+
+ 

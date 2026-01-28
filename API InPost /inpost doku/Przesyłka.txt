@@ -1,0 +1,908 @@
+Sercem Platformy Usług Zintegrowanych są przesyłki. Na definicję przesyłki składają się:
+
+dane nadawcy i odbiorcy 
+
+paczka (jedna lub więcej), która będzie fizycznie przesyłana 
+
+wybrana usługa (opcjonalnie usługi dodatkowe)
+
+inne dodatkowe atrybuty w zależności od preferencji użytkownika, np.:
+
+Ubezpieczenie
+
+Pobranie
+
+Aby utworzyć przesyłkę gotową do nadania, wymagane są 3 kroki:
+
+Utworzenie przesyłki, na co składa się podanie danych nadawcy, odbiorcy oraz informacji o paczce (fioletowe figury na poniższym diagramie),
+
+Pobranie informacji o dostępnych usługach dla utworzonego wcześniej obiektu przesyłki (niebieskie figury na poniższym diagramie),
+
+Zakupienie etykiety poprzez wskazanie określonej usługi, dostępnej dla przesyłki, która została utworzona w kroku 1 (zielona figura na poniższym diagramie) 
+
+Ceny usług mogą różnić się w zależności od wymiarów paczki oraz parametrów przesyłki, zdefiniowanych podczas jej tworzenia.
+
+Listę wszystkich usług można znaleźć na stronie 
+Rozmiary i usługi dla przesyłek
+ 
+
+Dostępność usług zależy od przewoźników z którymi dana organizacja podpisała umowy.
+
+Dla Klientów, których umowa pozwala na utworzenie debetu w systemie InPost (klient debetowy), nie będą zwracane ceny w odpowiedzi JSON, na wysłane żądanie do API.
+
+ 
+
+Na tej stronie
+
+Diagram tworzenia przesyłki
+Struktura
+Uwierzytelnianie
+Lista przesyłek Organizacji
+Przykładowe zapytanie
+
+
+
+Diagram tworzenia przesyłki
+
+ 
+
+Struktura
+Zasób Shipment  posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+Integer
+
+Tylko do odczytu. Identyfikator przesyłki w platformie ShipX.
+
+status
+
+String
+
+Tylko do odczytu. Aktualny status przesyłki.
+
+tracking_number
+
+String
+
+Numer trackingowy przesyłki (identyfikator na poziomie systemu logistycznego).
+
+return_tracking_number
+
+String
+
+Numer przesyłki zwrotnej, pojawi się tylko wtedy gdy przesyłka otrzyma status returned_to_sender.
+Informację można pobrać GETem:
+
+Dla pojedynczej przesyłki - GET /v1/shipments/ID_Shipments
+
+Dla wszystkich przesyłek organizacji - GET /v1/organizations/:organization_id/shipments
+
+
+
+            "href": "https://api-shipx-pl.easypack24.net/v1/shipments/123456789",
+            "id": 123456789,
+            "status": "returned_to_sender",
+            "tracking_number": "523000015611700083038270",
+            "return_tracking_number": "522107010621008001205984",
+            "service": "inpost_courier_standard",
+            ...
+Numer zwracany jest również w powiadomieniach webhook 
+Webhooki | Dane wysyłane w przypadku gdy przesyłka otrzyma status ZDN (Zwrot do Nadawcy   ...
+ 
+
+service
+
+String
+
+Wybrana przez klienta usługa.
+
+Dostępne wartości 
+Rozmiary i usługi dla przesyłek
+. 
+
+reference
+
+String
+
+Dodatkowy opis dla przesyłki, np. numer zamówienia lub ID klienta.
+
+is_return
+
+Boolean
+
+Określa czy przesyłka jest zwrotna. Dedykowany parametr dla serwisów: inpost_courier_standard, inpost_courier_express_1000, inpost_courier_express_1200, inpost_courier_express_1700
+
+application_id
+
+Integer
+
+Unikalny identyfikator aplikacji.
+
+created_by_id
+
+Integer
+
+Id użytkownika, który utworzył przesyłkę, jeśli użytkownik jest zalogowany.
+
+external_customer_id 
+
+String
+
+Identyfikator broker'a generującego przesyłki w ramach innej organizacji.
+
+sending_method
+
+String
+
+Powielenie pola z custom_attributes.
+
+end_of_week_collection
+
+Boolean
+
+Określa czy przesyłka posiada usługę “Paczka w Weekend”.
+
+comments
+
+String
+
+Dowolny komentarz.
+
+mpk
+
+String
+
+Nazwa miejsca powstania kosztów.
+
+additional_services
+
+Array[String]
+
+Usługi dodatkowe wybrane przy tworzeniu przesyłki (różne oferty mogą zawierać różne usługi dodatkowe).
+
+Dostępne usługi dodatkowe: sms, email, saturday. 
+Rozmiary i usługi dla przesyłek 
+
+custom_attributes
+
+CustomAttributes
+
+Dodatkowe, opcjonalne atrybuty dla przesyłki.
+
+cod
+
+MoneyData
+
+Pobranie za przesyłkę.
+
+insurance
+
+MoneyData
+
+Ubezpieczenie przesyłki.
+
+sender
+
+Peer
+
+Dane nadawcy.
+
+receiver
+
+Peer
+
+Dane odbiorcy.
+
+selected_offer
+
+Offer
+
+Usługa, która została wybrana podczas kupowania etykiety dla przesyłki.
+
+offers
+
+Array[Offer]
+
+Lista dostępnych usług wraz z cenami, które możliwe są do nabycia w ramach tej przesyłki.
+
+transactions
+
+Array[Transaction]
+
+Lista transakcji płatniczych związanych z daną przesyłką.
+
+parcels
+
+Array[Parcel]
+
+Lista paczek w ramach przesyłki.
+
+created_at
+
+DateTime
+
+Tylko do odczytu. Data utworzenia przesyłki w systemie ShipX.
+
+updated_at
+
+DateTime
+
+Tylko do odczytu. Data aktualizacji przesyłki w systemie ShipX.
+
+Atrybuty obiektu Parcel
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+Wymagany przy tworzeniu przesyłki z wieloma paczkami. Unikalny identyfikator danej paczki w ramach przesyłki, który pozwala zwrócić użytkownikowi informację o błędach walidacji przypisanych do konkretnej paczki. Id nie jest zapisywany w bazie danych i nie jest zwracany jak atrybut utworzonej paczki.
+
+template
+
+String
+
+Nazwa predefiniowanego szablonu wymiarów i wagi paczki. Listę predefiniowanych szablonów wymiarów i rozmiarów paczek można znaleźć na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731062
+ .
+
+dimensions
+
+Object
+
+Wymiary paczki.
+
+length - długość
+
+width - szerokość
+
+height - wysokość
+
+unit - jednostka, w której podane są wymiary. Aktualnie tylko mm (millimetry)
+
+Uzupełniane automatycznie w przypadku wybrania prawidłowego szablonu template.
+
+weight
+
+Object
+
+Waga paczki
+
+amount - waga,
+
+unit - jednostka, w której podana jest waga paczki. Aktualnie tylko kg (kilogramy)
+
+Uzupełniana automatycznie w przypadku wybrania prawidłowego szablonu template.
+
+tracking_number
+
+String
+
+Numer danej przesyłki. Nadawany w trakcie kupowania wybranej oferty.
+
+is_non_standard
+
+Bool
+
+Ustawiany na true jeżeli przesyłka jest niestandardowa. Parametr można ustawić tylko dla przesyłek kurierskich.
+
+Paczka realizowana tylko w ramach usług kurierskich w serwisie krajowym, której jeden z wymiarów przekracza 120 cm lub której suma wymiarów (długość + szerokość + wysokość) przekracza 220 cm. Paczką niestandardową są również: elementy o kształcie okrągłym, cylindrycznym lub owalnym, o nieregularnych kształtach lub/i z wystającymi elementami.
+Opcja paczek niestandardowych nie dotyczy paczek dłużycowych.
+
+Struktura obiektu Offer
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+Integer
+
+Unikalny identyfikator usługi oferowanej w ramach przesyłki
+
+service
+
+Service
+
+Obiekt oferowanej usługi.
+
+carrier
+
+Carrier
+
+Obiekt przewoźnika.
+
+additional_services
+
+Array[String]
+
+Usługi dodatkowe wybrane przy tworzeniu przesyłki - dostępne w danej ofercie.
+
+status
+
+String
+
+Status oferty. Możliwe statusy oferty: in_preparation, available, unavailable, selected, bought, expired  
+
+expires_at 
+
+DateTime
+
+Data i godzina do której możliwe jest zakupienie oferty.
+
+rate
+
+Decimal
+
+Cena za usługę.
+
+currency
+
+String
+
+Waluta, w której podana jest cena za usługę.
+
+unavailability_reasons
+
+Array
+
+Przyczyny niedostępności danej oferty.
+
+Struktura obiektu Service
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+Identyfikator usługi
+
+name
+
+String
+
+Nazwa usługi
+
+description 
+
+String
+
+Opis usługi
+
+Struktura obiektu Carrier
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+Identyfikator przewoźnika
+
+name 
+
+String
+
+Nazwa przewoźnika
+
+description 
+
+String
+
+Opis przewoźnika
+
+Struktura obiektu Transaction
+
+Atrybut
+
+Typ
+
+Opis
+
+ 
+
+id 
+
+String
+
+Identyfikator transakcji
+
+ 
+
+status
+
+String
+
+Status transakcji. Możliwe statusy: initiated, success, failure
+
+ 
+
+created_at
+
+DateTime
+
+Data utworzenia transakcji.
+
+ 
+
+updated_at
+
+DateTime
+
+Data ostatniej modyfikacji transakcji.
+
+ 
+
+offer_id
+
+Integer
+
+Id oferty, której transakcja dotyczy.
+
+ 
+
+Atrybuty obiektu Peer
+
+Atrybut
+
+Typ
+
+Opis
+
+id 
+
+String
+
+Identyfikator obiektu Peer
+
+name 
+
+String
+
+Nazwa
+
+company_name
+
+String
+
+Nazwa firmy
+
+first_name
+
+String
+
+Imię
+
+last_name
+
+String
+
+Nazwisko
+
+email
+
+String
+
+Adres e-mail
+
+phone
+
+String
+
+Numer telefonu
+
+address
+
+Address
+
+Adres
+
+Atrybuty obiektu Address
+
+Atrybut line1 i line2 jest jeszcze wspierany, jednak zalecane jest używanie street i building_number.
+
+Atrybut
+
+Typ
+
+Opis
+
+id 
+
+String
+
+Identyfikator obiektu adres
+
+line1
+
+String
+
+Pierwsza linia adresu
+
+line2
+
+String
+
+Druga linia adresu
+
+street 
+
+String
+
+Nazwa ulicy
+
+building_number 
+
+String
+
+Numer domu
+
+city
+
+String
+
+Miasto
+
+post_code
+
+String
+
+Kod pocztowy
+
+country_code
+
+String
+
+Kod kraju
+
+Atrybuty obiektu MoneyData
+
+Atrybut
+
+Typ
+
+Opis
+
+amount
+
+Decimal
+
+Kwota
+
+currency
+
+String
+
+Waluta
+
+Atrybuty obiektu CustomAttributes
+
+Atrybut
+
+Typ
+
+Opis
+
+ 
+
+target_point
+
+String
+
+Nazwa punktu docelowego, do którego ma zostać dostarczona przesyłka, z którego podejmie ją odbiorca, np. nazwa Paczkomat®.
+
+Tylko przesyłki Paczkomat®.
+
+ 
+
+sending_method 
+
+String
+
+https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731047
+ 
+
+Wymagane dla przesyłek Allegro.
+
+ 
+
+dropoff_point
+
+String
+
+Nazwa punktu nadawczego, do którego nadawca dostarczy przesyłkę do wysłania, np. nazwa Paczkomat®.
+
+Wymagane przy podaniu metody nadania pok, courier_pok, parcel_locker.
+
+ 
+
+dispatch_order_id 
+
+Integer
+
+Numer zlecenia odbioru.
+
+Atrybut tylko do odczytu, występuje gdy przesyłka posiada zdefiniowane zlecenie odbioru.
+
+ 
+
+Przykład zasobu Shipment w formacie JSON (przesyłka Paczkomat®). 
+
+
+
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/12345",
+    "id": 12345,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_locker_standard",
+    "reference": "Test",
+    "is_return": false,
+    "application_id": 25,
+    "created_by_id": null,
+    "external_customer_id": "8877xxx",
+    "sending_method": "dispatch_order",
+    "end_of_week_collection": false,
+    "comments": null,
+    "mpk": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "target_point": "KRA012",
+        "sending_method": "dispatch_order"
+    },
+    "cod": {
+        "amount": 12.5,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 25.0,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": 12345,
+        "name": "Name",
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 1764397634,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 12345,
+        "name": "Name",
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "test@inpost.pl",
+        "phone": "111222333",
+        "address": null
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 12345,
+            "identify_number": null,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": "small",
+            "dimensions": {
+                "length": 380.0,
+                "width": 640.0,
+                "height": 80.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-08-16T10:53:47.958+02:00",
+    "updated_at": "2023-08-16T10:53:47.958+02:00"
+}
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Lista przesyłek Organizacji
+Lista przesyłek w ramach określonej organizacji.
+
+Aby pobrać listę przesyłek dla określonej organizacji, użytkownik musi być jej członkiem.
+
+
+
+GET /v1/organizations/:organization/shipments
+
+Przykładowe zapytanie
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json  
+{
+    "href": "http://api-shipx-pl.easypack24.net/v1/organizations/115/shipments?owner_id=22&page=1&per_page=100&sort_by=id&sort_order=desc",
+    "count": 42,
+    "page": 1,
+    "per_page": 100,
+    "items": [
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/shipments/12345",
+            "id": 12345,
+            "status": "confirmed",
+            "tracking_number": "602677277331630317859008",
+            "return_tracking_number": null,
+            "service": "inpost_locker_standard",
+            "reference": "Test",
+            "is_return": false,
+            "application_id": 25,
+            "created_by_id": null,
+            "external_customer_id": "8877xxx",
+            "sending_method": "dispatch_order",
+            "end_of_week_collection": false,
+            "comments": null,
+            "mpk": null,
+            "additional_services": [],
+            "custom_attributes": {
+                "target_point": "KRA012",
+                "sending_method": "dispatch_order"
+            },
+            "cod": {
+                "amount": 12.5,
+                "currency": "PLN"
+            },
+            "insurance": {
+                "amount": 25.0,
+                "currency": "PLN"
+            },
+            "sender": {
+                "id": 12345,
+                "name": "Name",
+                "company_name": "Company_name",
+                "first_name": "first_name",
+                "last_name": "last_name",
+                "email": "test@grupainteger.pl",
+                "phone": "321321321",
+                "address": {
+                    "id": 1764397634,
+                    "street": "Czerniakowska",
+                    "building_number": "87A",
+                    "line1": null,
+                    "line2": null,
+                    "city": "Warszawa",
+                    "post_code": "00-718",
+                    "country_code": "PL"
+                }
+            },
+            "receiver": {
+                "id": 12345,
+                "name": "Name",
+                "company_name": "Company name",
+                "first_name": "Jan",
+                "last_name": "Kowalski",
+                "email": "test@inpost.pl",
+                "phone": "111222333",
+                "address": null
+            },
+            "selected_offer": {
+                "id": 12345,
+                "status": "bought",
+                "expires_at": null,
+                "rate": null,
+                "currency": "PLN",
+                "additional_services": [],
+                "carrier": {
+                    "id": "inpost_locker",
+                    "name": "InPost Paczkomaty",
+                    "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+                },
+                "service": {
+                    "id": "inpost_locker_standard",
+                    "name": "Paczkomatowa standardowa",
+                    "description": "Przesyłka paczkomatowa standardowa"
+                },
+                "unavailability_reasons": null
+            },
+            "offers": [
+                {
+                    "id": 12345,
+                    "status": "bought",
+                    "expires_at": null,
+                    "rate": null,
+                    "currency": "PLN",
+                    "additional_services": [],
+                    "carrier": {
+                        "id": "inpost_locker",
+                        "name": "InPost Paczkomaty",
+                        "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+                    },
+                    "service": {
+                        "id": "inpost_locker_standard",
+                        "name": "Paczkomatowa standardowa",
+                        "description": "Przesyłka paczkomatowa standardowa"
+                    },
+                    "unavailability_reasons": null
+                }
+            ],
+            "transactions": [
+                {
+                    "id": 12345,
+                    "status": "success",
+                    "offer_id": 12345,
+                    "details": {},
+                    "created_at": "2023-08-16T10:53:48.186+02:00",
+                    "updated_at": "2023-08-16T10:53:48.428+02:00"
+                }
+            ],
+            "parcels": [
+                {
+                    "id": 12345,
+                    "identify_number": null,
+                    "tracking_number": "602677277331630317859008",
+                    "is_non_standard": false,
+                    "template": "small",
+                    "dimensions": {
+                        "length": 380.0,
+                        "width": 640.0,
+                        "height": 80.0,
+                        "unit": "mm"
+                    },
+                    "weight": {
+                        "amount": 25.0,
+                        "unit": "kg"
+                    }
+                }
+            ],
+            "created_at": "2023-08-16T10:53:47.958+02:00",
+            "updated_at": "2023-08-16T10:53:50.460+02:00"
+        },
+Informacje o błędach
+
+Błędy jakie mogą wystąpić podczas pobierania listy przesyłek:
+
+resource_not_found - organizacja, dla której użytkownik chce pobrać listę przesyłek nie istnieje lub nie ma do niej dostępu.
+
+ 

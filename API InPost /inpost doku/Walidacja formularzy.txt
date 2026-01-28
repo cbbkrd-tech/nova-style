@@ -1,0 +1,958 @@
+Walidator (ang. validator) – jest skryptem sprawdzającym poprawność przekazywanych informacji w strukturze o określonej składni (JSON w przypadku metody POST lub jako parametr w przypadku metody GET). W przypadku platformy ShipX przeprowadzamy kilka wariantów walidacji jednocześnie.
+
+Wraz z wysłaniem żądania, przekazywane są wartości podlegające walidacji, dzięki której przekazywane dane zgodne są z założeniami platformy, przyjmującej żądanie.
+
+Dane, które nie spełniają założeń walidacji, nie są zapisywane przez platformę. Użytkownik w takim przypadku informowany jest czytelnym komunikatem zwrotnym.
+
+Zasób posiada informacje dot. walidacji formularzy wykorzystywanych w ShipX.
+
+Na tej stronie
+
+Custom Attributes Form
+Insurance Form
+Parcels Simple Form
+Dimensions Simple Form
+Weight Simple Form
+Receiver Form
+Sender Form
+Address Form
+Create Address Form
+Cod Form
+Shipment Select Offers Form
+Bulk Buy Shipments Form
+Format Parameters Form
+Mapping Form
+Kody odpowiedzi HTTP
+Błędy
+Klucze błędów
+Klucze błędów walidacji
+Custom Attributes Form
+Atrybut
+
+Typ
+
+Walidacja
+
+target_point
+
+String
+
+Atrybut jest wymagany dla poniższych serwisów:
+inpost_locker_standard, inpost_locker_allegro, inpost_locker_pass_thru, inpost_letter_allegro.
+
+dropoff_point
+
+String
+
+Atrybut jest wymagany dla poniższych serwisów:
+inpost_locker_pass_thru, inpost_letter_allegro.
+
+Wymagalność przekazania atrybutu dropoff_point występuje wraz z przekazaniem atrybutu sending_method
+
+Powyższa wymagalność występuje wyłącznie dla następujących wartości atrybutu sending_method (parcel_locker, pok, courier_pok)
+
+sending_method
+
+String
+
+Atrybut jest wymagany dla poniższych serwisów:
+inpost_locker_allegro, inpost_letter_allegro, inpost_courier_allegro.
+
+Dopuszczalne wartości (parcel_locker, pok, pop, courier_pok, branch, dispatch_order), możliwość przekazania pustego atrybutu.
+
+ 
+
+Insurance Form
+Atrybut
+
+Typ
+
+Walidacja
+
+amount
+
+Decimal
+
+Atrybut jest wymagany dla poniższych serwisów: 
+
+inpost_courier_standard, inpost_courier_express_1000, inpost_courier_express_1200, inpost_courier_express_1700, inpost_courier_palette w przypadku przekazania atrybutu COD.
+
+Minimum 1 mniej niż 10000000
+
+currency
+
+String
+
+Atrybut nie jest wymagany, domyślna wartość PLN 
+
+ 
+
+Parcels Simple Form
+Atrybut
+
+Typ
+
+Walidacja
+
+dimensions
+
+Dimensions Simple Form
+
+Atrybut nie jest wymagany, wymagalność pojawia się z chwilą kiedy template nie zostanie przekazany.
+
+template
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się z chwilą kiedy dimensions oraz weight nie zostanie przekazany.
+
+weight
+
+Weight Simple Form
+
+Atrybut nie jest wymagany, wymagalność pojawia się z chwilą kiedy template nie zostanie przekazany.
+
+id
+
+String
+
+Atrybut nie jest wymagany
+
+is_non_standard
+
+Boolean
+
+Atrybut nie jest wymagany, domyślna wartość null
+
+Dodatkowa walidacja:
+
+Przekazując kolekcję, pojawia się wymagalność przekazania atrybutu id w obiekcie paczki, jeśli atrybut id nie zostanie przekazany, użytkownik otrzyma stosowny komunikat.
+
+Przekazując kolekcję, pojawia się wymagalność przekazania atrybutu id w obiekcie paczki, jeśli atrybut id nie będzie unikatowy w ramach żądania, użytkownik otrzyma stosowny komunikat.
+
+ 
+
+Dimensions Simple Form
+Atrybut
+
+Typ
+
+Walidacja
+
+height
+
+Float
+
+Atrybut jest wymagany, minimum 1 mniej niż 1000000, możliwość przekazania pustego atrybutu.
+
+length
+
+Float
+
+Atrybut jest wymagany, minimum 1 mniej niż 1000000, możliwość przekazania pustego atrybutu.
+
+width
+
+Float
+
+Atrybut jest wymagany, minimum 1 mniej niż 1000000, możliwość przekazania pustego atrybutu.
+
+unit
+
+String
+
+Atrybut nie jest wymagany, domyślna wartość mm
+
+ 
+
+Weight Simple Form
+Atrybut
+
+Typ
+
+Walidacja
+
+amount
+
+Float
+
+Atrybut jest wymagany, minimum 1 mniej niż 10000000, możliwość przekazania pustego atrybutu.
+
+unit
+
+String
+
+Atrybut nie jest wymagany, domyślna wartość kg
+
+ 
+
+Receiver Form
+Atrybut
+
+Typ
+
+Walidacja
+
+company_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut first_name, last_name oraz address.
+
+Maksimum 255 znaków.
+
+name
+
+String
+
+Atrybut nie jest wymagany, (podana wartość nie jest widoczna na etykiecie)
+
+Maksimum 255 znaków.
+
+email
+
+String
+
+Atrybut nie jest wymagany, możliwość przekazania pustego atrybutu, w przypadku przesyłek Paczkomat® atrybut jest wymagany.
+
+address
+
+Address Form
+
+Atrybut jest wymagany dla poniższych serwisów: 
+inpost_courier_standard, inpost_courier_express_1000, inpost_courier_express_1200, inpost_courier_express_1700, inpost_courier_palette, inpost_letter_allegro, inpost_courier_allegro, inpost_courier_c2c.
+
+first_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut company_name, email oraz phone
+Maksimum 255 znaków.
+
+last_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut company_name, email oraz phone
+Maksimum 255 znaków.
+
+phone
+
+ 
+
+String
+
+Atrybut jest wymagany
+
+regex
+
+kraj
+
+liczba znaków
+
+PL: \A(\(?((\+)|00)48\)?)
+
+Polska
+
+9 znaków
+
+ FR: \A(\(?((\+)|00)33\)?)
+
+FR (Francja)
+
+9 znaków
+
+ ES: \A(\(?((\+)|00)34\)?)
+
+ES (Hiszpania)
+
+9 znaków
+
+ BE: \A(\(?((\+)|00)32\)?)
+
+BE (Belgia)
+
+8-9 znaków
+
+ DE: \A(\(?((\+)|00)49\)?)
+
+DE (Niemcy)
+
+10-11 znaków
+
+ LU: \A(\(?((\+)|00)352\)?)
+
+LU (Luksemburg)
+
+9 znaków
+
+ PT: \A(\(?((\+)|00)351\)?)
+
+PT (Portugalia)
+
+9 znaków
+
+ AT: \A(\(?((\+)|00)43\)?)
+
+AT (Austria)
+
+7-13 znaków
+
+ GB: \A(\(?((\+)|00)44\)?)
+
+GB (Wielka Brytania)
+
+10 znaków
+
+ IT: \A(\(?((\+)|00)39\)?)
+
+IT (Włochy)
+
+9-10 znaków
+
+ NL: \A(\(?((\+)|00)31\)?)
+
+NL (Holandia)
+
+10 znaków
+
+ IE: \A(\(?((\+)|00)353\)?)
+
+IE (Irlandia)
+
+10 znaków
+
+ MC: \A(\(?((\+)|00)377\)?)
+
+MC (Monako)
+
+8 znaków
+
+ CH: \A(\(?((\+)|00)41\)?)
+
+CH (Szwajcaria)
+
+9 znaków
+
+ UA: \A(\(?((\+)|00)380\)?)
+
+UA (Ukraina)
+
+9 znaków
+
+ BY: \A(\(?((\+)|00)375\)?)
+
+BY (Białoruś)
+
+9 znaków
+
+ BG: \A(\(?((\+)|00)359\)?)
+
+BG (Bułgaria)
+
+8-9 znaków
+
+ CY: \A(\(?((\+)|00)357\)?)
+
+CY (Cypr)
+
+8 znaków
+
+ CZ: \A(\(?((\+)|00)420\)?)
+
+CZ (Czechy)
+
+9 znaków
+
+ DK: \A(\(?((\+)|00)45\)?)
+
+DK (Dania)
+
+8 znaków
+
+ EE: \A(\(?((\+)|00)372\)?)
+
+EE (Estonia)
+
+7-8 znaków
+
+ FI: \A(\(?((\+)|00)358\)?)
+
+FI (Finlandia)
+
+8-10 znaków
+
+ GR: \A(\(?((\+)|00)30\)?)
+
+GR (Grecja)
+
+10 znaków
+
+ HU: \A(\(?((\+)|00)36\)?)
+
+HU (Węgry)
+
+9 znaków
+
+ LT: \A(\(?((\+)|00)370\)?)
+
+LT (Litwa)
+
+8 znaków
+
+ LV: \A(\(?((\+)|00)371\)?)
+
+LV (Łotwa)
+
+8 znaków
+
+ MT: \A(\(?((\+)|00)356\)?)
+
+MT (Malta)
+
+8 znaków
+
+ SE: \A(\(?((\+)|00)46\)?)
+
+SE (Szwecja)
+
+9 znaków
+
+ SK: \A(\(?((\+)|00)421\)?)
+
+SK (Słowacja)
+
+9 znaków
+
+ 
+
+Sender Form
+Atrybut
+
+Typ
+
+Walidacja
+
+company_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut first_name oraz last_name
+Maksimum 255 znaków.
+
+email
+
+String
+
+Atrybut jest wymagany
+
+phone
+
+String
+
+Atrybut jest wymagany. Tylko 9 cyfr (333222111)
+
+address
+
+Address Form
+
+Atrybut jest wymagany dla poniższych serwisów: 
+
+inpost_courier_standard, inpost_courier_express_1000, inpost_courier_express_1200, inpost_courier_express_1700, inpost_courier_palette.
+
+first_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut company_name, first_name lub last_name
+Maksimum 255 znaków.
+
+last_name
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy nie zostanie przekazany atrybut company_name, first_name lub last_name
+Maksimum 255 znaków.
+
+ 
+
+Address Form
+Atrybut
+
+Typ
+
+Walidacja
+
+line1
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy zostanie przekazany atrybut address
+
+Maksimum 255 znaków.
+
+city
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy zostanie przekazany atrybut address
+
+Maksimum 255 znaków.
+
+building_number
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy zostanie przekazany atrybut address
+
+Maksimum 255 znaków.
+
+country_code
+
+String
+
+Atrybut nie jest wymagany
+
+street
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy zostanie przekazany atrybut address
+Maksimum 255 znaków.
+
+post_code
+
+String
+
+Atrybut nie jest wymagany, wymagalność pojawia się w momencie kiedy zostanie przekazany atrybut address
+Format "00-000"
+
+ 
+
+Create Address Form
+Atrybut
+
+Typ
+
+Walidacja
+
+ 
+
+street
+
+String
+
+Atrybut jest wymagany, maksymalna długość 255 znaków, warunkiem walidacji atrybutu jest nieprzekazanie atrybutów line1 / line2 lub przekazanie atrybutu building_number 
+
+ 
+
+building_number
+
+String
+
+Atrybut jest wymagany, maksymalna długość 255 znaków, warunkiem walidacji atrybutu jest nieprzekazanie atrybutów line1 / line2 lub przekazanie atrybutu street
+
+ 
+
+line1
+
+String
+
+Atrybut jest wymagany, maksymalna długość 255 znaków, warunkiem walidacji atrybutu jest przekazanie atrybutu line2
+
+ 
+
+line2
+
+String
+
+Atrybut nie jest wymagany, maksymalna długość 255 znaków
+
+ 
+
+city
+
+String
+
+Atrybut jest wymagany, maksymalna długość 255 znaków
+
+ 
+
+post_code
+
+String
+
+Atrybut jest wymagany, format adresu zgodnie z konwencją Polskiego adresu pocztowego np. 00-000
+
+ 
+
+country_code
+
+String
+
+Atrybut nie jest wymagany, minimum 2 znaki, maksimum 3 znaki
+
+ 
+
+ 
+
+Cod Form
+Atrybut
+
+Typ
+
+Walidacja
+
+amount
+
+Decimal
+
+Atrybut nie jest wymagany. Z chwilą przekazania danych system oczekuje wartości z przedziału od 1 do 10000000
+
+currency
+
+String
+
+Atrybut nie jest wymagany, domyślna wartość PLN
+
+ 
+
+Shipment Select Offers Form
+Atrybut
+
+Typ
+
+Walidacja
+
+id
+
+String
+
+Atrybut nie jest wymagany
+
+shipment_id
+
+Integer
+
+Atrybut jest wymagany
+
+Dopuszczalny format Integer
+
+offer_id
+
+Integer
+
+Atrybut jest wymagany
+
+Dopuszczalny format Integer
+
+ 
+
+Bulk Buy Shipments Form
+Atrybut
+
+Typ
+
+Walidacja
+
+id
+
+String
+
+Atrybut nie jest wymagany
+
+shipment_id
+
+Integer
+
+Atrybut jest wymagany
+
+Dopuszczalny format Integer
+
+offer_id
+
+Integer
+
+Atrybut jest wymagany
+
+Dopuszczalny format Integer
+
+ 
+
+Format Parameters Form
+Atrybut
+
+Typ
+
+Walidacja
+
+field_separator
+
+String
+
+Atrybut nie jest wymagany
+
+character_encoding
+
+String
+
+Atrybut nie jest wymagany
+
+text_qualifier
+
+String
+
+Atrybut nie jest wymagany
+
+sheets_index
+
+Array[Integer]
+
+Atrybut nie jest wymagany
+
+ 
+
+Mapping Form
+Atrybut
+
+Typ
+
+Walidacja
+
+custom_attributes
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+insurance
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+cod
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+additional_services
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+service
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+parcels
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+receiver
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+sender
+
+String
+
+Atrybut nie jest wymagany, defaultowa wartość null
+
+ 
+
+ 
+
+Kody odpowiedzi HTTP
+Kody odpowiedzi HTTP, które mogą wystąpić w odpowiedzi od serwera:
+
+Kod HTTP
+
+Opis
+
+200 OK
+
+Odpowiedź prawidłowa.
+
+201 CREATED
+
+Zasób został utworzony.
+
+204 NO CONTENT
+
+Odpowiedź prawidłowa, żadna wartość nie została zwrócona. Spotykane np. podczas usuwania zasobów.
+
+400 BAD REQUEST
+
+Dane przesłane metodą POST lub PUT są niepoprawne. W odpowiedzi z serwera znajduje się więcej szczegółów.
+
+401 UNAUTHORIZED
+
+Dostęp do zasobu wymaga autoryzacji.
+
+403 FORBIDDEN
+
+Brak lub zestaw uprawnień jest niewystarczający, aby uzyskać dostęp do określonego zasobu.
+
+404 NOT FOUND
+
+Zasób nie został odnaleziony.
+
+500 SERVER ERROR
+
+Wystąpił błąd po stronie serwera.
+
+ 
+
+Błędy
+W przypadku wystąpienia błędu API zwraca obiekt błędu, który zawiera następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+status
+
+Integer
+
+Kod odpowiedzi HTTP. Zobacz tabelę powyżej.
+
+error
+
+String
+
+Klucz błędu, jednoznacznie identyfikujący problem.
+
+message
+
+String
+
+Prosty, łatwy do zrozumienia opis błędu.
+
+Opis błędu może ulegać zmianie i nie należy opierać na nim warunków w kodzie.
+
+ 
+
+details
+
+Object
+
+Szczegóły dotyczące błędu, który wystąpił, np. lista błędów walidacji. Może być puste w przypadku błędów, których nie dotyczy.
+
+Przykładowa odpowiedź:
+
+
+
+HTTP/1.1 404 Not Found
+ 
+{
+	"status": 404,
+	"error": "resource_not_found",
+	"message": "Resource you are looking for are not found",
+	"details: {}
+} 
+W przypadku zapytania przesłanego metodą POST lub PUT mogą wystąpić błędy walidacji. Szczegóły na ich temat umieszczane są pod atrybutem details w odpowiedzi:
+
+
+
+HTTP/1.1 400 Bad Request
+{
+	"status": 400,
+	"error": "validation_failed",
+	"message": "Data sent by POST or PUT request are not valid. Check details for more info",
+	"details: {
+		"name": ["required", "too_short"],
+		"post_code": ["invalid_format"]
+	}
+} 
+ Kluczami obiektu details są nazwy atrybutów przesłanych metodą POST lub PUT, dla których wystąpiły błędy walidacji. Natomiast ich wartości to tablica kluczy błędów, które są prawdziwe dla przesłanej wartości. Poniżej opisana jest lista generycznych kluczy błędów walidacji.
+
+Klucze błędów
+Poniższa tabela przedstawia klucze błędów, które mogą zostać zwrócone przez serwer, wraz z możliwymi kodami HTTP:
+
+Klucz błędu
+
+Kod HTTP
+
+Opis
+
+resource_not_found
+
+404
+
+Szukany zasób nie został odnaleziony, np. adres URL jest niepoprawny lub zasób nie istnieje.
+
+validation_failed
+
+400
+
+Przy przesyłaniu danych metodą POST lub PUT wystąpiły błędy w walidacji. Szczegółowe błędy walidacji zawarte są pod atrybutem details.
+
+unauthorized
+
+401
+
+Dostęp do zasobu jest niemożliwy, ponieważ zapytanie nie zostało podpisane kluczem access token.
+
+access_forbidden
+
+403
+
+Dostęp do określone zasobu jest zabroniony dla tego zapytania (np. z powodu braku lub niewłaściwego zakresu uprawnień).
+
+Klucze błędów walidacji
+Poniższa tabela przedstawia generyczne klucze błędów walidacji, które zwracane są pod atrybutem details dla odpowiedzi błędu validation_failed:
+
+Klucz błędu
+
+Opis
+
+required
+
+Podanie wartości jest wymagane.
+
+invalid
+
+Podana wartość jest nieprawidłowa. Szczegóły w dokumentacji opisującej zasób.
+
+too_short
+
+Podana wartość jest zbyt krótka. Szczegóły w dokumentacji opisującej zasób.
+
+too_long
+
+Podana wartość jest zbyt długa. Szczegóły w dokumentacji opisującej zasób.
+
+too_small
+
+Podana wartość jest zbyt mała. Dotyczy głównie wartości liczbowych. Szczegóły w dokumentacji opisującej zasób.
+
+too_big
+
+Podana wartość jest zbyt duża. Dotyczy głównie wartości liczbowych. Szczegóły w dokumentacji opisującej zasób.
+
+invalid_format
+
+Podana wartość ma niepoprawny format, np. gdy w pole numer telefonu zostały wpisane cyfry.
+Szczegóły w dokumentacji opisującej zasób. 
+
+ 
+
+Oprócz powyższych błędów walidacji mogą wystąpić inne, które są specyficzne dla określonych zasobów. Szczegółów należy szukać w rozdziałach właściwych dla tych zasobów.
+
+ 
+
+
+
+
+ 

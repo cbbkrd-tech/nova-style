@@ -1,0 +1,435 @@
+The InPost Returns REST API provides comprehensive access to return functionalities available through the Returns Portal, enabling seamless programmatic consumption of services. This API version contains basic functionalities that allow you to order return shipments and retrieve information about them. It facilitates integration with your retail, ordering, and logistics systems, supporting operations at scale.
+
+Sandbox
+Production environment
+Authentication
+Returns API
+Create Return
+Get Returns
+Get Return Label
+Sandbox
+The sandbox environment is a dedicated testing platform that replicates the production API behavior, allowing you to safely develop and test your integration without affecting real data. It provides all API functionalities, enabling thorough testing of your implementation before going live. Using the sandbox environment is strongly recommended during the development phase to ensure your integration works correctly before connecting to the production environment.
+
+To obtain the client_id  and client_secret credentials necessary for sandbox access, contact integracja@inpost.pl is required.
+
+ 
+
+Addresses on the sandbox environment
+Component
+
+URL
+
+Keycloak
+
+https://sandbox-login.inpost.pl/auth
+
+API Gateway
+
+https://sandbox-api.inpost.pl/
+
+ 
+
+Production environment
+Addresses on the production environment
+Component
+
+URL
+
+Keycloak
+
+https://login.inpost.pl
+
+API Gateway
+
+https://api.inpost.pl
+
+ 
+
+Authentication
+This API endpoint will provide you with an access token to authenticate your request to InPost API. This is required to access InPost Returns resources. Most important thing from response is access_token which needs to be included in further request.
+
+ 
+
+URL: https://login.inpost.pl/auth/realms/external/protocol/openid-connect/token
+
+HTTP Method: POST
+
+CONTENT-TYPE: application/x-www-form-urlencoded
+
+REQUEST
+BODY
+
+client_id   - [required] client identification, provided by your InPost Sales or Customer Success representative
+
+client_secret   - [required] client secret, provided by your InPost Sales or Customer Success representative
+
+grant_type   - [required] type, which is used by to obtain an access token, in this scope grant type should be "client_credentials"
+
+RESPONSE
+access_token   - access token string as issued by the authorization server, will be used in every request made to InPost Returns API.
+
+expires_in   - duration of time in seconds, the access token is granted for (i.e., 300 seconds)
+
+token_type - type of token, in this case this always be “Bearer”
+
+refresh_expires_in   - if returned, specifies the duration (in seconds) for which a refresh token remains valid
+
+not-before-policy   - if set, invalidates all tokens issued before a specified timestamp
+
+scope   - this specifies scope the user has access to
+
+Examples
+Request
+
+ 
+
+
+
+
+curl --location 'https://login.inpost.pl/auth/realms/external/protocol/openid-connect/token' -H 'Content-Type: application/x-www-form-urlencoded'
+-d 'client_secret=<HERE PUT YOUR client_secret>'
+-d 'client_id=<HERE PUT YOUR client_id>'
+-d 'grant_type=client_credentials'
+ 
+
+Response
+
+
+
+
+{
+    "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlpXVzFNZzVlQnpDYU1XU3JvTlBjRWFveFpXcW9Ua2FuZVB3X291LWxvIn0.eyJleHAiOjE2OTc3MDI5NzYsImlhdCI6MTY5NzcwMjY3NiwianRpIjoiY2E3NjY3M2YtNGZjZC00NmQyLWJjOTYtYTg0M2I3MWU3NDQ2IiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5pbnBvc3QucGwvYXV0aC9yZWFsbXMvZXh0ZXJuYWwiLCJzdWIiOiI4ZTczMjJjZi01ODEwLTQ4YmQtYTc0MC03MTgzYmRlYWQ0MzAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ6YWxhbmRvIiwiYWNyIjoiMSIsInNjb3BlIjoiYXBpOmFwaXBvaW50cyIsImNsaWVudElkIjoiemFsYW5kbyIsImNsaWVudEhvc3QiOiIxMC4yOS41LjE0IiwidXVpZCI6IjU5ODU4OTRmLTc5MTMtNDU3My04NTcwLWVkZTBkMDJhNjdmNyIsImNsaWVudEFkZHJlc3MiOiIxMC4yOS41LjE0In0.jjNzxW2oilTYeuFRFP2eNdFjE7BPvpQLsun0Q2-EfhqPnccxABMCM7nA8qt4lXJFxI1y-_5XTjyEirpdjstfZ2pyxFGlh33uIs15MeUy50hTXgyDzlCdolllRtJ1Vucdrgm9HashoY3DnAnCiqZiv4uLVbvGRNwiLfCbUdm84ADB3wYd6ZoD5F0BITbqrT1k5_HuN9y4G9RQWvuPh8LK0Sl_DAQ7a4YTaWnPwzTCKUQ74MWXGwSv_aALUQkMtoX7xlrceRpBV-I9yQex2AJ4rKeqpDnDN_sLHbm8CzVv-YDb_GY-kqrv-yqGz7DjzdIyUxRgw5RBu8tz68lNJzJ3OA",
+    "expires_in": 300,
+    "refresh_expires_in": 0,
+    "token_type": "Bearer",
+    "not-before-policy": 0,
+    "scope": "api:apipoints"
+}
+ 
+
+Note that all requests to InPost Returns API require authentication based on access_token returned from response. This access_token should be used as Bearer token in header to authenticate your requests: --header 'Authorization: Bearer <access_token>'.
+
+ 
+
+Returns API
+Create Return
+Description: This endpoint is used to generate shipments for returns. Depending on the settings, you can create a return shipment with the option to send it without a label using a code, or a labeled shipment with the option to send it using a printed label. For shipments without a label, the response will include a code that can be used to send the package. For labeled shipments, please use the GET LABEL method to download the label.
+
+URL: https://api.inpost.pl/v1/returns/tickets
+
+HTTP Method: POST
+
+CONTENT-TYPE: application/json
+
+AUTHORIZATION: OAuth 2.0 - Bearer token ( -H 'Authorization: Bearer <access_token>' )
+
+REQUEST
+BODY
+
+shipment
+
+size - [optional] shipment parcel size (data type: string) - allowed values: "A", "B", "C" (A - 8 × 38 × 64 cm up to 25 kg, B - 19 × 38 × 64 cm up to 25 kg, C - 41 × 38 × 64 cm up to 25 kg). If size is not set, default value from organization settings (return parameters) will be set
+
+sender
+
+firstName - [required] sender first name (data type: string, max length: 125)
+
+lastName - [required] sender last name (data type: string, max length: 125)
+
+phone - [required] sender phone number, required in E.164 format (data type: string, max length: 25, pattern: ^\+[1-9]\d{1,14}$)
+
+email - [required] sender email address (data type: string, max length: 255)
+
+receiver -[optional] if empty, values from organization settings (return parameters) will be set
+
+companyName - [optional] name of receiver company (data type: string, max length: 255). If company name is empty - need to provide firstName and lastName fields for receiver
+
+firstName - [optional] receiver first name (data type: string, max length: 50). If company name is set - don't need to provide receiver firstName
+
+lastName - [optional] receiver last name (data type: string, max length: 50). If company name is set - don't need to provide receiver lastName
+
+phone - [required] receiver phone number, required in E.164 format (data type: string, max length: 25, pattern: ^\+[1-9]\d{1,14}$)
+
+email - [optional] receiver email address (data type: string, max length: 255)
+
+address   - this section is optional, but if provided, there are multiple fields required
+
+buildingNumber - [required] receiver building number (data type: string, max length: 10)
+
+province - [optional] receiver address province (data type: string, max length: 50)
+
+street - [required] receiver address street (data type: string, max length: 50)
+
+city - [required] receiver address city (data type: string, max length: 50)
+
+postalCode - [required] receiver address postal code (data type: string) must be given in the form NN-NNN, where N is a digit (i.e., "02-200").
+
+countryCode - [optional] receiver address country code (data type: string, max length: 2), required format is ISO 3166-1 alpha
+
+expirationDate - [optional] the date until which the customer can send the return shipment. If not set, default value from organization settings (return parameters) is set, but when there are no parameters specified then the default value is provided (now + 7 days) example: 2023-09-30T01:53:13.969+02:00
+
+Data type: string, format: zoned date time ISO 8601
+
+Max value: now + 720 days, min value: now + 7 days
+
+externalReference - [optional] field is used to provide an identifier or value that will uniquely recognize the return associated with the request.
+
+The value entered in this field will be displayed in the "order number" section of the InPost mobile application and printed on the return label.
+
+For returns sent using a code, the format of this field can be printed as QRCODE, BARCODE, or PLAIN_TEXT, depending on the settings agreed upon between your business account manager and the integrated client. The PLAIN_TEXT format does not require any agreements. Reach out to your account representative to enable this option for returns sent without a label using a code.
+
+For QRCODE (resolution 25x25 for up to 15 characters, 29x29 for 15 and more) or BARCODE (format EAN 128 B), the value should be alphanumeric only, with a recommended length of 5 to 20 characters. Not adhering to this recommendation may result in an incorrectly generated graphic code.
+
+For returns sent using a return label, the value of this field will be printed in PLAIN_TEXT format.
+
+Data type: string
+
+description - [optional] field is used to provide additional information for the return sender. The value entered in this field will be displayed in the "additional information" section of the InPost mobile application.
+
+Data type: string, max length: 255
+
+ 
+
+RESPONSE
+id - new return ticket identification (uuid)
+
+size - shipment parcel size, will be returned if it was not set in request
+
+trackingNumber - a unique return shipment number used to track the return package throughout its journey. This number will be returned in the response depending on the settings configured in your account.
+
+expirationDate - return code expiration date, will be returned in response if it was not set in request, and default value was assigned
+
+code - a code used to send the return package when shipping without a printed label. This code will be returned in the response depending on the settings configured in your account. The availability of this feature is determined by the specific configurations enabled for your account.
+
+(new) labelUrl - contains the URL, that can be used in Get Return Label endpoint, to download the label PDF file for shipments with a label. If this field is present in the response, it indicates that label generation option is enabled by administrator in your Returns Portal account settings.
+
+HTTP STATUSES
+200 - Ticket created
+
+400 - Validation request failed
+
+401 - Unauthorized
+
+403 - Permission denied
+
+404 - Not found - code not found for given organization
+
+500 - Internal Server Error
+
+Examples
+Request
+
+
+
+curl -X POST --location 'https://api.inpost.pl/v1/returns/tickets'
+-H 'Content-Type: application/json'
+-H 'Authorization: Bearer <access_token>'
+-d '{
+  "shipment": {
+    "size": "A",
+    "sender": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "phone": "+48535456723",
+      "email": "test@email.com"
+    },
+    "receiver": {
+      "companyName": "Test Company",
+      "firstName": "Jan",
+      "lastName": "Kowalski",
+      "phone": "+48535456723",
+      "email": "test@email.com",
+      "address": {
+        "buildingNumber": "10",
+        "province": "małopolskie",
+        "street": "Lwowska",
+        "city": "Kraków",
+        "postalCode": "30-300",
+        "countryCode": "PL"
+      }
+    }
+  },
+  "expirationDate": "2024-06-19T12:14:32.856Z",
+  "externalReference": "Order123aff3",
+  "description": "Dear valued user, We kindly ask that you make sure to properly secure your package when returning goods."
+}'
+Response
+
+
+
+{
+  "id": "d462ec8a-b760-4125-bf35-9f9a509f3629",
+  "size": "A",
+  "trackingNumber": "543223453224",    
+  "expirationDate": "2024-06-19T12:10:19.168Z",
+  "code": "1234",
+  "labelUrl": "https://example.org/example/url"
+}
+ 
+
+Get Returns
+Description: This endpoint is used to retrieve information about registered return shipments. The query can be narrowed down using the parameters specified below in the documentation.
+
+URL: https://api.inpost.pl/v1/returns/tickets?dateFrom=2024-01-01T12:00:00.000Z&dateTo=2025-06-19T12:10:19.168Z&status=ACCEPTED&page=0&size=100
+
+HTTP Method: GET
+
+CONTENT-TYPE: application/json
+
+AUTHORIZATION: OAuth 2.0 - Bearer token ( -H 'Authorization: Bearer <access_token>' )
+
+REQUEST
+HEADER
+
+Accept-Time-Zone - [optional] header that specify time zone for filtering as well as for return tickets response dates, it should have string format like this "Europe/Warsaw" or "America/New_York"
+
+QUERY PARAMETERS
+
+dateFrom - [required] filter for created return ticket date as minimum date that API will return, need to provide date in format "YYYY-MM-DDTHH:mm:ss" for example like this:  "2023-08-02T09:00:01" (note that it should be date in specific time zone, provided in header - if header with time zone is not provided, API will takie this date and time as UTC date time)
+
+dateTo   - [required] filter for created return ticket date as maximum date that API will return, need to provide date in format "YYYY-MM-DDTHH:mm:ss" for example like this: "2025-06-19T12:10:19"
+
+status   - [required] return tickets with this status will be returned (available statuses: NEW, ACCEPTED, SCANNED, USED, CANCELED, REJECTED, EXPIRED, DELIVERED)
+
+page   - [optional] page number (indicates which page of return tickets will be returned, starting from page number 0)
+
+size   - [optional] returned page size (default is 100, maximum is 1000 - if provided greater value, API will return validation error)
+
+sort   - [optional] sorting parameter which allows to sort by specific return ticket parameter (for example: "createdAt,desc" will sort return tickets by creation date from newest to oldest in the given time range)
+
+RESPONSE
+returns - list of organization return tickets
+
+code - return code used for shipment
+
+id - return ticket identification
+
+sender - return ticket sender data
+
+name - return ticket sender name (combining first name and last name)
+
+email - return ticket sender email
+
+phoneNumber - return ticket sender phone number in E.164 format
+
+shipment - return ticket shipment data
+
+size - return ticket parcel size (available types: A., B, C)
+
+tracking - return ticket tracking data and external pages
+
+number - return ticket tracking number
+
+page - tracking page url with tracking number
+
+url - tracking API url with tracking number
+
+status - return ticket status available statuses: NEW, ACCEPTED, SCANNED, USED, CANCELED, REJECTED, EXPIRED, DELIVERED)
+
+createdAt - return ticket creation date in ISO Date Time format, example: "2024-07-26T11:59:09.508752Z"
+
+expiresAt - return ticket expiration date in ISO Date Time format, example: "2024-08-14T11:59:09.508752Z"
+
+sentAt - return ticket sent date in ISO Date Time format, example: "2024-07-29T17:00:06.508752Z"
+
+deliveredAt - return ticket delivered date in ISO Date Time format, example: "2024-07-30T09:21:01.781151Z"
+
+count - number how many return tickets were returned with given filters
+
+page - page number of return tickets list (can be specified in request query param)
+
+perPage - how many return tickets are returned by API call (can be specified in request query param)
+
+HTTP STATUSES
+200 - Return pageable list of organization's returns
+
+404 - Organization was not found
+
+Examples
+Request
+
+
+
+curl -X GET --location 'https://api.inpost.pl/v1/returns/tickets?dateFrom=2024-01-01T12:00:00.000Z&dateTo=2025-06-19T12:10:19.168Z&status=ACCEPTED&page=0&size=100'
+-H 'Content-Type: application/json'
+-H 'Authorization: Bearer <access_token>' -H 'Accept-Time-Zone: Europe/Warsaw'
+Response
+
+
+
+{
+  "returns": [
+    {
+      "code": "8840221068",
+      "id": "3be7337e-d694-4e12-ad8d-99d39889c1f5",
+      "sender": {
+        "name": "Jan Kowalski",
+        "email": "jan.kowalski@example.com",
+        "phoneNumber": "+48123456789"
+      },
+      "shipment": {
+        "size": "A",
+        "tracking": {
+          "number": "600000997430727012159810",
+          "page": "https://inpost.pl/sledzenie-przesylek?number=600000997430727012159810",
+          "url": "https://api-shipx-pl.easypack24.net/v1/tracking/600000997430727012159810"
+        }
+      },
+      "status": "used",
+      "createdAt": "2024-04-12T12:49:16.921+02:00",
+      "expiresAt": "2024-04-26T12:49:16.906+02:00",
+      "sentAt": "2024-04-14T14:09:46.921+02:00",
+      "deliveredAt": "2024-04-14T14:09:46.921+02:00"
+    }
+  ],
+  "count": 1,
+  "page": 0,
+  "perPage": 100
+}
+ 
+
+Get Return Label
+Description: This endpoint returns the bytes of a PDF file containing the return label. The label can be downloaded multiple times during the lifecycle of the package. Please note that the label will only be generated if the label generation option in your Returns Portal account settings. Instead of using the hard URL reference from the documentation, you can also use the value returned when creating the return contained in the response in the 'labelUrl' field to retrieve the label.
+
+URL: https://api.inpost.pl/v1/returns/tickets/{id}/label
+
+HTTP Method: GET
+
+CONTENT-TYPE: application/json
+
+AUTHORIZATION: OAuth 2.0 - Bearer token ( -H 'Authorization: Bearer <access_token>' )
+
+REQUEST
+URL - the full value returned in the response in the 'labelUrl' field from the endpoint Create Return
+
+id - identifier of return shipments received in response from endpoint Create Return
+
+ 
+
+Examples
+Request
+
+
+
+curl -X GET --location 'https://api.inpost.pl/v1/returns/tickets/d462ec8a-b760-4125-bf35-9f9a509f3629/label'
+-H 'Content-Type: application/json'
+-H 'Authorization: Bearer <access_token>'
+ 
+
+Response
+200 OK: The request was successful, and the response body contains the bytes of the PDF file.
+
+Content-Type: application/pdf
+
+Body: Binary data representing the PDF file of the return label.
+
+ 
+
+HTTP STATUSES
+200 - Bytes with pdf
+
+404 - Label for ticket was not found
+
+ 
+
+ 

@@ -1,0 +1,298 @@
+Zasób Batch słuzy do tworzenia i podglądu wielu przesyłek. W trybie asynchronicznym po walidacji każda przesyłka procesuje się w osobnym wątku, a co za tym idzie informacje zwrotne są wysyłane na WebHooki dla każdej przesyłki z osobna.
+
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Tworzenie wielu przesyłek
+Podgląd wielu przesyłek
+Struktura
+Zasób Batch posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+Integer
+
+Id obiektu
+
+status
+
+String
+
+Status przetwarzania przesyłek
+
+shipments
+
+Array[Shipment]
+
+Przesyłki
+
+created_at
+
+DateTime
+
+Data utworzenia
+
+updated_at
+
+DateTime
+
+Data aktualizacji
+
+Przykład zasobu Batch w formacie JSON:
+
+
+
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/batches/14143598",
+    "id": 14143598,
+    "status": "in_progress",
+    "shipments": [],
+    "created_at": "2025-08-27T15:16:58.601+02:00",
+    "updated_at": "2025-08-27T15:16:58.601+02:00"
+}
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i aktualnego access tokenu.
+
+ 
+
+Tworzenie wielu przesyłek
+Po utworzeniu przesyłki nie zwracamy cen dla klientów debetowych.
+Atrybut rate przyjmuje wartość null
+
+
+
+POST /v1/organizations/:organization_id/batches
+Parametry
+
+ 
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+only_choice_of_offer
+
+Boolean
+
+Ustawienie parametru na true powoduje, że oferta we wszystkich przesyłkach zostanie wybrana dla podanego serwisu, ale nie zostanie automatycznie opłacona.
+Taka przesyłkę trzeba opłacić przed końcem wygaśnięcia oferty wykonując operacje (Opłacanie przesyłki). 
+Parametr ten można ustawić również dla każdej przesyłki z osobna (w takim przypadku parametr ustawiony w przesyłce ma wyższy priorytet).
+
+Atrybut nie jest wymagany.
+
+Defoultowa wartość false
+
+shipments
+
+Array[Hash]
+
+ 
+
+Atrybut nie jest wymagany.
+
+Minimum 1
+
+Maksimum 2500
+
+ 
+
+Parametry zasobu shipments
+
+Parametr
+
+Type
+
+Opis
+
+id
+
+String
+
+Wymagany. Unikalny identyfikator danej przesyłki, który pozwala zwrócić użytkownikowi informację o błędach walidacji przypisanych do konkretnej przesyłki. Id nie jest zapisywany w bazie danych i nie jest zwracany jak atrybut utworzonej przesyłki.
+
+...
+
+...
+
+Pozostałe parametry przesyłki uproszczonej opisane na stronie
+
+https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731061
+ 
+
+Przykład zapytania
+
+
+
+curl -X POST https://api-shipx-pl.easypack24.net/v1/organizations/1/batches -H 'Authorization: Bearer token' -H 'content-type: application/json' -d '{ 
+  "only_choice_of_offer": false,
+  "shipments": [
+    {
+      "id": 1,
+      "service": "inpost_locker_standard",
+      "custom_attributes": {
+        "target_point": "KRA010"
+      },
+      "parcels":{
+        "template": "small"
+      },
+      "receiver": {
+        "company_name": "Company name 1",
+        "email": "sklep@inpost.pl",
+        "phone": "888888888",
+        "address": {
+          "line1": "Zawila 65L",
+          "city": "Krakow",
+          "post_code": "30-390",
+          "country_code": "PL"
+        }
+      },
+      "sender": {
+       "company_name": "Company name 2",
+        "email": "sklep@inpost.pl",
+        "phone": "999999999",
+        "address": {
+          "line1": "Zawila 65L",
+          "city": "Krakow",
+          "post_code": "30-390",
+          "country_code": "PL"
+        }
+      },
+      "cod": {
+        "amount": 1,
+        "currency": "PLN"
+      },
+      "insurance": {
+        "amount": 23,
+        "currency": "PLN"
+      }
+    },
+    {
+      "id": 2,
+      "service": "inpost_locker_standard",
+      "custom_attributes": {
+        "target_point": "KRA010"
+      },
+      "parcels":{
+        "template": "small"
+      },
+      "receiver": {
+        "company_name": "Company name 1",
+        "email": "sklep@inpost.pl",
+        "phone": "888888888",
+        "address": {
+          "line1": "Zawila 65L",
+          "city": "Krakow",
+          "post_code": "30-390",
+          "country_code": "PL"
+        }
+      },
+      "sender": {
+       "company_name": "Company name 2",
+        "email": "sklep@inpost.pl",
+        "phone": "999999999",
+        "address": {
+          "line1": "Zawila 65L",
+          "city": "Krakow",
+          "post_code": "30-390",
+          "country_code": "PL"
+        }
+      },
+      "cod": {
+        "amount": 1,
+        "currency": "PLN"
+      },
+      "insurance": {
+        "amount": 23,
+        "currency": "PLN"
+      }
+    }
+  ]
+}'
+Odpowiedź
+
+
+
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/batches/14143598",
+    "id": 14143598,
+    "status": "in_progress",
+    "shipments": [],
+    "created_at": "2025-08-27T15:16:58.601+02:00",
+    "updated_at": "2025-08-27T15:16:58.601+02:00"
+}
+Informacje o błędach
+
+ Serwer może zwrócić następujące błędy
+
+validation_failed - błąd walidacji 
+
+forbidden - akcja jest niedostępna dla podanego tokenu
+
+token_invalid - użytkownik nie ma praw dostępu do określonej organizacji
+
+ 
+
+Podgląd wielu przesyłek
+ 
+
+
+
+GET /v1/batches/:id
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/batches/16 -H 'Authorization: Bearer token' -H 'content-type: application/json' 
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "href": "https://api-shipx-pl.easypack24.net/v1/batches/16",
+  "id": 16,
+  "status": "done",
+  "shipments": [
+    {
+      "href": "https://api-shipx-pl.easypack24.net/v1/shipments/151",
+      "id": 151,
+      "status": "confirmed",
+      "tracking_number": "633100159730624319900067"
+    },
+    {
+      "href": "https://api-shipx-pl.easypack24.net/v1/shipments/150",
+      "id": 150,
+      "status": "confirmed",
+      "tracking_number": "633100159730624319900068"
+    }
+  ],
+  "created_at": "2017-06-08T14:17:25.675+02:00",
+  "updated_at": "2017-06-08T14:17:25.675+02:00"
+}
+Informacje o błędach
+
+Serwer może zwrócić następujące błędy
+
+resource_not_found - w przypadku gdy batch nie istnieje
+
+token_invalid - użytkownik nie ma praw dostępu do określonej organizacji
+
+ 
+
+ 
+
+ 

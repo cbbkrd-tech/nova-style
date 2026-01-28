@@ -1,0 +1,410 @@
+ 
+
+Lista przesyłek
+Wyszukiwanie przesyłek odbywa się poprzez podanie jednego lub więcej z poniższych kryteriów
+
+Nie zwracamy cen dla klientów debetowych. Atrybut rate przyjmuje wartość null
+
+
+
+GET /v1/organizations/:organization_id/shipments
+Kryteria wyszukiwania
+
+Parametr
+
+Typ
+
+Działanie
+
+Przykład
+
+id
+
+Integer
+
+Array
+
+Wyszukuje przesyłkę, o podanym id.
+
+Wyszukuje przesyłki o podanych id.
+
+?id=1
+
+?id=1,2
+
+created_at
+
+Date
+
+Wyszukuje przesyłki utworzone w danym dniu.
+
+?created_at=2016-01-07
+
+created_at_gteq
+
+Time
+
+Wyszukuje przesyłki których czas stworzenia jest >= wskazany czas.
+
+Czas może być podany w formacie ISO 8601 lub podobnym, a także jako timestamp.
+
+?created_at_gteq=2016-01-01T13:10+01:00
+
+?created_at_gteq=1451650200
+
+created_at_lteq
+
+Time
+
+Wyszukuje przesyłki utworzone wcześniej niż wskazany czas.
+
+Czas może być podany w formacie ISO 8601 lub podobnym, a także jako timestamp.
+
+?created_at_lteq=2016-01-01T13:10+01:00
+
+?created_at_lteq=1451650200
+
+tracking_number
+
+String
+
+Wyszukuje przesyłki, których numer trackingowy jest identyczny jak wskazany ciąg.
+
+?tracking_number=630000328531876219900746
+
+tracking_number_cont
+
+String
+
+Wyszukuje przesyłki, których numer trackingowy zawiera wskazany ciąg.
+
+?tracking_number_cont=5318
+
+status
+
+String
+
+Array
+
+Wyszukuje przesyłki we wskazanym statusie.
+
+Wyszukuje przesyłki w jednym ze wskazanych statusów.
+
+?status=confirmed
+
+?status=confirmed,offers_prepared
+
+service
+
+String
+
+Array
+
+Wyszukuje przesyłki, dla których zakupiona została wskazana usługa.
+
+Wyszukuje przesyłki, dla których zakupiona została jedna ze wskazanych usług.
+
+?service=inpost_courier_express_1700
+
+?service=inpost_locker_standard,inpost_courier_standard
+
+carrier
+
+String
+
+Array
+
+Wyszukuje przesyłki, dla których została zakupiona usługa wskazanego przewoźnika.
+
+Wyszukuje przesyłki, dla których została zakupiona usługa jednego ze wskazanych przewoźników.
+
+?carrier=InPost%20Kurier
+
+?carrier=InPost%20Kurier,InPost%20Paczkomaty
+
+insurance_amount_gteq
+
+Number
+
+Wyszukuje przesyłki ubezpieczone na kwotę równą lub większą niż wskazana.
+
+?insurance_amount_gteq=50
+
+insurance_amount_lteq
+
+Number
+
+Wyszukuje przesyłki ubezpieczone na kwotę mniejszą lub równą niż wskazana.
+
+?insurance_amount_lteq=100
+
+cod_amount_gteq
+
+Number
+
+Wyszukuje przesyłki z wartością pobrania większą lub równą wskazanej.
+
+?cod_amount_gteq=50
+
+cod_amount_lteq
+
+Number
+
+Wyszukuje przesyłki z wartością pobrania mniejszą lub równą wskazanej.
+
+?cod_amount_lteq=100
+
+receiver_name
+
+String
+
+Wyszukuje przesyłki, w których imię, nazwisko lub nazwa firmy odbiorcy rozpoczyna się od wskazanego ciągu.
+
+?receiver_name=smith
+
+receiver_address
+
+String
+
+Wyszukuje przesyłki, w których adres odbiorcy (street lub line1) rozpoczyna się od wskazanego ciągu.
+
+?receiver_address=Zaw
+
+receiver_city
+
+String
+
+Wyszukuje przesyłki, w których miejscowość odbiorcy jest identyczna jak wskazany ciąg.
+
+?receiver_city=Kraków
+
+receiver_post_code
+
+String
+
+Wyszukuje przesyłki, w których kod pocztowy odbiorcy zaczyna się od wskazanego ciągu.
+
+?receiver_post_code=30-442
+
+receiver_country_code
+
+String
+
+Wyszukuje przesyłki, w których kod kraju odbiorcy jest identyczny jak wskazany ciąg.
+
+?receiver_country_code=PL
+
+receiver_phone
+
+String
+
+Wyszukuje przesyłki, w których numer telefonu odbiorcy jest identyczny jak wskazany ciąg.
+
+?receiver_phone=123123123
+
+receiver_email
+
+String
+
+Wyszukuje przesyłki, w których adres e-mail odbiorcy rozpoczyna się od wskazanego ciągu.
+
+?receiver_email=devnull@inpost.pl
+
+sender_name
+
+String
+
+Wyszukuje przesyłki, w których imię, nazwisko lub nazwa firmy nadawcy rozpoczyna się od wskazanego ciągu.
+
+?sender_name=smith
+
+sender_address
+
+String
+
+Wyszukuje przesyłki, w których adres nadawcy (street lub line1) rozpoczyna się od wskazanego ciągu.
+
+?sender_address=Zaw
+
+sender_city
+
+String
+
+Wyszukuje przesyłki, w których miejscowość nadawcy jest identyczna jak wskazany ciąg.
+
+?sender_city=Kraków
+
+sender_post_code
+
+String
+
+Wyszukuje przesyłki, w których kod pocztowy nadawcy zaczyna się od wskazanego ciągu.
+
+?sender_post_code=30-442
+
+sender_country_code
+
+String
+
+Wyszukuje przesyłki, w których kod kraju nadawcy jest identyczny jak wskazany ciąg.
+
+?sender_country_code=PL
+
+sender_phone
+
+String
+
+Wyszukuje przesyłki, w których numer telefonu nadawcy jest identyczny jak wskazany ciąg.
+
+?sender_phone=123123123
+
+sender_email
+
+String
+
+Wyszukuje przesyłki, w których adres e-mail nadawcy rozpoczyna się od wskazanego ciągu.
+
+?sender_email=devnull@inpost.pl
+
+monitoring
+
+String
+
+Wyszukuje przesyłki, których status jest na liście:
+
+dispatched_by_sender, collected_from_sender, taken_by_courier, adopted_at_source_branch, sent_from_source_branch,
+adopted_at_sorting_center, sent_from_sorting_center, adopted_at_target_branch, out_for_delivery ready_to_pickup,
+ready_to_pickup, pickup_reminder_sent, delivered, pickup_time_expired, avizo, claimed, returned_to_sender, canceled,
+other, dispatched_by_sender_to_pok, out_for_delivery_to_address, pickup_reminder_sent_address, rejected_by_receiver,
+undelivered_wrong_address, undelivered_incomplete_address, undelivered_unknown_receiver, undelivered_cod_cash_receiver,
+taken_by_courier_from_pok, undelivered, return_pickup_confirmation_to_sender, ready_to_pickup_from_branch,
+delay_in_delivery, redirect_to_box, canceled_redirect_to_box, readdressed, undelivered_no_mailbox, oversized,
+undelivered_lack_of_access_letterbox, ready_to_pickup_from_pok, ready_to_pickup_from_pok_registered, undelivered_not_live_address
+
+?monitoring=true
+
+external_customer_id
+
+String
+
+Wyszukiwanie przesyłek nadanych przez broker'a, którego id jest identyczne jak wskazany ciąg.
+
+
+
+?external_customer_id=broker10
+sending_method
+
+String
+
+Array
+
+Wyszukuje przesyłki mające wskazany sposób nadania.
+
+Wyszukuje przesyłki mające jeden ze wskazanych sposobów nadania.
+
+?sending_method =parcel_locker
+
+?sending_method =parcel_locker,dispatch_order
+
+only_choice_active_offers
+
+Boolean
+
+Wyszukuje przesyłki, które posiadają flagę 'only_choice_of_offer' ustawioną na true oraz nie wygaśnięte oferty.
+
+?only_choice_active_offers=true
+
+offers_status
+
+String
+
+Wyszukuje przesyłki posiadające oferty o wskazanym statusie.
+
+?offers_status=available
+
+Sortowanie wyników
+
+Wyniki wyszukiwania można sortować przekazujący parametr sort_by, który może przyjmować następujące wartości:
+
+Wartość sort_by
+
+Działanie
+
+Przykład
+
+id
+
+Sortuje przesyłki po identyfikatorze
+
+?sort_by=id
+
+created_at
+
+Sortuje przesyłki po czasie utworzenia
+
+?sort_by=created_at
+
+tracking_number
+
+Sortuje przesyłki po numerze trackingowym
+
+?sort_by=tracking_number
+
+service
+
+Sortuje przesyłki po nazwie usługi
+
+?sort_by=service
+
+status
+
+Sortuje przesyłki po statusie
+
+?sort_by=status
+
+insurance_amount
+
+Sortuje przesyłki po kwocie ubezpieczenia
+
+?sort_by=insurance_amount
+
+cod_amount
+
+Sortuje przesyłki po kwocie pobrania
+
+?sort_by=cod_amount
+
+external_customer_id
+
+Sortuje przesyłki po id broker'a
+
+?sort_by=external_customer_id
+
+Sortowanie może odbywać się w dwóch kierunkach, poprzez użycie parametru sort_order. Domyślnie wyniki sortowane są malejąco (desc) wg daty utworzenia przesyłki (created_at).
+
+Wartość sort_order
+
+Działanie
+
+Przykład
+
+asc
+
+Sortuje przesyłki rosnąco
+
+?sort_order=asc&sort_by=insurance_amount
+
+desc
+
+Sortuje przesyłki malejąco
+
+?sort_order=desc&sort_by=status
+
+ 
+
+Na tej stronie
+
+Lista przesyłek
+ 
+
+ 

@@ -1,0 +1,261 @@
+Zasób SendingMethod reprezentuje sposób nadania przesyłki utworzonej w API ShipX. 
+
+Na tej stronie
+
+Uwierzytelnianie
+Struktura
+Sposoby nadawania przesyłek 
+Lista sposobów nadania
+
+
+
+Uwierzytelnianie
+Dostęp do zasobu SendingMethod nie wymaga uwierzytelniania.
+
+ 
+
+Struktura
+Zasób SendingMethod posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+Unikalny identyfikator metody nadania. Możliwe wartości:
+
+parcel_locker - Nadanie w Paczkomat®,
+
+branch - Nadanie w Oddziale,
+
+dispatch_order - Zlecenie odbioru - zamówienie kuriera,
+
+pop - Nadanie w Punkcie Obsługi Przesyłek
+
+any_point - Nadanie w dowolnym automacie Paczkomat® lub PaczkoPunkcie
+Przykład:
+
+
+
+    "custom_attributes": {
+        "sending_method": "any_point",
+        "target_point": "ADA01M"
+    },
+name
+
+String
+
+Nazwa metody nadania.
+
+description
+
+String
+
+Opis metody nadania, który można wykorzystać w integracji.
+
+ 
+
+Sposoby nadawania przesyłek 
+Poniższa tabela prezentuje dostępne sposoby nadania dla poszczególnych usług
+
+Nazwa usługi
+
+parcel_locker
+
+dispatch_order
+
+pop
+
+branch
+
+any_point
+
+inpost_locker_standard
+
+Check Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Check Mark  
+
+inpost_locker_pass_thru
+
+Check Mark
+
+Cross Mark
+
+Cross Mark
+
+Cross Mark  
+
+Check Mark  
+
+inpost_courier_standard
+
+Cross Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Cross Mark  
+
+inpost_courier_express_1000
+
+Cross Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Cross Mark  
+
+inpost_courier_express_1200
+
+Cross Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Cross Mark  
+
+inpost_courier_express_1700
+
+Cross Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Cross Mark  
+
+inpost_locker_allegro
+
+Check Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Check Mark  
+
+inpost_courier_allegro
+
+Check Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Check Mark  
+
+inpost_letter_allegro
+
+Check Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Check Mark  
+
+inpost_courier_c2c
+
+Check Mark
+
+Check Mark
+
+Check Mark
+
+Check Mark  
+
+Check Mark  
+
+ 
+
+ 
+
+Lista sposobów nadania
+Pobieranie listy dostępnych sposobów nadania
+
+
+
+GET /v1/sending_methods
+Przykład zapytania
+
+
+
+GET /v1/sending_methods HTTP/1.1
+Host: api-shipx-pl.easypack24.net
+Content-Type: application/json
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+   [
+        {
+            "id": "parcel_locker",
+            "name": "Nadanie w automacie Paczkomat",
+            "description": "Nadam przesyłkę w automacie Paczkomat"
+        },
+        {
+            "id": "pok",
+            "name": "Nadanie w POK",
+            "description": "Nadam przesyłkę w Punkcie Obsługi Klienta"
+        },
+        {
+            "id": "pop",
+            "name": "Nadanie w POP",
+            "description": "Nadam przesyłkę w Punkcie Obsługi Przesyłek"
+        },
+        {
+            "id": "courier_pok",
+            "name": "Nadanie w POK",
+            "description": "Nadam przesyłkę w Punkcie Obsługi Klienta"
+        },
+        {
+            "id": "branch",
+            "name": "Nadanie w Oddziale",
+            "description": "Dostarczę przesyłkę do Oddziału InPost"
+        },
+        {
+            "id": "dispatch_order",
+            "name": "Odbiór przez Kuriera",
+            "description": "Utworzę zelecenie odbioru - przesyłkę odbierze Kurier InPost"
+        },
+        {
+            "id": "any_point",
+            "name": "Nadanie w dowolnym punkcie",
+            "description": "Nadam przesyłkę w dowolnym automacie Paczkomat lub PaczkoPunkcie"
+        }
+    ]
+}   
+ 
+
+ 

@@ -1,0 +1,328 @@
+Zasób Statuses reprezentuje statusy, które określają na jakim etapie procesu logistycznego znajduje się przesyłka. Każdy status posiada unikalną w skali systemu nazwę (name). Poza nazwą status posiada również dwa opisy: krótki oraz rozszerzony, w formie zrozumiałej dla człowieka. Można wykorzystać je przy projektowaniu i tworzeniu interfejsów użytkownika, dzięki czemu komunikacja do użytkownika będzie spójna pomiędzy różnymi systemami, a zmiany w opisach statusów widoczne automatycznie.
+
+Zasób Status jest zasobem tylko do odczytu.
+
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Lista statusów
+Lista statusów które posiadają przypisany origin_status
+Struktura
+Element zasobu Statuses posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+name
+
+String
+
+Nazwa statusu.
+
+title
+
+String
+
+Krótki opis (tytuł) statusu.
+
+description
+
+String
+
+Długi opis statusu, który dokładniej wyjaśnia aktualny stan przesyłki.
+
+Przykład reprezentacji zasobu Status w formacie JSON:
+
+
+
+{
+	"name": "stored_by_sender",
+	"title": "Umieszczona w Paczkomacie nadawczym",
+	"description": "Paczka oczekuje na wyjęcie z Paczkomatu przez doręczyciela. Stąd trafi do najbliższego oddziału InPost i wyruszy w trasę do Paczkomatu odbiorczego. Na tym etapie Odbiorca otrzyma e-mail informujący o wyruszeniu przesyłki w drogę."
+}
+ 
+
+Uwierzytelnianie
+Zasób status nie jest autoryzowany, nie jest wymagane podanie tokenu.
+
+ 
+
+Lista statusów
+Pobieranie listy wszystkich statusów obsługiwanych przez ShipX.
+
+Kolekcja nie obsługuje stronicowania.
+
+
+
+GET /v1/statuses
+ 
+
+Kryteria wyszukiwania
+
+Nazwa
+
+Typ
+
+Opis
+
+lang
+
+String
+
+Język opisów. Określa w jakim języku mają być zwracane opisy (title i description) dla poszczególnych statusów.
+
+Możliwe wartości: en_GB, pl_PL
+Domyślnie: pl_PL 
+
+W przypadku gdy przekazana wartość będzie niepoprawna, API zwróci błąd z kluczem invalid_parameter. Przykład:
+
+
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+ 
+{
+    "status": 400,
+    "error": "invalid_parameter",
+    "description": "Provided unsupported value (fr_FR) to parameter (lang)",
+    "details": null
+}
+
+
+
+shipment_type
+
+String
+
+Rodzaj przesyłki.
+Tytuł i opisy statusów zostaną dostosowane dla określonego rodzaju przesyłki.
+
+W przypadku gdy przekazana wartość będzie niepoprawna, serwer zwróci błąd invalid_parameter z kodem HTTP 400 Bad Request:
+
+
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+ 
+{
+	"status": 400,
+	"error": "invalid_parameter",
+	"description": "Provided unsupported value (inpost_locker) to
+parameter (shipment_type)",
+	"details": null
+}
+ 
+
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/statuses -H 'Content-Type: application/json'
+ 
+
+ 
+
+Przykładowa odpowiedź
+
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+	"href": "https://api-shipx-pl.easypack24.net/v1/statuses",
+	"items": [
+		{
+			"name": "confirmed",
+			"title": "Przygotowana przez Nadawcę",
+			"description": "Nadawca poinformował nas, że przygotował paczkę do nadania. Podróż paczki jeszcze się nie rozpoczęła."
+		},
+		{
+			"name": "stored_by_sender",
+			"title": "Umieszczona w Paczkomacie Nadawczym",
+			"description": "Paczka oczekuje na wyjęcie z Paczkomatu przez doręczyciela. Stąd trafi do najbliższego oddziału InPost i wyruszy w trasę do 
+                            Paczkomatu odbiorczego. Na tym etapie Odbiorca otrzyma e-mail informujący o wyruszeniu przesyłki w drogę."
+		},
+		{...}
+	]
+}
+Lista statusów które posiadają przypisany origin_status
+ 
+
+Origin_status
+
+Name
+
+N/A
+
+created
+
+N/A
+
+offers_prepared
+
+N/A
+
+offer_selected
+
+PPN
+
+confirmed
+
+PWPOK
+
+ready_to_pickup_from_pok
+
+GAB
+
+oversized
+
+NWPOK
+
+dispatched_by_sender_to_pok
+
+NWP
+
+dispatched_by_sender
+
+PKL
+
+collected_from_sender
+
+OZPA
+
+taken_by_courier
+
+PWO
+
+adopted_at_source_branch
+
+WZO
+
+sent_from_source_branch 
+
+PDA
+
+readdressed 
+
+PDD_2
+
+out_for_delivery 
+
+UWP
+
+ready_to_pickup
+
+AWI_3
+
+pickup_reminder_sent
+
+PWP
+
+pickup_time_expired
+
+PDO
+
+avizo
+
+OZPOK
+
+taken_by_courier_from_pok
+
+OPP
+
+rejected_by_receiver
+
+PDMPN
+
+undelivered
+
+MOD
+
+delay_in_delivery
+
+ZDN
+
+returned_to_sender
+
+OW
+
+ready_to_pickup_from_branch
+
+DOR
+
+delivered
+
+ANU
+
+canceled
+
+ZAR
+
+claimed
+
+PWP_1
+
+stack_in_customer_service_point
+
+DOPM
+
+stack_parcel_pickup_time_expired
+
+OZP_1
+
+unstack_from_customer_service_point
+
+PWP_2
+
+courier_avizo_in_customer_service_point
+
+PDO_1
+
+taken_by_courier_from_customer_service_point
+
+PWPM
+
+stack_in_box_machine
+
+DOPM_1
+
+stack_parcel_in_box_machine_pickup_time_expired
+
+OZPMM
+
+unstack_from_box_machine
+
+POS
+
+adopted_at_sorting_center
+
+PDD_3
+
+out_for_delivery_to_address
+
+AWI_1
+
+pickup_reminder_sent_address
+
+BDA
+
+undelivered_wrong_address
+
+BRG
+
+undelivered_cod_cash_receiver
+
+PDP
+
+redirect_to_box
+
+APDP
+
+canceled_redirect_to_box
+
+ 

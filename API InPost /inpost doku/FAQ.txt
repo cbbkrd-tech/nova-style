@@ -1,0 +1,220 @@
+Na tej stronie
+
+Informacje ogólne
+Przesyłka
+Tracking
+Statusy
+Kontakt
+ 
+
+ 
+
+Informacje ogólne
+
+Jak mogę uzyskać dostęp do środowiska produkcyjnego API ShipX?
+W celu uzyskania dostępu dla API ShipX prosimy o postępowanie według instrukcji z poniższego linku:
+https://inpost.pl/sites/default/files/2022-03/instrukcja-konfiguracji-api-shipx.pdf
+
+
+Czy w API dostępne jest środowisko testowe?
+Tak, w API ShipX jest dostępne środowisko testowe (sandbox) adres środowiska testowego: https://sandbox-api-shipx-pl.easypack24.net.
+
+
+W jaki sposób mogę wygenerować dostęp do środowiska sandbox?
+InPost - Manager paczek  > zakładka Moje konto > API. Aby wygenerować Token i ID organizacji należy uzupełnić wszystkie dane, łącznie z danymi do faktury w zakładce Moje konto > Dane. Do utworzenia przesyłki Paczkomat® niezbędne są środki na koncie, konto doładujesz wirtualnie w zakładce Płatności.
+
+
+Czy dostępne są gotowe zapytania API?
+Tak, gotowe zapytania json można pobrać z linku: 
+Autoryzacja / Kolekcje zapytań
+. 
+
+
+API zwraca komunikat "401 invalid authorization" co mam zrobić?
+Upewnij się, że podany został poprawny token z zakładki API  w InPost - Manager paczek  jeżeli token jest poprawny.
+
+Należy pamiętać, aby używać na środowisku produkcyjnym tokenu z 
+InPost - Manager paczek a na środowisku sandbox z InPost - Manager paczek. 
+
+
+API zwraca komunikat "500 server error" co mam zrobić?
+Jeżeli API zwraca błąd 500, należy skorzystać z formularza wsparcia integracyjnego Support | InPost i wybrać kategorię Problem z dostępnością systemu.
+
+
+API zwraca błąd "403 access forbidden fo this token'
+API zwraca błąd, w momencie gdy wpisane jest błędne id organizacji. Należy zalogować się do InPost - Manager paczek  i pobrać id organizacji znajdujące się w zakładce API w 
+InPost - Manager paczek.
+
+
+Jak mogę dodać adres webhook do organizacji
+Należy zalogować się do InPost - Manager paczek  następnie przejść do zakładki Moje konto > API > Ustawienia organizacji, a następnie należy wkleić adres webhook w Nowy adres webhook i wcisnąć Dodaj do API.
+
+ 
+
+ 
+
+Przesyłka
+
+Czy mogę utworzyć więcej niż jedną paczkę jednym zapytaniem?
+Tak, jest taka możliwość z wykorzystaniem zasobu batch: 
+Tworzenie i podgląd wielu przesyłek. 
+
+
+Czy podczas tworzenia paczki wymagane jest podanie danych nadawcy?
+Nie, jeżeli przy tworzeniu paczki nie zostały podane dane nadawcy, zostaną one pobrane z konta API ShipX.
+
+
+Czy w trybie asnychronicznym, muszę oczekiwać na przygotowanie ofert a następnie ich zakup?
+Nie, API ShipX posiada tryb uproszczony, podczas tworzenia paczek należy wskazać serwis, za pomocą którego ma być nadana paczka, a następnie API automatycznie ją opłaca.
+
+
+Podczas tworzenia przesyłki pobraniowej API zwraca błąd "Insurance should be equal or higher than COD"
+Podczas tworzenia paczki pobraniowej należy pamiętać, że paczka musi zostać ubezpieczona minimum na wartość pobrania lub wyższą.
+
+
+Ubezpieczyłem/am paczkę pobraniową, niestety paczka pozostaje w statusie "offer_prepared"
+Należy sprawdzić, czy w systemie InPost - Manager paczek  został uzupełniony numer rachunku bankowego. Po uzupełnieniu numeru rachunku, paczki pobraniowe będą tworzyć się prawidłowo.
+
+
+Czy dla paczki Paczkomat® musimy podawać jej wymiary oraz wagę?
+Nie, dla przesyłek Paczkomat® zostały utworzone szablony, które można wykorzystać, aby wskazać skrytkę, do której powinna zostać umieszczona przesyłka:
+
+Nazwa szablonu
+
+Wymiary
+
+Waga
+
+Gabaryt
+
+small
+
+8 x 38 x 64 cm
+
+do 25 kg
+
+Gabaryt A
+
+medium
+
+19 x 38 x 64 cm
+
+do 25 kg
+
+Gabaryt B
+
+large
+
+41 x 38 x 64 cm
+
+do 25 kg
+
+Gabaryt C
+
+
+Czy dla paczki kurierskiej również możemy wykorzystać szablony?
+Zalecamy, aby dla paczek kurierskich przekazywać prawidłowe wymiary oraz wagę.
+
+
+
+"parcels": {
+                "dimensions": {
+                "length": "10",
+                "width": "10",
+                "height": "10",
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": "10",
+                "unit": "kg"
+            }
+           },
+ 
+
+
+Nie mogę zaktualizować danych w przesyłce.
+Aktualizować można tylko przesyłki, które nie zostały jeszcze zakupione, tzn. posiadają status created, offers_prepared albo offer_selected
+
+
+Nie mogę anulować przesyłki.
+Aby anulować przesyłkę w ramach określonej organizacji, użytkownik musi być jej członkiem. Dodatkowym warunkiem jest to, aby przesyłka miała status created lub offers_prepared.
+
+
+Czy w API moge utworzyć paczkę w weekend?
+Tak, API ShipX umożliwia tworzenie paczki z usługą Paczka w Weekend: 
+Paczka w Weekend
+ 
+
+
+Kiedy mogę utworzyć paczkę z usługą Paczka w weekend?
+Usługa będzie dostępna w określonym oknie czasowym, np. od czwartku od godziny 20:00 do soboty do godziny 13:00. Nie uwzględniamy świąt ani dni wolnych.
+
+
+Utworzyłem/am przesyłkę, ale nie mogę pobrać etykiety
+Etykietę można pobrać dla przesyłki opłaconej — w statusie confirmed lub późniejszym.
+
+Aby, pobrać etykietę przesyłki użytkownik musi być jej nadawcą.
+
+
+Czy mogę pobrać więcej niż jedną etykietę za pomocą jednego requestu?
+Tak, maksymalnie można pobrać etykiety dla 100 przesyłek. 
+[1.6.0] Pobieranie wielu etykiet
+archived
+ 
+
+
+Czy mogę podać zagraniczny numer telefonu
+Nie, API ShipX obsługuje wyłącznie polskie numery telefonu, należy podać 9 cyfrowy numer telefonu, bez znaków specjalnych oraz numerów kierunkowych np. „+48”.
+
+
+API zwraca błąd "debt_collection'
+Jeżeli jesteś klientem postpaid (posiadasz umowę) proszę sprawdzić, czy została uiszczona opłata za ostatnią fakturę, a następnie prosimy o kontakt z opiekunem. Jeżeli natomiast jesteś klientem prepaid (bez umowy) proszę sprawdzić, czy na koncie widnieje odpowiednia ilość środków.
+
+
+API zwraca błąd "trucker_ID_is_not_set_for_organization'
+API zwraca błąd, ponieważ próbują Państwo użyć serwisu kurierskiego, który dostępny jest po podpisaniu umowy kurierskiej. Dla kont prepaid dedykowanym serwisem jest kurier C2C “inpost_courier_c2c”.
+
+
+Chciałem utworzyć paczkę Allegro SMART, ale utworzyła się jako Paczkomat® Standard.
+W przypadku podania nieodpowiedniego serwisu dla metody dostawy (np. serwisu inpost_locker_standard dla metody Allegro Paczkomat® 24/7), usługa SMART nie będzie dostępna. 
+Obsługa serwisów SMART
+ 
+
+
+Nie mogę utworzyć paczki Allegro SMART na środowisku sandbox.
+Aby utworzyć paczkę Allegro SMART na sandbox, należy pobrać dane potrzebne do wygenerowania paczki ze środowiska sandbox Allegro.
+
+
+Dlaczego na środowisku sandbox, tracking zwraca brak informacji?
+Na środowisku sandbox, komponent trackingowy jest wyłączony, dlatego też nie ma możliwości sprawdzenia statusu paczki.
+
+Tracking
+
+Czy można wyszukać więcej niż jedną paczkę za pomocą jednego requestu?
+Nie ma takiej możliwości, API pozwala na sprawdzenie statusu dla pojedynczej przesyłki.
+
+
+Czy mogę sprawdzić status paczki utworzonej w zeszłym miesiącu?
+Tak, API umożliwia śledzenie statusów paczek 45 dni wstecz.
+
+Statusy
+
+W jaki sposób mogę pobrać listę dostępnych statusów w API?
+Sposób pobrania listy statusów opisany jest w dokumentacji: 
+Statusy
+ 
+
+
+Czy można pobrać statusy w języku angielskim?
+Tak, API umożliwia pobranie statusów wraz z ich opisami w języku angielskim. W requeście należy dodać parametr: en_GB.
+
+ 
+
+ 
+
+ 
+
+Kontakt
+W przypadku dodatkowych pytań zapraszamy do kontaktu z nami za pomocą formularza https://inpost.pl/formularz-wsparcie.
+
+ 

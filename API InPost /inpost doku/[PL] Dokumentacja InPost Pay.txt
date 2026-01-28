@@ -1,0 +1,125 @@
+Pomóż nam ulepszyć dokumentację
+backhand index pointing right Kliknij tutaj i wypełnij ankietę 
+
+Twoja opinia ma ogromne znaczenie – czytelność, dostępność, kompletność i użyteczność materiałów są dla nas kluczowe. Prosimy Cię o poświęcenie kilku minut na wypełnienie krótkiej ankiety, dzięki której zidentyfikujemy, co działa dobrze, a co możemy jeszcze poprawić.
+
+W ankiecie chcielibyśmy usłyszeć od Ciebie:
+
+Jak oceniasz klarowność poszczególnych sekcji dokumentacji?
+
+Czy struktura i nawigacja są intuicyjne?
+
+Czy znalazłeś(-aś) wszystkie potrzebne informacje?
+
+Co możemy zrobić, aby dokumentacja lepiej wspierała Twoją pracę / proces integracji?
+
+Dzięki Twojemu feedbackowi możemy:
+
+Usprawnić wyszukiwanie informacji i uprościć strukturę dokumentu.
+
+Rozbudować lub uprościć treści — tak aby były jak najbardziej użyteczne.
+
+Lepiej dopasować format — diagramy, przykłady, checklisty, nagrania wideo.
+
+Dziękujemy za Twój czas i wkład!
+
+ 
+
+W skład integracji Merchant – InPost Pay wchodzą elementy:
+
+Widget InPost Pay
+ – widget pozwalający na integrację stron www (frontend) Merchantów z backend platformy Merchanta oraz udostępniający na backend Merchanta metody 
+Merchant Backend API
+, które “wołała będzie” usługa InPost Pay.
+
+InPost Pay (Basket App)
+  – moduł udostępniający API, pozwalający na wymianę informacji o koszyku i realizacji zamówienia 
+
+Słownik pojęć
+Termin
+
+Definicja
+
+InPost Pay
+
+Całość rozwiązania IT, składającego się z kilku systemów obsługujących proces finalizacji zakupu przez użytkownika w aplikacji InPost Mobile.
+
+InPost Mobile
+
+Obecnie funkcjonująca aplikacja InPostu, pozwalająca na śledzenie, nadawanie i zwrot przesyłek.
+
+Merchant
+
+Sklep/platforma prowadząca sprzedaż produktów w Internecie, zintegrowana z InPost Pay.
+
+Koszyk
+
+Jeden lub kilka produktów, które Użytkownik wybrał na stronie Merchanta. Zawartość koszyka jest przekazywana do InPost Pay.
+
+Użytkownik
+
+Użytkownik końcowy dokonujący zakupu na stornie Merchanta i posiadający aplikacje InPost Mobile.
+
+Bank
+
+Bank - operator płatności.
+
+InPost Pay Widget
+
+Element osadzany na stronie www Merchanta, pozwalający na wybranie opcji Kup z InPost Pay oraz powiązanie przeglądarki z aplikacją InPost Mobile. Widget służy do parowania z wykorzystaniem numeru tel./QR lub szybkiego dodawania do koszyka InPost Pay dla zarejestrowanego użytkownika.
+
+Zamówienie
+
+Jest to koszyk, dla którego został rozpoczęty proces płatności.
+
+Zaufana/powiązana przeglądarka
+
+Instancja przeglądarki WWW działająca na konkretnym urządzeniu, dodana do zaufanych do aplikacji InPost Mobile. Tylko zaufana przeglądarka może dodawać produkty do koszyka w InPost Mobile.
+
+ 
+
+W tym rozdziale:
+
+Changelog
+Checklista implementacji API InPost Pay
+Standardy implementacji InPost Pay
+Scenariusze testowe InPost Pay
+Autoryzacja i wymagania techniczne
+Widget InPost Pay
+Widget 2.0
+Wiązanie koszyka z InPost Pay
+Aktualizacja koszyka powiązanego z InPost Pay
+Koszyk powiązany oraz desynchronizacja koszyka z InPost Pay
+Zamówienie i płatność
+InPost Pay (Basket App)
+Weryfikacja sygnatury
+Pobranie klucza
+Pobranie klucza dla wersji
+Koszyk
+Powiązanie koszyka [Widget 2.0]
+Aktualizacja koszyka [Widget 2.0]
+Pobranie listy koszyków
+Usuwanie powiązania koszyka
+Weryfikacja powiązania koszyka
+Zamówienie
+Aktualizacja zamówienia
+Pobranie listy zamówień
+Płatności
+Merchant Backend API
+Koszyk (Merchant API)
+Potwierdzenie powiązania koszyka
+Pobranie szczegółów koszyka
+Desynchronizacja koszyka
+Aktualizacja koszyka
+Zamówienie (Merchant API)
+Utworzenie zamówienia
+Pobranie szczegółów zamówienia
+Aktualizacja zamówienia u Merchanta
+Zwroty i podgląd transakcji w InPost Pay
+Lista transakcji
+Zlecenie zwrotu
+Webhooki transakcyjne
+Webhooki wersja v2
+Webhooki wersja v1 (old)
+InPost Pay - Analityka
+FAQ InPost Pay

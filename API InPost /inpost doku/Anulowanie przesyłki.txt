@@ -1,0 +1,41 @@
+ 
+
+ 
+
+Na tej stronie
+
+Uwierzytelnianie
+Anulowanie przesyłki
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Anulowanie przesyłki
+Aby anulować przesyłkę w ramach określonej organizacji, użytkownik musi być jej członkiem. Dodatkowym warunkiem jest to, aby przesyłka miała status created, offers_prepared lub offer_selected, w przeciwnym wypadku zostanie zwrócony błąd invalid_action
+
+ 
+
+Nie ma możliwości anulowania przesyłki w statusie confirmed. Można utworzyć przesyłkę z użyciem parametru  "only_choice_of_offer": true i zatrzymać ją na statusie "status": "offer_selected" następnie anulować lub opłacić korzystając z https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731082
+ 
+
+
+
+DELETE /v1/shipments/:id
+Przykładowe zapytanie
+
+
+
+curl -X DELETE https://api-shipx-pl.easypack24.net/v1/shipments/1 -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 204: No Content
+Informacje o błędach
+
+invalid_action - błędny status przesyłki
+
+ 
+
+ 

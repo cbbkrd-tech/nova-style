@@ -1,0 +1,71 @@
+Raport zwraca informacje tylko dla przesyłek kurierskich:
+inpost_courier_standard, inpost_courier_express_1000, inpost_courier_express_1200, inpost_courier_express_1700, inpost_courier_palette.
+
+ 
+
+Struktura
+Plik w formacie: csv
+
+Struktura pliku:
+
+
+
+data,nrklienta,nadawca,odbiorca,odbiorca_kod,odbiorca_miasto,nrlistu,datanadania,datadoreczenia,kwota,uwagi,referencja,mpk
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Pobieranie raportu COD
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Pobieranie raportu COD
+
+
+GET /v1/organizations/:organization_id/reports/cod
+Kryteria wyszukiwania
+
+Atrybut
+
+Typ
+
+Opis
+
+start_date
+
+Date
+
+Data początku zakresu
+
+end_date
+
+Date
+
+Data końca zakresu
+
+format
+
+String
+
+Format zwracanego pliku. Obecnie jest to csv
+
+Przykład zapytania
+
+
+
+curl "https://api-shipx-pl.easypack24.net/v1/organizations/1/reports/cod?format=csv&start_date=2011-01-01&end_date=2012-01-01" -X GET -H "Authorization: Bearer token"
+Odpowiedź
+
+
+
+Plik w formacie: csv
+Struktura pliku: 
+data,nrklienta,nadawca,odbiorca,odbiorca_kod,odbiorca_miasto,nrlistu,datanadania,datadoreczenia,kwota,uwagi,referencja,mpk
+ 
+
+
+
+
+ 

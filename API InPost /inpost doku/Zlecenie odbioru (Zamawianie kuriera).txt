@@ -1,0 +1,538 @@
+Zlecenia odbioru pozwalają na zamówienie podjazdu kuriera w celu odebrania wcześniej przygotowanych przesyłek.
+
+Każde zlecenie odbioru posiada status, który określa jego stan. Obsługiwane statusy to:
+
+new - nowe zlecenie odbioru, które nie zostało jeszcze przekazane do realizacji,
+
+sent - zlecenie odbioru zostało przekazane do realizacji, ale nie jest jeszcze przyjęte,
+
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Tworzenie zlecenia odbioru
+Usuwanie zlecenia odbioru
+Lista zleceń odbioru
+Szczegóły zlecenia odbioru
+Tworzenie komentarza do zlecenia odbioru
+Aktualizowanie komentarza do zlecenia odbioru
+Usuwanie komentarza do zlecenia odbioru
+Struktura
+Zasób DispatchOrder posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+ID Zlecenia Odbioru. Tylko do odczytu.
+
+status
+
+String
+
+Status zlecenia odbioru.
+
+created_at
+
+DateTime
+
+Czas utworzenia zlecenia odbioru.
+
+address
+
+Address
+
+Adres, z którego ma nastąpić odbiór.
+
+shipments
+
+Array[Shipment]
+
+Tablica przesyłek, których dotyczy zlecenie odbioru. 
+
+Obiekt Shipment zawiera atrybuty:
+
+href - adres uri przesyłki,
+
+id - id przesyłki,
+
+tracking_number - numer trackingowy przesyłki.
+
+comment
+
+String
+
+Opcjonalny komentarz do zlecenia odbioru
+
+ 
+
+Przykład zasobu DispatchOrder w formacie JSON:
+
+ 
+
+
+
+{
+	"href": "https://api-shipx-pl.easypack24.net/v1/dispatch_orders/1",
+	"id": 1,
+	"status": "sent",
+	"address": {
+		"id": "123",
+		"street": "Malborska",
+    	"building_number": "130",
+		"post_code": "30-624",
+		"city": "Kraków",
+		"country_code": "PL",
+	},
+	"shipments": [
+        {
+          "href": "https://api-shipx-pl.easypack24.net/v1/shipments/8",
+          "id": 8,
+          "tracking_number": "622111081631876319900026"
+        }
+    ],
+	"comments": [
+        {
+		 "24",	
+		 "comment": "Some Test Comment",
+         "created_at": "2018-02-14T11:37:07.852+01:00"
+        }
+    ],
+	"created_at": "2018-02-14T11:37:07.843+01:00",
+    "updated_at": "2018-02-14T11:37:08.340+01:00"
+}
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Tworzenie zlecenia odbioru
+ 
+
+Generowanie zlecenia na adres wymusza przekazanie adresu poprzez atrybut address
+
+System generuje sumę kontrolną z przekazanych informacji, należy zwrócić uwagę, aby adres był dokładny i bez błędów (tzw. literówek)
+
+Na podstawie sumy kontrolnej system sprawdza, czy istnieje w bazie punkt odbioru o takim samym adresie, jeśli nie istnieje, automatycznie generowany jest nowy punkt odbioru (dotyczy wyłącznie przesyłek Paczkomat®).
+
+Na nowo wygenerowany punkt odbioru (DipstachPoint) realizowane jest zlecenie odbioru (DispatchOrder).
+
+Działanie asynchroniczne, aby pobrać numer zlecenia należy skorzystać z https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731045#Szczeg%C3%B3%C5%82y-zlecenia-odbioru
+, numer zlecenia znajduje się w parametrze "external_id".
+
+Po utworzeniu zlecenia odbioru nie zwracamy cen dla klientów debetowych.
+Atrybut price przyjmuje wartość null
+
+
+
+POST /v1/organizations/:organization_id/dispatch_orders
+Parametry
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+shipments
+
+Array
+
+Lista ID przesyłek, dla których ma zostać utworzone zlecenia odbioru. 
+
+ 
+
+ 
+
+Atrybut jest wymagany.
+
+Paczki muszą być w statusie confirmed i nie mogą być przypisane do innego zlecenia odbioru w statusie new, sent.
+
+Muszą być to przesyłki utworzone za pomocą serwisów InPost paczkomat® lub tylko za pomocą serwisów InPost Kurier
+
+comment
+
+String
+
+Opcjonalny komentarz do zlecenia odbioru
+
+Atrybut nie jest wymagany do tworzenia zlecenia odbioru.
+
+Wymagalność pojawia się z chwilą tworzenia komentarza do już istniejącego zlecenia odbioru.
+
+address
+
+Address
+
+Adres zlecenia odbioru
+
+Atrybut jest wymagany.
+
+office_hours
+
+String
+
+Godziny funkcjonowania punktu
+
+Atrybut nie jest wymagany.
+
+Określa godziny funkcjonowania punktu, jeżeli tworzymy zlecenie odbioru na adres.
+
+name 
+
+String
+
+Nazwa punktu. Wykorzystywana do stworzenia dispatch_point.
+
+Atrybut jest wymagany.
+
+phone
+
+String
+
+Kontakt telefoniczny. Wykorzystywany do stworzenia dispatch_point.
+
+Atrybut jest wymagany.
+
+email 
+
+String
+
+Kontakt mailowy. Wykorzystywany do stworzenia dispatch_point.
+
+Atrybut nie jest wymagany.
+
+Przykład zapytania
+
+
+
+curl -X POST https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+	"shipments": ["1", "2"],
+	"comment": "Dowolny komentarz do zlecenia odbioru",
+	"name": "Przykładowa nazwa DispatchPoint",
+ 	"phone": "505404202",
+	"email": "sample@email.com",
+	"address": {
+        "street": "Malborska",
+        "building_number": "130",
+        "city": "Krakow",
+        "post_code": "31-209",
+        "country_code": "PL"
+    }
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+{
+	"href": "https://api-shipx-pl.easypack24.net/v1/dispatch_orders/1",
+	"id": 1,
+	"status": "sent",
+	"address": {
+		"id": "123",
+		"street": "Malborska",
+    	"building_number": "130",
+		"post_code": "30-624",
+		"city": "Kraków",
+		"country_code": "PL",
+	},
+	"shipments": [
+        {
+          "href": "https://api-shipx-pl.easypack24.net/v1/shipments/8",
+          "id": 8,
+          "tracking_number": "622111081631876319900026"
+        }
+    ],
+	"comments": [
+        {
+		 "id": 24,	
+		 "comment": "Dowolny komentarz do zlecenia odbioru",
+         "created_at": "2018-02-14T11:37:07.852+01:00"
+        }
+    ],
+	"created_at": "2018-02-14T11:37:07.843+01:00",
+    "updated_at": "2018-02-14T11:37:08.340+01:00"
+}
+Informacje o błędach
+
+validation_failed - przesłane dane są niepoprawne, np. podany punkt odbioru lub któraś z przesyłek ma niepoprawny status
+
+invalid_range - podano nieprawidłowy zakres identyfikatora przesyłki, zakres nie mieści się w zakresie typu Integer
+
+dispatch_point_and_address_cannot_be_mixed - Nie można jednocześnie nadawać zlecenia odbioru na adres oraz id punktu odbioru
+
+already_dispatched - oznacza, że co najmniej na jedną przesyłka wskazaną w żądaniu zostało utworzone zlecenie
+
+various_types_of_carrie - oznacza, że co najmniej jedna przesyłka jest innej kategorii usług. Muszą to być przesyłki utworzone za pomocą serwisów InPost paczkomat® lub tylko za pomocą serwisów InPost Kurier
+
+ 
+
+Usuwanie zlecenia odbioru
+Zlecenie odbioru można usunąć, jeśli jest ono w statusie new .
+
+
+
+DELETE /v1/dispatch_orders/:id
+Przykład zapytania
+
+
+
+curl -X DELETE https://api-shipx-pl.easypack24.net/v1/dispatch_orders/1 -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 204 No Content
+Content-Type: application/json
+Informacje o błędach
+
+resource_not_found - w przypadku gdy zlecenie o podanym ID nie zostanie odnalezione,
+
+ 
+
+Lista zleceń odbioru
+Listę zleceń odbioru w ramach określonej organizacji można pobrać pod adresem:
+
+
+
+GET /v1/organizations/:organization_id/dispatch_orders
+ 
+
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+ {
+	"href": "https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders",
+	"count": 15,
+	"per_page": 30,
+	"page": 1,
+	"created_at": "2016-03-21T10:13:58.625+01:00",
+	"items": [
+		{
+			"href": "https://api-shipx-pl.easypack24.net/v1/dispatch_orders/3",
+			"id": 123,
+			... other attribute omitted for brevity ....
+		}
+		... other items omitted for brevity ...
+	]
+}
+Informacja o błędach
+
+Błędy jakie mogą wystąpić podczas pobierania listy zleceń odbioru:
+
+resource_not_found - organizacja, dla której użytkownik chce pobrać listę zleceń odbioru nie istnieje
+
+forbidden - token nie uprawnia do pobrania listy zleceń odbioru dla wybranej organizacji
+
+ 
+
+Szczegóły zlecenia odbioru
+
+
+GET /v1/dispatch_orders/:id
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/dispatch_orders/1 -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+ {
+    "href": "https://api-shipx-pl.easypack24.net/v1/dispatch_orders/3223738",
+    "id": 3223738,
+    "status": "sent",
+    "external_id": 2003222292,
+    "price": null,
+    "address": {
+        "id": 1192036131,
+        "street": "Malborska",
+        "building_number": "130",
+        "line1": null,
+        "line2": null,
+        "city": "Krakow",
+        "post_code": "31-209",
+        "country_code": "PL"
+    },
+    "statuses": [],
+    "shipments": [
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/shipments/793374228",
+            "id": 793374228,
+            "tracking_number": "602677358231630337744964"
+        }
+    ],
+    "comments": [
+        {
+            "id": 3198262,
+            "comment": "Dowolny komentarz do zlecenia odbioru",
+            "created_at": "2022-05-27T10:15:31.765+02:00"
+        }
+    ],
+    "created_at": "2022-05-27T10:15:31.756+02:00",
+    "updated_at": "2022-05-27T10:15:32.122+02:00"
+}
+Informacje o błędach
+
+resource_not_found - w przypadku gdy zlecenie o podanym ID nie zostanie odnalezione
+
+ 
+
+Tworzenie komentarza do zlecenia odbioru
+Tworząc zlecenie odbioru, umożliwiamy przekazanie opcjonalnego komentarza.
+
+Dodatkowo umożliwiamy dodawanie innych komentarzy do już istniejącego zlecenia odbioru. 
+
+
+
+POST /v1/organizations/:organization_id/dispatch_orders/:dispatch_order_id/comment
+Przykładowe zapytanie
+
+
+
+curl -X POST https://api-shipx-pl.easypack24.net//v1/organizations/1/dispatch_orders/1/comment -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+	"comment": "Dodatkowy dowolny komentarz do zlecenia odbioru"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+ 
+{
+    "id": 37,
+    "href": "https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders/17/comment",
+    "comment": "Dodatkowy dowolny komentarz do zlecenia odbioru",
+    "created_at": "2018-02-15T10:32:31.345+01:00"
+}
+ 
+
+Aktualizowanie komentarza do zlecenia odbioru
+Do istniejącego zlecenia odbioru, umożliwiamy przekazanie dodatkowych komentarzy.
+
+Dodatkowo umożliwiamy aktualizacje komentarza przynależnego do konkretnego zlecenia odbioru.
+
+ 
+
+
+
+PUT /v1/organizations/:organization_id/dispatch_orders/:dispatch_order_id/comment
+Przykładowe zapytanie
+
+
+
+curl -X PUT https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders/1/comment -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+	"id": 37,
+	"comment": "Aktualizacja komentarza"
+}
+Odpowiedź
+
+
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+{
+    "id": 37,
+    "href": "https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders/17/comment",
+    "comment": "Aktualizacja komentarza",
+    "created_at": "2018-02-15T10:32:31.345+01:00"
+}
+Informacje o błędach
+
+Błędy jakie mogą wystąpić podczas pobierania listy zleceń odbioru:
+
+resource_not_found - organizacja, dla której użytkownik chce pobrać listę zleceń odbioru nie istnieje
+
+forbidden - token nie uprawnia do pobrania listy zleceń odbioru dla wybranej organizacji
+
+ 
+
+Usuwanie komentarza do zlecenia odbioru
+Do istniejącego zlecenia odbioru, umożliwiamy usunięcie komentarza lub ich kolekcji.
+
+
+
+DELETE /v1/organizations/:organization_id/dispatch_orders/:dispatch_order_id/comment
+Przykładowe zapytanie 
+
+
+
+curl -X DELETE https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders/1/comment -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+ 
+
+Odpowiedź
+
+
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+ 
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/dispatch_orders/2",
+    "id": 2,
+    "status": "sent",
+    "external_id": 2000000001,
+    "price": null,
+    "address": {
+        "id": 211,
+        "street": "Malborska",
+        "building_number": "130",
+        "line1": null,
+        "line2": null,
+        "city": "Krakow",
+        "post_code": "31-209",
+        "country_code": "PL"
+    },
+    "statuses": [],
+    "shipments": [
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/shipments/103",
+            "id": 103,
+            "tracking_number": "520000017830390003050784"
+        }
+    ],
+    "comments": [
+        {
+            "id": 24,
+            "comment": "Test 22",
+            "created_at": "2018-05-15T11:34:54.119+02:00"
+        },
+        {
+            "id": 23,
+            "comment": "Test 21",
+            "created_at": "2018-05-15T11:34:51.438+02:00"
+        },
+        {
+            "id": 22,
+            "comment": "Test 20",
+            "created_at": "2018-05-15T11:34:48.637+02:00"
+        }
+    ],
+    "created_at": "2018-05-15T09:19:32.317+02:00",
+    "updated_at": "2018-05-15T09:19:32.448+02:00"
+}
+ 
+
+
+
+
+ 

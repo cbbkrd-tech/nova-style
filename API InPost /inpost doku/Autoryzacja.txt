@@ -1,0 +1,331 @@
+ 
+
+ 
+
+Środowisko produkcyjne
+Adres środowiska produkcyjnego  https://api-shipx-pl.easypack24.net
+
+Generowanie danych autoryzacyjnych
+
+Pobierz poradnik wyjaśniający jak szybko we własnym zakresie utworzyć dostęp do API ShipX,  Instrukcja konfiguracji konta API
+
+ 
+
+Na tej stronie
+
+Środowisko produkcyjne
+Środowisko testowe
+Kolekcja zapytań oraz profile środowisk
+Autoryzacja
+Nagłówki zapytania
+Nagłówki odpowiedzi
+Kolekcje
+Stronicowanie
+Błędy
+
+
+
+Środowisko testowe
+Adres środowiska testowego: https://sandbox-api-shipx-pl.easypack24.net
+
+Adres środowiska testowego Managera Paczek: https://sandbox-manager.paczkomaty.pl/
+
+Generowanie danych autoryzacyjnych
+
+https://sandbox-manager.paczkomaty.pl/ > zakładka Moje konto > API. 
+
+Aby wygenerować Token i ID organizacji należy uzupełnić wszystkie dane, łącznie z danymi do faktury w zakładce Moje konto > Dane. 
+
+Do utworzenia przesyłki Paczkomat® niezbędne są środki na koncie, konto doładujesz wirtualnie w zakładce Płatności. 
+
+Na środowisku sandbox należy zarejestrować osobne konto. Dane produkcyjne nie będą działać na sandbox. 
+
+
+
+
+Kolekcja zapytań oraz profile środowisk
+ 
+
+Poniżej udostępniamy przykładową kolekcję oraz profile środowisk dla aplikacji Postman. W celu uruchomienia należy pobrać pliki i zaimportować je. 
+
+Kolekcja zapytań 
+
+API ShipX 1.1.postman_collection.json
+21 Dec 2023, 10:36 PM
+ 
+
+Środowisko produkcyjne
+
+Production environment.postman_environment.json
+03 Feb 2022, 01:48 PM
+ 
+
+Środowisko sandbox
+
+Sandbox environment.postman_environment.json
+03 Feb 2022, 01:48 PM
+ 
+
+ 
+
+Autoryzacja
+Wszystkie zapytania wysyłane do serwera wymagają podania prawidłowego i ważnego access tokenu, który należy do określonego właściciela (owner) organizacji.
+
+Access token należy przekazać w nagłówku Authorization.
+
+ID organizacji należy przekazać w parametrze zapytania:
+
+
+
+GET /v1/organizations/:id
+Przykład zapytania
+
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations' \
+--header 'Authorization: Bearer W-TYM-MIEJSCU-NALEZY-UMIESCIC-TOKEN' \
+ 
+
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json 
+{
+  "href": "https://api.shipx.pl.easypack24.net/v1/organizations/34",
+  "id": 34,
+  "owner_id": 1,
+  "tax_id": "3973902075",
+  "name": "Random org name39739020755741",
+  "created_at": "2016-10-04T10:36:49.631+02:00",
+  "updated_at": "2016-10-04T10:36:49.631+02:00",
+  "services": [
+    "inpost_locker_standard",
+    "inpost_courier_standard"
+  ],
+  "address": {
+    "id": 808,
+    "line1": null,
+    "line2": null,
+    "street": "Ulica jakaś39739020755741",
+    "building_number": "Budynek39739020755741",
+    "city": "Szczecin39739020755741",
+    "post_code": "22-100",
+    "country_code": "PL"
+  }
+}
+ 
+
+Nagłówki zapytania
+Podczas wykonywania zapytania można określić następujące nagłówki
+
+Nagłowek
+
+Opis
+
+Authorization
+
+Nagłówek autoryzacji, w którym należy przesyłać wszelkie dane związane z autoryzacją. Szczegóły zostały opisane w rozdziale Autoryzacja.
+
+X-User-Agent
+
+Nagłówek ten pozwala na określenie nazwy klienta/platformy i/lub innych informacji z nim związanych.
+
+X-User-Agent-Version
+
+Nagłówek ten pozwala na określenie wersji klienta/platformy, który wykonuje zapytania. Jego zawartość nie wpływa na funkcjonowanie API.
+
+X-Request-ID
+
+Nagłówek ten pozwala na określenie identyfikator zapytania. Jest on przydatny przy debugowaniu błędów i problemów, które mogą zdarzyć się przy integracji z API. Jego podanie nie wpływa na funkcjonowanie API.
+
+Accept-Language
+
+Nagłówek pozwala na zmianę formatu komunikatów błędów. Dostępne:
+
+keys (some_error_message)
+
+en_GB (Some error message)
+
+pl_PL (Przykładowy komunikat o błędzie)
+
+ 
+
+Nagłówki odpowiedzi
+W odpowiedzi serwer zwraca następujące nagłówki
+
+Nagłówek
+
+Opis
+
+X-Request-ID
+
+Identyfikator zapytania. Przydatny podczas debugowania problemów z API.
+W przypadku gdy zostanie on określony podczas zapytania, API nie będzie generowało własnego IID, a w odpowiedzi zostanie zwrócony ten podany podczas zapytania. 
+
+ 
+
+Kolekcje
+Atrybuty kolekcji
+
+Atrybut
+
+Typ
+
+Opis
+
+href
+
+String
+
+Absolutny adres URL do kolekcji.
+
+count
+
+Integer
+
+Łączna ilość elementów kolekcji.
+
+page
+
+Integer
+
+Aktualna strona wyników kolekcji.
+
+per_page
+
+Integer
+
+Ilość wyników (na stronę) zwracanych w odpowiedzi.
+
+items
+
+Array
+
+Elementy kolekcji.
+
+Przykład kolekcji w formacie JSON:
+
+
+
+{
+	"href": "https://api-pl-shipx.easypack24.net/v1/points",
+	"count": 1024,
+	"page": 10,
+	"per_page": 100,
+	"items": [
+		{
+			"href": "https://api-shipx-pl.easypack24.net/v1/points/KRA010",
+			"id": "KRA010",
+			... other resource's params ...
+		}
+	]
+}
+Stronicowanie
+Kolekcje wspierają stronicowanie (chyba że zostało zaznaczone inaczej w dokumentacji właściwej dla zasobu).
+
+Przewijanie po kolejnych stronach kolekcji obywa się poprzez przekazanie w zapytaniu parametrów (page) i/lub (page_page). Przykład zapytania:
+
+
+
+GET /v1/points?page=10 HTTP/1.1
+Host: api-shipx-pl.easypack24.net
+Content-Type: application/json
+ 
+
+Błędy
+Przykład błędu
+
+
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+ 
+{
+	"status": 400,
+	"error": "invalid_parameter",
+	"description": "Passed unsupported value (value of the parameter here) to parameter (parameter name)",
+	"details": null
+}
+Poniżej znajduje się lista kluczy błędów, które mogą wystąpić.
+
+Klucz
+
+Opis
+
+resource_not_found
+
+Szukany zasób nie został odnaleziony.
+
+access_forbidden
+
+Dostęp do określonego zasobu jest zabroniony.
+
+invalid_parameter
+
+Przekazano niepoprawną wartość dla określonego parametru w URI. Szczegóły dostępne pod kluczem description odpowiedzi błędu.
+
+validation_failed
+
+Błąd walidacji. Dane przesłane w ciele zapytania metodą POST są niepoprawne. Szczegóły błędu zawarte w odpowiedzi pod kluczem details. Zobacz poniżej przykład błędu walidacji.
+
+offer_expired
+
+Zakupienie oferty jest niemożliwe, ponieważ upłynął termin jej ważności.
+
+
+
+
+Przykład błędu validation_failed
+
+
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+ 
+{
+	"status": 400,
+	"error": "validation_failed",
+	"description": "Some of data sent in payload are invalid. Check details for more information.",
+	"details": {
+		"email": ["invalid"]
+	}
+}
+Obiekt details zawiera w tym przypadku kolekcję, w której klucze odpowiadają nazwom przesłanych w ciele zapytania parametrów, natomiast wartości to tablica z kluczami określającymi jakie błędy walidacji wystąpiły dla określonego parametru.
+
+Możliwe błędy walidacji to:
+
+Błąd walidacji
+
+Opis
+
+required
+
+Wartość dla określonego parametru jest wymagana.
+
+too_short
+
+Ilość znaków zbyt mała. Sprawdź szczegóły w dokumentacji określonego zasobu.
+
+too_long
+
+Ilość znaków zbyt duża. Sprawdź szczegóły w dokumentacji określonego zasobu.
+
+not_a_number
+
+Wprowadzona wartość powinna być liczbą.
+
+not_an_integer
+
+Wprowadzona wartość powinna być liczbą całkowitą.
+
+invalid
+
+Wprowadzona wartość jest niepoprawna. Sprawdź szczegóły w dokumentacji określonego zasobu.
+
+ 
+
+ 
+
+ 

@@ -1,0 +1,413 @@
+ 
+
+ 
+
+Zasób Organization reprezentuje firmę, która posiada podpisaną umowę na świadczenie usług.
+
+W ramach organizacji użytkownik ma możliwość zarządzania przesyłkami.
+
+Na tej stronie
+
+Uwierzytelnianie
+Struktura
+Lista organizacji
+Szczegóły organizacji
+Statystyki organizacji
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i aktualnego access tokenu.
+
+ 
+
+Struktura
+Zasób Organization posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+integer
+
+ID Organizacji
+
+owner_id
+
+integer
+
+ID Właściciela organizacji
+
+name
+
+string
+
+Nazwa organizacji (nazwa firmy)
+
+tax_id
+
+string
+
+NIP
+
+bank_account_number
+
+string
+
+Numer konta bankowego organizacji
+
+carriers
+
+Array[String]
+
+Zakres usług
+
+services
+
+Array[String]
+
+Lista dostępnych dla organizacji usług
+
+address
+
+Address
+
+Obiekt zawierający adres organizacji
+
+created_at
+
+datetime
+
+Data utworzenia organizacji
+
+updated_at
+
+datetime
+
+Data ostatniej aktualizacji organizacji
+
+Struktura obiektu Address:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+string
+
+Identyfikator obiektu adres
+
+line1
+
+string
+
+Ulica
+
+line2
+
+string
+
+Numer budynku
+
+street
+
+string
+
+Ulica
+
+building_number
+
+string
+
+Numer budynku
+
+city
+
+string
+
+Miasto
+
+post_code
+
+string
+
+Kod pocztowy
+
+country_code
+
+string
+
+Kod kraju (2-3 znaki)
+
+Przykład zasobu Organization w formacie JSON:
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "http://api-shipx-pl.easypack24.net/v1/organizations",
+    "count": 1,
+    "page": 1,
+    "per_page": 100,
+    "items": [
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/organizations/1",
+            "id": 1,
+            "owner_id": 11,
+            "name": "ShpiX",
+            "tax_id": "PL1234567890",
+            "bank_account_number": null,
+            "carriers": [
+                "inpost_locker",
+                "inpost_letter",
+                "inpost_courier"
+            ],
+            "services": [
+                "inpost_locker_allegro",
+                "inpost_locker_pass_thru",
+                "inpost_locker_standard",
+                "inpost_letter_allegro",
+                "inpost_courier_palette",
+                "inpost_courier_allegro",
+                "inpost_courier_standard",
+                "inpost_courier_express_1000",
+                "inpost_courier_express_1200",
+                "inpost_courier_express_1700",
+                "inpost_courier_c2c",
+                "inpost_locker_standard_smart",
+                "inpost_locker_allegro_smart"
+            ],
+            "address": {
+                "id": 123456,
+                "street": "Pana Tadeusza",
+                "building_number": "4",
+                "line1": null,
+                "line2": null,
+                "city": "Kraków",
+                "post_code": "30-727",
+                "country_code": "PL"
+            },
+            "invoice_address": null,
+            "contact_person": {
+                "id": 12344,
+                "email": null,
+                "phone": null,
+                "first_name": null,
+                "last_name": null
+            },
+            "created_at": "2016-07-27T12:00:33.923+02:00",
+            "updated_at": "2023-10-30T12:59:09.555+01:00"
+        }
+    ]
+}
+ 
+
+Lista organizacji
+Lista organizacji, do których użytkownik ma dostęp.
+
+Zasób jest stronicowany. Więcej informacji na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731055
+ 
+
+
+
+GET /v1/organizations
+Sortowanie wyników
+
+Parametr
+
+Opis
+
+sort_by
+
+Określa atrybut po którym mają zostać posortowane wyniki.
+Domyślnie: id
+Możliwe:
+
+id
+
+name
+
+tax_id
+
+address
+
+created_at 
+
+sort_order
+
+Określa rodzaj sortowania - w kolejności malejącej (desc) lub rosnącej (asc).
+Domyślnie: rosnąco (asc)
+
+Przykład zapytania
+
+
+
+$ curl -X GET https://api-shipx-pl.easypack24.net/v1/organizations -H "Authorization: Bearer token" -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "http://api-shipx-pl.easypack24.net/v1/organizations",
+    "count": 1,
+    "page": 1,
+    "per_page": 100,
+    "items": [
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/organizations/1",
+            "id": 1,
+            "owner_id": 11,
+            "name": "ShpiX",
+            "tax_id": "PL1234567890",
+            "bank_account_number": null,
+            "carriers": [
+                "inpost_locker",
+                "inpost_letter",
+                "inpost_courier"
+            ],
+            "services": [
+                "inpost_locker_allegro",
+                "inpost_locker_pass_thru",
+                "inpost_locker_standard",
+                "inpost_letter_allegro",
+                "inpost_courier_palette",
+                "inpost_courier_allegro",
+                "inpost_courier_standard",
+                "inpost_courier_express_1000",
+                "inpost_courier_express_1200",
+                "inpost_courier_express_1700",
+                "inpost_courier_c2c",
+                "inpost_locker_standard_smart",
+                "inpost_locker_allegro_smart"
+            ],
+            "address": {
+                "id": 12345,
+                "street": "Pana Tadeusza",
+                "building_number": "4",
+                "line1": null,
+                "line2": null,
+                "city": "Kraków",
+                "post_code": "30-727",
+                "country_code": "PL"
+            },
+            "invoice_address": null,
+            "contact_person": {
+                "id": 1244,
+                "email": null,
+                "phone": null,
+                "first_name": null,
+                "last_name": null
+            },
+            "created_at": "2016-07-27T12:00:33.923+02:00",
+            "updated_at": "2023-10-30T12:59:09.555+01:00"
+        }
+    ]
+}
+ 
+
+Szczegóły organizacji
+Pobieranie informacji o określonej organizacji, do której dostęp ma użytkownik.
+
+
+
+GET /v1/organizations/:id
+Przykład zapytania
+
+
+
+$ curl -X GET https://api-shipx-pl.easypack24.net/v1/organizations/1 -H "Authorization: Bearer token" -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json 
+{
+  "href": "https://api.shipx.pl.easypack24.net/v1/organizations/34",
+  "id": 34,
+  "owner_id": 1,
+  "tax_id": "3973902075",
+  "name": "Random org name39739020755741",
+  "created_at": "2016-10-04T10:36:49.631+02:00",
+  "updated_at": "2016-10-04T10:36:49.631+02:00",
+  "services": [
+    "inpost_locker_standard",
+    "inpost_courier_standard"
+  ],
+  "address": {
+    "id": 808,
+    "line1": null,
+    "line2": null,
+    "street": "Ulica jakaś39739020755741",
+    "building_number": "Budynek39739020755741",
+    "city": "Szczecin39739020755741",
+    "post_code": "22-100",
+    "country_code": "PL"
+  }
+}
+Informacje o błędach
+
+ Serwer może zwrócić następujące błędy
+
+resource_not_found - w przypadku gdy organizacja nie istnieje
+
+token_invalid - użytkownik nie ma praw dostępu do określonej organizacji
+
+ 
+
+Statystyki organizacji
+Lista statystyk danej organizacji.
+
+
+
+GET /v1/organizations/:organization_id/statistics
+Kryteria wyszukiwania
+
+Parametr
+
+Opis
+
+to_send
+
+Zwraca liczbę przesyłek organizacji do wysyłki.
+
+Statusy przesyłek: created, offers_prepared, offer_selected, confirmed
+
+in_logistics
+
+Zwraca liczbę przesyłek organizacji w procesie logistycznym.
+
+Statusy przesyłek: dispatched_by_sender, collected_from_sender, taken_by_courier, adopted_at_source_branch, sent_from_source_branch, 
+adopted_at_sorting_center, sent_from_sorting_center, adopted_at_target_branch, out_for_delivery, ready_to_pickup, pickup_reminder_sent, 
+pickup_time_expired, avizo, claimed, returned_to_sender
+
+delivered
+
+Zwraca liczbę dostarczonych przesyłek organizacji.
+
+Statusy przesyłek: delivered
+
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/organizations/1/statistics -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+{
+  "to_send": 23,
+  "in_logistics": 31,
+  "delivered": 58
+}
+ 
+
+ 

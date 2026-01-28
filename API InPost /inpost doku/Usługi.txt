@@ -1,0 +1,545 @@
+Lista dostępnych usług dla Organizacji. Obecnie dostępne usługi dla danego kraju znajdują się pod adresem: 
+Rozmiary i usługi dla przesyłek 
+
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Lista serwisów
+Struktura
+Zasób Service posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+Unikalny identyfikator serwisu
+
+name
+
+String
+
+Nazwa serwisu
+
+description
+
+String
+
+Opis serwisu
+
+additional_services
+
+Array
+
+Lista dostępnych usług dodatkowych. 
+
+
+
+
+Pole additional_services posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+String
+
+Unikalny identyfikator
+
+name
+
+String
+
+Nazwa
+
+description
+
+String
+
+Opis
+
+Przykład zasobu w formacie JSON:
+
+
+
+{
+    "id":"inpost_courier_standard",
+    "name":"Kurier Standard",
+    "description":"Przesyłka kurierska standardowa.",
+    "additional_services":[
+      {
+        "id":"insurance",
+        "name":"Ubezpieczenie",
+        "description":"Ubezpieczenie przesyłki."
+      },{
+        "id":"cod",
+        "name":"Pobranie",
+        "description":"Pobranie za przesyłkę."
+      },{
+        "id":"sms",
+        "name":"Serwis SMS",
+        "description":"Powiadomienie o przesyłce via SMS."
+      },{
+        "id":"email",
+        "name":"Serwis e-mail",
+        "description":"Powiadomienie o przesyłce via e-mail."
+      },{
+        "id":"saturday",
+        "name":"Doręczenie sobota",
+        "description":"Doręczenie przesyłki w sobotę."
+      },{
+        "id":"dor1720",
+        "name":"Doręczenie od 17",
+        "description":"Doręczenie pomiędzy 17:00 a 20:00 obejmuje doręczenie przesyłki do Odbiorcy w dni robocze w godzinach wieczornych pomiędzy 17:00 a 20:00"
+      },{
+        "id":"rod",
+        "name":"Zwrot dokumentów",
+        "description":"Zwrot dokumentów"
+      }
+    ]
+  }
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu nie wymaga uwierzytelnienia. 
+
+
+
+
+Lista serwisów
+Pobieranie listy aktualnie dostępnych serwisów.
+
+
+
+GET /v1/services
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/services -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+[
+    {
+        "id": "inpost_locker_standard",
+        "name": "Paczkomatowa standardowa",
+        "description": "Przesyłka paczkomatowa standardowa",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "labelless",
+                "name": "Przesyłka bez etykiety",
+                "description": "Przesyłka bez etykiety"
+            },
+            {
+                "id": "end_of_week_collection",
+                "name": "Dostawa weekendowa",
+                "description": "Weekendowa dostawa przesyłki"
+            }
+        ]
+    },
+    {
+        "id": "inpost_locker_economy",
+        "name": "Paczkomatowa ekonomiczna",
+        "description": "Przesyłka paczkomatowa ekonomiczna",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            }
+        ]
+    },
+    {
+        "id": "inpost_locker_allegro",
+        "name": "Allegro Paczkomaty24/7 InPost",
+        "description": "Przesyłka paczkomatowa Allegro Paczkomat 24/7 InPost",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            }
+        ]
+    },
+    {
+        "id": "inpost_locker_pass_thru",
+        "name": "Podaj dalej",
+        "description": "Przesyłka paczkomatowa Podaj Dalej",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "end_of_week_collection",
+                "name": "Dostawa weekendowa",
+                "description": "Weekendowa dostawa przesyłki"
+            }
+        ]
+    },
+    {
+        "id": "inpost_locker_standard_smart",
+        "name": "Paczkomatowa standardowa",
+        "description": "Przesyłka paczkomatowa standardowa",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            }
+        ]
+    },
+    {
+        "id": "inpost_locker_allegro_smart",
+        "name": "Allegro Paczkomaty24/7 InPost",
+        "description": "Przesyłka paczkomatowa Allegro Paczkomat 24/7 InPost",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_allegro",
+        "name": "Allegro Kurier24 InPost",
+        "description": "Przesyłka kurierska Allegro Kurier24 InPost",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_c2c",
+        "name": "Kurier standard",
+        "description": "Przesyłka kurierska standardowa",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "labelless",
+                "name": "Przesyłka bez etykiety",
+                "description": "Przesyłka bez etykiety"
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_palette",
+        "name": "Paleta standard",
+        "description": "Przesyłka kurierska Paleta Standard",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "sms",
+                "name": "Serwis SMS",
+                "description": "Powiadomienie o przesyłce via SMS"
+            },
+            {
+                "id": "email",
+                "name": "Serwis Email",
+                "description": "Powiadomienie o przesyłce via e-mail"
+            },
+            {
+                "id": "rod",
+                "name": "Zwrot dokumentów",
+                "description": "Zwrot dokumentów."
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_standard",
+        "name": "Kurier standard",
+        "description": "Przesyłka kurierska standardowa",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "sms",
+                "name": "Serwis SMS",
+                "description": "Powiadomienie o przesyłce via SMS"
+            },
+            {
+                "id": "email",
+                "name": "Serwis Email",
+                "description": "Powiadomienie o przesyłce via e-mail"
+            },
+            {
+                "id": "saturday",
+                "name": "Doręczenie w sobotę",
+                "description": "Doręczenie przesyłki w sobotę"
+            },
+            {
+                "id": "dor1720",
+                "name": "Doręczenie od 17:00",
+                "description": "Doręczenie pomiędzy 17:00 a 20:00 obejmuje doręczenie przesyłki do Odbiorcy w dni robocze w godzinach wieczornych pomiędzy 17:00 a 20:00"
+            },
+            {
+                "id": "rod",
+                "name": "Zwrot dokumentów",
+                "description": "Zwrot dokumentów."
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_express_1000",
+        "name": "Kurier doręczenie 10:00",
+        "description": "Przesyłka kurierska z doręczeniem do godziny 10:00 następnego dnia",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "sms",
+                "name": "Serwis SMS",
+                "description": "Powiadomienie o przesyłce via SMS"
+            },
+            {
+                "id": "email",
+                "name": "Serwis Email",
+                "description": "Powiadomienie o przesyłce via e-mail"
+            },
+            {
+                "id": "saturday",
+                "name": "Doręczenie w sobotę",
+                "description": "Doręczenie przesyłki w sobotę"
+            },
+            {
+                "id": "rod",
+                "name": "Zwrot dokumentów",
+                "description": "Zwrot dokumentów."
+            },
+            {
+                "id": "forhour_9",
+                "name": "Doręczenie na godzinę 9:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            },
+            {
+                "id": "forhour_10",
+                "name": "Doręczenie na godzinę 10:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_express_1200",
+        "name": "Kurier doręczenie 12:00",
+        "description": "Przesyłka kurierska z doręczeniem do godziny 12:00 następnego dnia",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "sms",
+                "name": "Serwis SMS",
+                "description": "Powiadomienie o przesyłce via SMS"
+            },
+            {
+                "id": "email",
+                "name": "Serwis Email",
+                "description": "Powiadomienie o przesyłce via e-mail"
+            },
+            {
+                "id": "saturday",
+                "name": "Doręczenie w sobotę",
+                "description": "Doręczenie przesyłki w sobotę"
+            },
+            {
+                "id": "rod",
+                "name": "Zwrot dokumentów",
+                "description": "Zwrot dokumentów."
+            },
+            {
+                "id": "forhour_11",
+                "name": "Doręczenie na godzinę 11:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            },
+            {
+                "id": "forhour_12",
+                "name": "Doręczenie na godzinę 12:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_express_1700",
+        "name": "Kurier doręczenie 17:00",
+        "description": "Przesyłka kurierska z doręczeniem do godziny 17:00 następnego dnia",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            },
+            {
+                "id": "sms",
+                "name": "Serwis SMS",
+                "description": "Powiadomienie o przesyłce via SMS"
+            },
+            {
+                "id": "email",
+                "name": "Serwis Email",
+                "description": "Powiadomienie o przesyłce via e-mail"
+            },
+            {
+                "id": "saturday",
+                "name": "Doręczenie w sobotę",
+                "description": "Doręczenie przesyłki w sobotę"
+            },
+            {
+                "id": "rod",
+                "name": "Zwrot dokumentów",
+                "description": "Zwrot dokumentów."
+            },
+            {
+                "id": "forhour_13",
+                "name": "Doręczenie na godzinę 13:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            },
+            {
+                "id": "forhour_14",
+                "name": "Doręczenie na godzinę 14:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            },
+            {
+                "id": "forhour_15",
+                "name": "Doręczenie na godzinę 15:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            },
+            {
+                "id": "forhour_16",
+                "name": "Doręczenie na godzinę 16:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            },
+            {
+                "id": "forhour_17",
+                "name": "Doręczenie na godzinę 17:00",
+                "description": "Obejmująca doręczenie przesyłki w dni robocze do określonej przez Nadawcę pełnej godziny"
+            }
+        ]
+    },
+    {
+        "id": "inpost_courier_alcohol",
+        "name": "eSmartMIX",
+        "description": "Przesyłka kurierska eSmartMix z elektronicznym obiegiem dokumentów i potwierdzeniem danych odbiorcy",
+        "additional_services": []
+    },
+    {
+        "id": "inpost_letter_allegro",
+        "name": "Allegro miniKurier24 InPost",
+        "description": "Przesyłka listowa Allegro miniKurier24 InPost",
+        "additional_services": [
+            {
+                "id": "insurance",
+                "name": "Ubezpieczenie",
+                "description": "Ubezpieczenie przesyłki"
+            },
+            {
+                "id": "cod",
+                "name": "Pobranie",
+                "description": "Pobranie za przesyłkę"
+            }
+        ]
+    }
+]
+ 
+
+ 
+
+ 
+
+ 
+
+

@@ -1,0 +1,221 @@
+Zasady aktualizacji przesyłek:
+
+Aktualizować można wszystkie atrybuty przesyłki opisane w sekcji 
+Przesyłka
+ 
+
+Aktualizować można tylko przesyłki, które nie zostały jeszcze zakupione, tzn. posiadają status created, offers_prepared albo offer_selected
+
+Możliwe jest także aktualizowanie przesyłki utworzonej w trybie uproszczonym jeśli nie doszło do jej zakupu, np. z powodu braku ofert
+
+Nie można aktualizować przesyłek, które są w trakcie pobierania ofert lub w trakcie dokonywania transakcji zakupu
+
+Aktualizacja przesyłki spowoduje re kalkulację ofert - nieaktualne oferty zostaną usunięte, a w ich miejsce przygotowane zostaną nowe
+
+Możliwe jest usunięcie wartości podanych przy tworzeniu przesyłki, poprzez ustawienie ich wartości na null
+
+Na tej stronie
+
+Uwierzytelnianie
+Aktualizacja przesyłki
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Aktualizacja przesyłki
+Operacja umożliwiająca modyfikowanie informacji zawartych w przesyłce. 
+
+Po aktualizacji przesyłki nie zwracamy cen dla klientów debetowych. Atrybut rate przyjmuje wartość null
+
+
+
+PUT /v1/shipments/:id
+Przykład zapytania
+
+
+
+curl -X PUT https://api-shipx-pl.easypack24.net/v1/shipments/1 -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+  "mpk":"miejsce_powstania_kosztow",
+  "comments": "dowolny komentarz",
+  "external_customer_id": "8877xxx",
+  "receiver": {
+    "company_name": "Some company inc.",
+    "first_name": "John",
+    "last_name": "Due",
+	"name": "Nazwa",
+	"email": "john@due.com",
+    "phone": "456123789",
+    "address": {
+	  "id": "123",
+      "street": "Santa st",
+	  "building_number": "130",
+	  "city": "New York",
+      "post_code": "44-556",
+      "country_code": "PL"
+    }
+  },
+  "sender": {
+	"name": "Nazwa",
+    "company_name": "Some company inc.",
+    "first_name": "John",
+    "last_name": "Due",
+    "email": "john@due.com",
+    "phone": "321654987",
+    "address": {
+	  "id": "123",
+      "street": "Santa st",
+	  "building_number": "130",
+	  "city": "New York",
+      "post_code": "33-333",
+      "country_code": "PL"
+    }
+  },
+  "cod": {
+    "amount": "132",
+    "currency": "PLN"
+  },
+  "reference": "69854156",
+  "is_return": true,
+  "only_choice_of_offer":true,
+  "parcels": [
+    {
+      "id": "small package",
+	  "template": "small",
+	  "dimensions": {
+      "length": "80",
+	  "width": "360",
+	  "height": "640",
+	  "unit": "mm"
+	},
+	  "weight": {
+	  "amount": "25",
+	  "unit": "kg"
+	}
+    }
+  ],
+  "insurance": {
+    "amount": "33",
+    "currency": "PLN"
+  },
+  "custom_attributes": {
+    "allegro_transaction_id": "98754641",
+    "allegro_user_id": "98757"
+  },
+  "mpk": "Nazwa miejsca powstania kosztów."
+}'
+Odpowiedź
+
+
+
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments/1",
+    "id": "1",
+    "status": "offers_prepared",
+    "parcels": [
+        {
+            "id": "small package",
+            "template": "small",
+            "dimensions": {
+                "length": "80",
+                "width": "360",
+                "height": "640",
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": "25",
+                "unit": "kg"
+            },
+            "tracking_number": null,
+            "is_non_standard": false
+        }
+    ],
+    "custom_attributes": {
+        "target_point": "KRA010",
+        "dropoff_point": null,
+        "sending_method": "parcel_locker",
+        "dispatch_order_id": 1
+    },
+    "sender": {
+        "id": "123",
+        "name": "Nazwa",
+        "company_name": "InPost S.A.",
+        "first_name": "Jan",
+        "last_name": "Nowak",
+        "email": "sender@email.com",
+        "phone": "888000000",
+        "address": {
+            "id": "123",
+            "street": "Malborska",
+            "building_number": "130",
+            "city": "Kraków",
+            "post_code": "30-624",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": "123",
+        "name": "Nazwa",
+        "company_name": null,
+        "first_name": null,
+        "last_name": null,
+        "email": "sender@email.com",
+        "phone": "888000000",
+        "address": null
+    },
+    "created_at": "2015-09-06T19:21:00.000+02:00",
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 25,
+        "currency": "PLN"
+    },
+    "additional_services": [],
+    "reference": "Order No. 12345",
+    "is_return": false,
+    "tracking_number": null,
+    "created_by_id": 3,
+    "offers": [
+        {
+            "id": 1278,
+            "carrier": {
+                "id": "inpost_locker",
+                "name": "InPost Paczkomaty",
+                "description": "InPost Paczkomaty - Przesyłki paczkomatowe."
+            },
+            "service": {
+                "id": "inpost_locker_standard",
+                "name": "Paczkomatowa Standardowa",
+                "description": "Przesyłka paczkomatowa standardowa."
+            },
+            "status": "available",
+            "expires_at": "2015-09-06T19:21:00.000+02:00",
+            "rate": 2.02,
+            "currency": "PLN",
+            "unavailability_reasons": null
+        }
+    ],
+    "selected_offer": null,
+    "transactions": [],
+    "sending_method": "parcel_locker",
+    "external_customer_id": "8877xxx",
+  }
+Informacje o błędach
+
+Lista błędów, które mogą wystąpić przy opłacaniu przesyłki:
+
+resource_not_found - może wystąpić gdy określona przesyłka nie istnieje lub użytkownik nie ma do niej dostępu,
+
+invalid_action - występuje przy próbie aktualizacji przesyłki już zakupionej (status confirmed lub późniejszy),
+
+shipment_locked - występuje przy próbie aktualizacji przesyłki, dla której proces kalkulacji ofert nie został ukończony (albo wykonywana jest inna operacja na przesyłce).
+
+forbidden - użyty token nie uprawnia do dokonywania aktualizacji wskazanej przesyłki.
+
+ 
+
+ 

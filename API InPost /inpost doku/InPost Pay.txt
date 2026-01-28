@@ -1,0 +1,175 @@
+Co to jest InPost Pay? 
+InPost Pay to zakupy na skróty – sklepy, płatność i dostawa w jednym miejscu, Twojej ulubionej apce InPost. Skorzystaj z przycisku „Dodaj do koszyka z InPost” w sklepie internetowym, a całą transakcję sfinalizujesz błyskawicznie w aplikacji InPost. Dodatkowo możesz śledzić zamówienia i ich status w jednej apce - koniec z setkami maili i wiadomościami z różnych sklepów. Do InPost Pay rejestrujesz się tylko raz, bezpiecznie kupujesz jednym przyciskiem, korzystasz ze swojej ulubionej dostawy i płatności, a co najważniejsze, wszystkie szczegóły Twoich zakupów, koszyki z różnych sklepów, płatności, dostawy, statusy i powiadomienia masz w jednej aplikacji!
+
+InPost Pay to dużo więcej niż płatność - to zakupy od płatności po dostawę w jednym przycisku. Z InPost Pay można wygodnie płacić za koszyki z różnych sklepów. To kompletne rozwiązanie, które mieści płatności i dostawę z całą historią zamówień i powiadomienia z różnych sklepów w jednym miejscu - aplikacji InPost. Do InPost Pay rejestrujesz się tylko jeden raz, bezpiecznie kupujesz i płacisz, korzystasz ze swojej ulubionej dostawy, a co najważniejsze, wszystkie etapy Twoich zakupów, koszyki z różnych sklepów, płatności, dostawy, statusy i powiadomienia masz w jednej aplikacji!
+
+Koncepcja rozwiązania
+Rozwiązanie InPost Pay pozwala na finalizację procesu zakupu (checkout) w aplikacji mobilnej InPost Mobile w oparciu o integrację z różnymi platformami/sklepami internetowymi.
+
+Rozwiązanie adresuje podstawowe problemy, występujące na rynku e-commerce:
+
+Zakupy w trybie gościa, bez konieczności zakładania konta na wielu sklepach
+
+Brak konieczności uzupełniania danych dostawy/ faktury itp.
+
+Skrócenie czasu potrzebnego od wyświetlenia produktu do finalizacji zakupu
+
+Zmniejszenie liczby porzuconych koszyków.
+
+InPost Pay to dodatkowe możliwości sprzedażowe!
+Produkty promowane (hot produkty) to funkcjonalność, która daje Merchantom możliwość wyróżniania i promowania swoich produktów bezpośrednio w aplikacji InPost.
+
+Dzięki niej Merchant może nie tylko zwiększyć konwersję zakupową, ale także:
+
+podnieść transakcyjność,
+
+zwiększyć widoczność swojego sklepu w aplikacji,
+
+poprawić jego pozycjonowanie,
+
+zaprezentować użytkownikom szerszą ofertę produktów.
+
+ 
+
+Produkty sugerowane (rekomendacje) to funkcjonalność, która pozwala merchantowi przekazać listę rekomendowanych produktów dla danego koszyka. Użytkownik zobaczy je w aplikacji InPost Mobile i będzie mógł dodać je bezpośrednio do swojego koszyka.
+
+Dzięki tej funkcjonalności merchant może:
+
+zwiększyć średnią liczbę produktów w koszyku,
+
+podnieść AOV (średnią wartość zamówienia).
+
+ 
+
+Podstawowe flow InPost Pay w Twoim sklepie internetowym
+Przebieg procesu zakupowego w InPost Pay - LINK.
+
+Podstawowy scenariusz wykorzystania InPost Pay przez użytkownika końcowego (klienta) przebiega następująco:
+
+Użytkownik otwiera stronę www Merchanta (zarówno w wersji mobilnej, jak i desktopowej).
+
+Klika przycisk „Utwórz koszyk z InPost”.
+
+Produkt zostaje dodany do koszyka u Merchanta. Informacje o koszyku są przesyłane do InPost Pay (Basket App), a koszyk oznaczony jako synchronizowany z InPost Pay.
+
+Aplikacja InPost Mobile wysyła powiadomienie push o nowym koszyku gotowym do opłacenia.
+
+Kliknięcie w powiadomienie otwiera aplikację InPost Mobile na odpowiednim koszyku.
+
+Aplikacja automatycznie uzupełnia ostatnio wybraną formę dostawy oraz domyślną metodę płatności na podstawie profilu użytkownika.
+
+Po wybraniu akcji „Zamawiam i płacę”, InPost Pay tworzy u Merchanta zamówienie w oparciu o aktualny koszyk.
+
+Użytkownik dokonuje płatności w aplikacji InPost Mobile.
+
+Informacja o zrealizowanej płatności trafia do Merchanta.
+
+Merchant przygotowuje i nadaje przesyłkę tak jak dotychczas – usługa InPost Pay nie zmienia procesu wysyłki.
+
+Po nadaniu zamówienia Merchant przekazuje do InPost Pay numer listu przewozowego.
+
+Integracja z InPost Pay odbywa się poprzez koszyk.
+
+Produkty, które użytkownik chce kupić za pomocą InPost Pay, najpierw trafiają do koszyka u Merchanta. Następnie Merchant przekazuje do InPost Pay informacje o zmianach w koszyku. Synchronizacja dotyczy wyłącznie tych koszyków, w których użytkownik choć raz wybrał akcję „Utwórz koszyk z InPost” – tylko wtedy koszyk jest oznaczony jako powiązany z InPost Pay.
+
+W przypadku, gdy użytkownik wprowadzi zmiany w synchronizowanym koszyku na stronie Merchanta (np. zmieni liczbę sztuk lub doda nowe produkty), Merchant przesyła cały koszyk do aplikacji InPost Pay w celu jego aktualizacji lub ponownego utworzenia. Po otrzymaniu danych InPost Pay:
+
+aktualizuje istniejący koszyk lub
+
+wiąże koszyk z numerem telefonu przypisanym do zaufanej przeglądarki,
+
+a następnie zwraca komunikat potwierdzający pomyślne zakończenie operacji.
+
+Integracja zakłada, że użytkownik w aplikacji InPost Mobile może wykonywać określone akcje na koszyku, np. zmieniać liczbę sztuk czy wprowadzać kod rabatowy. Każda taka zmiana jest przekazywana do Merchanta, który po przeliczeniu zawartości koszyka odsyła zaktualizowane dane z powrotem do InPost Pay.
+
+Przed dokonaniem zakupu użytkownik akceptuje regulaminy oraz wymagane zgody określone przez Merchanta.
+
+Użytkownik zawsze ma również możliwość finalizacji koszyka bezpośrednio na stronie Merchanta. W takim przypadku zamówienie nie jest realizowane przez InPost Pay, a Merchant przekazuje do InPost Pay informację o finalizacji koszyka innym kanałem.
+
+Warto pamiętać:
+Użytkownik może mieć w tym samym czasie wiele aktywnych, synchronizowanych koszyków (np. robiąc zakupy u różnych Merchantów). Płatność za każdy koszyk odbywa się osobno. Tak samo odrębnie procesowane są wszystkie modyfikacje koszyka – np. zmiana liczby sztuk czy zastosowanie kodu rabatowego – zgodnie z wytycznymi danego Merchanta.
+
+Relacja między koszykiem po stronie Merchanta a koszykiem w InPost Pay jest 1:1 – każdy koszyk Merchanta odpowiada jednemu koszykowi w InPost Pay.
+
+W aplikacji InPost Mobile użytkownik ma możliwość:
+• zmiany liczby produktów w koszyku,
+• usunięcia produktu z koszyka,
+• dodania produktów rekomendowanych,
+• wprowadzenia kodu rabatowego,
+• podania danych do faktury.
+
+Każda zmiana w koszyku dokonana w InPost Mobile jest przesyłana do Merchanta. Merchant zawsze odsyła pełną zawartość koszyka.
+
+Jeżeli po stronie Merchanta zsynchronizowany koszyk ulega zmianie, Merchant również odsyła do InPost Pay cały koszyk.
+
+INFO: Integracja z InPost Pay nie wpływa na obecną integrację Merchanta z systemami InPost w zakresie generowania przesyłek.
+
+ 
+
+[PL] Dokumentacja InPost Pay
+Changelog
+Checklista implementacji API InPost Pay
+Standardy implementacji InPost Pay
+Scenariusze testowe InPost Pay
+Autoryzacja i wymagania techniczne
+Widget InPost Pay
+Widget 2.0
+Wiązanie koszyka z InPost Pay
+Aktualizacja koszyka powiązanego z InPost Pay
+Koszyk powiązany oraz desynchronizacja koszyka z InPost Pay
+Zamówienie i płatność
+InPost Pay (Basket App)
+Weryfikacja sygnatury
+Pobranie klucza
+Pobranie klucza dla wersji
+Koszyk
+Powiązanie koszyka [Widget 2.0]
+Aktualizacja koszyka [Widget 2.0]
+Pobranie listy koszyków
+Usuwanie powiązania koszyka
+Weryfikacja powiązania koszyka
+Zamówienie
+Aktualizacja zamówienia
+Pobranie listy zamówień
+Płatności
+Merchant Backend API
+Koszyk (Merchant API)
+Potwierdzenie powiązania koszyka
+Pobranie szczegółów koszyka
+Desynchronizacja koszyka
+Aktualizacja koszyka
+Zamówienie (Merchant API)
+Utworzenie zamówienia
+Pobranie szczegółów zamówienia
+Aktualizacja zamówienia u Merchanta
+Zwroty i podgląd transakcji w InPost Pay
+Lista transakcji
+Zlecenie zwrotu
+Webhooki transakcyjne
+Webhooki wersja v2
+Webhooki wersja v1 (old)
+InPost Pay - Analityka
+FAQ InPost Pay
+Wtyczki dla platform sklepowych
+InPost Pay - Woocommerce (Widget 2.0)
+InPost Pay - Analityka - Woocommerce
+Specyfikacja techniczna - InPost Pay Plugin
+Kompatybilne wtyczki - InPost Pay WooCommerce
+InPost Pay - Magento (Widget 2.0)
+InPost Pay - Analityka - Magento
+Debugowanie problemów na lokalnym środowisku - instrukcja dla developera
+InPost Pay - PrestaShop (Widget 2.0)
+InPost Pay - Analityka - PrestaShop
+Obsługa kuponów - dodatkowy moduł dla PrestaShop
+Widok koszyka w InPost Pay Mobile
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 

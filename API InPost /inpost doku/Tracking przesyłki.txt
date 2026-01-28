@@ -1,0 +1,400 @@
+Zasób Tracking reprezentuje obiekt z informacjami o aktualnym stanie przesyłki w procesie logistycznym. Za jego pomocą można uzyskać informacje o utworzeniu przesyłki, ostatniej zmianie statusu czy też historii statusów.
+
+ 
+
+Listę statusów występujących w trackingu można pobrać korzystając z 
+Statusy
+ 
+
+Tracking nie jest dostępna na środowisku sandboxowym, nie są zwracane statusy.
+
+Tracking zwracany jest przez 45 dni, liczony od daty utworzenia przesyłki. 
+
+Na tej stronie
+
+Uwierzytelnianie
+Struktura
+Historia przesyłki
+Historia serwisu przesyłek
+Uwierzytelnianie
+Zasób Tracking nie jest autoryzowany, nie jest wymagane podanie tokenu.
+
+ 
+
+Struktura
+Zasób Tracking posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+tracking_number
+
+String
+
+Numer przesyłki
+
+type
+
+String
+
+Rodzaj przesyłki. Dostępne rodzaje opisane są na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731062
+ 
+
+service
+
+String
+
+Rodzaj przesyłki. Dostępne rodzaje opisane są na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731062
+ 
+
+custom_attributes
+
+Object
+
+Dodatkowe atrybuty dla przesyłek Paczkomat®.
+
+status
+
+String
+
+Status w jakim aktualnie znajduje się przesyłka.
+
+created_at
+
+DateTime
+
+Data utworzenia przesyłki.
+
+updated_at
+
+DateTime
+
+Data ostatniej aktualizacji informacji o zmianie statusu.
+
+tracking_details
+
+Array
+
+Tablica obiektów zawierające historię zmian statusów, posortowana chronologicznie w kolejności malejącej (ostatni status jest pierwszy na liście).
+
+expected_flow
+
+Array
+
+Tablica przewidywanych statusów, przez które może przejść jeszcze określona przesyłka.
+
+Dodatkowe atrybuty dla przesyłek Paczkomat® custom_attributes
+
+Atrybut
+
+Typ
+
+Opis
+
+size
+
+String
+
+Rozmiar przesyłki [A, B, C]
+
+target_machine_id
+
+String
+
+Nazwa Paczkomat® odbiorczego.
+
+target_machine_detail
+
+Hash
+
+Dodatkowe parametry Paczkomat® odbiorczego.
+
+dropoff_machine_id 
+
+String
+
+Nazwa Paczkomat® nadawczego.
+
+dropoff_machine_detail
+
+Hash
+
+Dodatkowe parametry Paczkomat® nadawczego.
+
+Tablica obiektów zawierające historię zmian statusów, posortowana chronologicznie w kolejności malejącej (ostatni status jest pierwszy na liście) tracking_details
+
+Atrybut
+
+Typ
+
+Opis
+
+status
+
+String
+
+Nazwa statusu
+
+origin_status
+
+String 
+
+Symbol statusu  Lista statusów które posiadają przypisany origin_status
+
+agency 
+
+String 
+
+Nazwa agencji
+
+datetime
+
+String 
+
+Czas zmiany statusu
+
+Przykład zasobu Tracker w formacie JSON:
+
+
+
+{
+    "tracking_number": "632085946340007012341234",
+    "service": "inpost_locker_standard",
+    "type": "inpost_locker_standard",
+    "status": "delivered",
+    "custom_attributes": {
+        "size": "A",
+        "target_machine_id": "KAT07A",
+        "target_machine_detail": {
+            "name": "KAT07A",
+            "opening_hours": "24/7",
+            "location_description": "Przy Instytucie Matematyki UŚ",
+            "location": {
+                "latitude": 50.26219,
+                "longitude": 19.02902
+            },
+            "address": {
+                "line1": "Bankowa 14",
+                "line2": "40-007 Katowice"
+            },
+            "type": [
+                "parcel_locker"
+            ],
+            "location247": true
+        },
+        "end_of_week_collection": false
+    },
+    "tracking_details": [
+        {
+            "origin_status": "DOR",
+            "status": "delivered",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T11:20:06.000+01:00"
+        },
+        {
+            "origin_status": "UWP",
+            "status": "ready_to_pickup",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T10:14:01.000+01:00"
+        },
+        {
+            "origin_status": "PDD_2",
+            "status": "out_for_delivery",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T08:37:45.000+01:00"
+        },
+        {
+            "origin_status": "PWO",
+            "status": "adopted_at_source_branch",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T05:56:59.000+01:00"
+        },
+        {
+            "origin_status": "WZO",
+            "status": "sent_from_source_branch",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-17T19:10:51.000+01:00"
+        },
+        {
+            "origin_status": "PWO",
+            "status": "adopted_at_source_branch",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-17T17:39:59.000+01:00"
+        },
+        {
+            "origin_status": "PPN",
+            "status": "confirmed",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-17T12:58:39.000+01:00"
+        }
+    ],
+    "expected_flow": [],
+    "created_at": "2023-12-17T12:58:39.539+01:00",
+    "updated_at": "2023-12-18T11:20:07.005+01:00"
+}
+ 
+
+Historia przesyłki
+Pobieranie informacji o zmianach statusów dla określonej przesyłki:
+
+
+
+GET /v1/tracking/:tracking_number
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/tracking/632085946340007012341234 -H 'content-type: application/json' 
+Odpowiedź
+
+Gdy podany numer przesyłki jest poprawny i zostały odnalezione informacje o przesyłce, serwer zwróci odpowiedź jak poniżej:
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "tracking_number": "632085946340007012341234",
+    "service": "inpost_locker_standard",
+    "type": "inpost_locker_standard",
+    "status": "delivered",
+    "custom_attributes": {
+        "size": "A",
+        "target_machine_id": "KAT07A",
+        "target_machine_detail": {
+            "name": "KAT07A",
+            "opening_hours": "24/7",
+            "location_description": "Przy Instytucie Matematyki UŚ",
+            "location": {
+                "latitude": 50.26219,
+                "longitude": 19.02902
+            },
+            "address": {
+                "line1": "Bankowa 14",
+                "line2": "40-007 Katowice"
+            },
+            "type": [
+                "parcel_locker"
+            ],
+            "location247": true
+        },
+        "end_of_week_collection": false
+    },
+    "tracking_details": [
+        {
+            "origin_status": "DOR",
+            "status": "delivered",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T11:20:06.000+01:00"
+        },
+        {
+            "origin_status": "UWP",
+            "status": "ready_to_pickup",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T10:14:01.000+01:00"
+        },
+        {
+            "origin_status": "PDD_2",
+            "status": "out_for_delivery",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T08:37:45.000+01:00"
+        },
+        {
+            "origin_status": "PWO",
+            "status": "adopted_at_source_branch",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-18T05:56:59.000+01:00"
+        },
+        {
+            "origin_status": "WZO",
+            "status": "sent_from_source_branch",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-17T19:10:51.000+01:00"
+        },
+        {
+            "origin_status": "PWO",
+            "status": "adopted_at_source_branch",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-17T17:39:59.000+01:00"
+        },
+        {
+            "origin_status": "PPN",
+            "status": "confirmed",
+            "agency": null,
+            "location": null,
+            "datetime": "2023-12-17T12:58:39.000+01:00"
+        }
+    ],
+    "expected_flow": [],
+    "created_at": "2023-12-17T12:58:39.539+01:00",
+    "updated_at": "2023-12-18T11:20:07.005+01:00"
+}
+Przykład odpowiedzi w sytuacji gdy informacje o przesyłce nie zostały odnalezione:
+
+
+
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+{
+	"status": 404,
+	"error": "resource_not_found",
+	"description": "Tracking information about 612345678901234567890123 InPost Locker shipment has not been found.",
+	"details": null
+}
+Przykład odpowiedzi w sytuacji, gdy system nie był w stanie rozpoznać rodzaju przesyłki na podstawie podanego numeru:
+
+
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+{
+    "status": 400,
+    "error": "uknown_tracking_number",
+    "message": "Cannot identify type of shipment by given tracking number (612345678901234567890123)",
+    "details": null
+}
+ 
+
+Historia serwisu przesyłek
+Paczki mieszane mogą zmieniać swój serwis w tracie procesu logistycznego.
+Historię ostatniego serwisu paczki można przeglądać, odpytują poniższy zasób:
+
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/tracking/523000015802677003881245/service_history -H 'content-type: application/json'
+Przykład odpowiedzi
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+ 
+{
+	"href": "https://api-shipx-pl.easypack24.net/v1/shipments/120"
+	"id": "120"
+	"service_history": {
+		"last_service": "inpost_courier_standard",
+		"updated_at": "2017-10-27T12:39:02.125+02:00"
+    }
+}
+ 
+
+ 

@@ -1,0 +1,206 @@
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Przeliczanie cen zleceń odbiorów
+Struktura
+Zasób DispatchOrderPriceList posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+total_success_count
+
+Integer
+
+Ilość poprawnie przetworzonych przesyłek
+
+total_error_count
+
+Integer
+
+Ilość błędnie przetworzonych przesyłek
+
+total_price
+
+Hash
+
+Całkowita kwota za podjazd kuriera
+
+price_list
+
+Hash
+
+Cennik podjazdu kuriera
+
+invalid_shipments
+
+Hash
+
+Błędy nieprzetworzonych przesyłek
+
+Przykład zasobu DispatchOrderPriceList w formacie JSON:
+
+
+
+{
+    "total_success_count": 3,
+    "total_error_count": 1,
+    "total_price": {
+        "amount": 20.3,
+        "currency": "PLN"
+    },
+    "price_list": {
+        "courier": {
+            "count": 1,
+            "price": {
+                "amount": "12",
+                "currency": "PLN"
+            },
+            "shipments": [
+                24921
+            ]
+        },
+        "locker": {
+            "count": 1,
+            "price": {
+                "amount": "4.30",
+                "currency": "PLN"
+            },
+            "shipments": [
+                24907
+            ]
+        }
+        "allegro": {
+            "count": 1,
+            "price": {
+                "amount": "4.30",
+                "currency": "PLN"
+            },
+            "shipments": [
+                24908
+            ]
+        }
+    },
+    "invalid_shipments": {
+        "24906": [
+            "already_dispatched"
+        ]
+    }
+}
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu i jego metod wymaga podania aktualne i ważnego access tokenu.
+
+ 
+
+Przeliczanie cen zleceń odbiorów
+ 
+
+
+
+POST /v1/organizations/:organization_id/dispatch_orders/calculate
+Parametry
+
+Możesz usunąć tę część jeśli zasób nie przyjmujemy żadnych parametrów (jako filtry lub dane wysyłane metodą POST).
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+dispatch_point_id
+
+Integer
+
+Identyfikator punktu odbioru, z którego przesyłka ma być odebrana (adres punkty odbioru stanie się adresem zlecenia odbioru).
+
+Atrybut nie jest wymagany.
+
+shipments
+
+Array[Integer]
+
+Lista ID przesyłek, dla których ma zostać utworzone zlecenia odbioru. 
+
+Atrybut jest wymagany.
+
+Paczki muszą być w statusie confirmed i nie mogą być przypisane do innego zlecenia odbioru w statusie new, sent, accepted lub done.
+
+Przykład zapytania
+
+
+
+curl -X POST https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders/calculate -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+  "dispatch_point_id": 10,
+  "shipments": [24907, 24908, 24906, 24918, 24921]
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+    "total_success_count": 3,
+    "total_error_count": 2,
+    "total_price": {
+        "amount": 16.3,
+        "currency": "PLN"
+    },
+    "price_list": {
+        "courier": {
+            "count": 1,
+            "price": {
+                "amount": "12",
+                "currency": "PLN"
+            },
+            "shipments": [
+                24921
+            ]
+        },
+        "locker": {
+            "count": 2,
+            "price": {
+                "amount": "4.30",
+                "currency": "PLN"
+            },
+            "shipments": [
+                24907,
+                24908
+            ]
+        }
+    },
+    "invalid_shipments": {
+        "24906": [
+            "already_dispatched"
+        ],
+        "24918": [
+            "invalid_status"
+        ]
+    }
+}
+Informacje o błędach
+
+Serwer może zwrócić następujące błędy
+
+validation_failed - błąd walidacji
+
+forbidden -  użytkownik nie ma praw dostępu do określonej organizacji
+
+token_invalid - token jest niepoprawny
+
+ 
+
+ 
+
+ 
+
+ 

@@ -1,0 +1,253 @@
+ 
+
+Lista zleceń odbioru
+Wyszukiwanie książek adresowych odbywa się poprzez podanie jednego lub więcej z poniższych kryteriów
+
+Nie zwracamy cen dla klientów debetowych.
+Atrybut rate przyjmuje wartość null
+
+
+
+GET /v1/organizations/:organization_id/dispatch_orders
+Kryteria wyszukiwania
+
+Parametr
+
+Typ
+
+Działanie
+
+Przykład
+
+id
+
+Integer
+
+Array
+
+Wyszukuje zlecenie odbioru o podanym id.
+
+Wyszukuje zlecenia odbioru o podanych id.
+
+?id=12
+
+?id=12,17
+
+created_at
+
+Date
+
+Wyszukuje zlecenia odbioru utworzone w danym dniu.
+
+?created_at=2016-01-07
+
+created_at_gteq
+
+Time
+
+Wyszukuje zlecenia odbioru, których czas utworzenia jest >= wskazany czas.
+
+Czas może być podany w formacie ISO 8601 lub podobnym, a także jako timestamp.
+
+?created_at_gteq=2016-01-01T13:10+01:00
+
+?created_at_gteq=1451650200
+
+created_at_lteq
+
+Time
+
+Wyszukuje zlecenia odbioru, których czas utworzenia jest <= wskazany czas.
+
+Czas może być podany w formacie ISO 8601 lub podobnym, a także jako timestamp.
+
+?created_at_lteq=2016-01-01T13:10+01:00
+
+?created_at_lteq=1451650200
+
+status
+
+String
+
+Array
+
+Wyszukuje zlecenia odbioru we wskazanym statusie.
+
+Wyszukuje zlecenie odbioru w jednym ze wskazanych statusów.
+
+?status=sent
+
+?status=new,sent
+
+address
+
+String
+
+Wyszukuje zlecenia odbioru, w których adres (street) rozpoczyna się od wskazanego ciągu.
+
+?address=Zaw
+
+post_code
+
+String
+
+Wyszukuje zlecenia odbioru, w których kod pocztowy zaczyna się od wskazanego ciągu.
+
+?post_code=30-442
+
+country_code
+
+String
+
+Wyszukuje zlecenia odbioru, w których kod kraju jest identyczny jak wskazany ciąg.
+
+?country_code=PL
+
+city
+
+String
+
+Wyszukuje zlecenia odbioru, w których miejscowość jest identyczna jak wskazany ciąg.
+
+?city=Kraków
+
+shipment_id
+
+Integer
+
+Arrray
+
+Wyszukuje zlecenia odbioru, które zawierają przesyłkę o wskazanym id
+
+Wyszukuje zlecenia odbioru, które zawierają jedno ze wskazanych id przesyłki
+
+?shipment_id=1
+
+?shipment_id=1,2
+
+tracking_number
+
+String
+
+Array
+
+Wyszukuje zlecenia odbioru, które zawierają przesyłkę ze wskazanym numerem trackingowym
+
+Wyszukuje zlecenia odbioru, które zawierają jeden ze wskazanych numerów trackingowych
+
+?tracking_number=630000328531876219900746
+
+?tracking_number=630000328531876219900746,630000328531876219900747
+
+shipment_service
+
+String
+
+Array
+
+Wyszukuje zlecenia odbioru, które zawierają jeden ze wskazanych typów podjazdu:
+
+courier
+
+locker
+
+allegro
+
+?shipment_service=locker
+
+?shipment_service=locker,courier,allegro
+
+status
+
+String
+
+Array
+
+Wyszukuje zlecenia odbioru w wybranym statusie
+
+new
+
+sent
+
+?status=new
+
+?status=new,sent
+
+Sortowanie wyników
+
+Wyniki wyszukiwania można sortować przekazując parametr sort_by, który może przyjmować następujące wartości:
+
+Wartość sort_by
+
+Działanie
+
+Przykład
+
+id
+
+Sortuje zlecenia odbioru po identyfikatorze
+
+?sort_by=id
+
+created_at
+
+Sortuje zlecenia odbioru po czasie utworzenia
+
+?sort_by=created_at
+
+address
+
+Sortuje zlecenia odbioru po pierwszej linii adresu
+
+?sort_by=address
+
+post_code
+
+Sortuje zlecenia odbioru po kodzie pocztowym
+
+?sort_by=post_code
+
+country_code
+
+Sortuje zlecenia odbioru po kodzie kraju
+
+?sort_by=country_code
+
+shipment_id
+
+Sortuje zlecenia odbioru po identyfikatorze pierwszej przesyłki
+
+?sort_by=shipment_id
+
+tracking_number
+
+Sortuje zlecenia odbioru po numerze trackingowym pierwszej przesyłki
+
+?sort_by=tracking_number
+
+Sortowanie może odbywać się w dwóch kierunkach, poprzez użycie parametru sort_order. Domyślnie wyniki sortowane są malejąco (desc) wg daty utworzenia zlecenia odbioru (created_at).
+
+ 
+
+Wartość sort_order
+
+Działanie
+
+Przykład
+
+asc
+
+Sortuje zlecenia odbioru rosnąco
+
+?sort_order=asc&sort_by=id
+
+desc
+
+Sortuje zlecenia odbioru malejąco
+
+?sort_order=desc&sort_by=id
+
+Na tej stronie
+
+Lista zleceń odbioru
+ 

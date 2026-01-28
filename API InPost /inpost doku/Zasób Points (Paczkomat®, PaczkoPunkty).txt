@@ -1,0 +1,916 @@
+Zasób Points reprezentuje lokalizacje, w których dostępne są usługi operatorów logistycznych. Punktami mogą być maszyny samoobsługowe (Paczkomat®) lub oddziały, punkty obsługi klienta. Każda z lokalizacji oferuje określone usługi - lista tych usług zwracana jest w odpowiedzi pod atrybutem functions.
+
+Nowe środowiska z autoryzacją
+
+Środowisko produkcyjne:
+
+https://api.inpost.pl/v1/points
+
+Generowanie dostępu
+
+Wejdź na stronę Managera Paczek InPost - Manager paczek
+
+W oknie logowania wpisz swój login i kliknij: Zaloguj
+
+Po zalogowaniu na konto przejdź do zakładki Moje Konto
+
+W zakładce Dane sprawdzić, czy wszystkie dane firmy są prawidłowo uzupełnione
+Pamiętaj, aby możliwe było wygenerowanie dostępu do API uzupełnione muszą być zarówno dane adresowe firmy, jak i dane do faktury.
+
+Po weryfikacji przejdź do nowej zakładki API
+
+Aby wygenerować nowy dostęp do Zasobu Points, rozwiń zakładkę API ShipX i kliknij Generuj
+
+Jeśli posiadasz już wygenerowany token zwróć uwagę, aby do autoryzacji używać tokenu z listy (Lista tokenów do API InPost (API ShipX oraz API Points)).  Jeśli nie posiadasz takiej listy musisz wygenerować nowy token.
+
+Środowisko testowe:
+https://sandbox-api-gateway-pl.easypack24.net/v1/points
+
+Generowanie dostępu
+
+Wejdź na stronę Managera Paczek https://sandbox-manager.paczkomaty.pl/
+
+W oknie logowania wpisz swój login i kliknij: Zaloguj
+
+Po zalogowaniu na konto przejdź do zakładki Moje Konto
+
+W zakładce Dane sprawdzić, czy wszystkie dane firmy są prawidłowo uzupełnione
+Pamiętaj, aby możliwe było wygenerowanie dostępu do API uzupełnione muszą być zarówno dane adresowe firmy, jak i dane do faktury.
+
+Po weryfikacji przejdź do nowej zakładki API
+
+Aby wygenerować nowy dostęp do Zasobu Points, rozwiń zakładkę API ShipX i kliknij Generuj
+
+Jeśli posiadasz już wygenerowany token zwróć uwagę, aby do autoryzacji używać tokenu z listy (Lista tokenów do API InPost (API ShipX oraz API Points)). Jeśli nie posiadasz takiej listy musisz wygenerować nowy token.
+
+ 
+
+Więcej informacji o dostępnych sposobach prezentacji punktów odbioru https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/45744192
+ 
+
+Na tej stronie
+
+Struktura
+Lista punktów
+Szczegóły punktu
+Kryteria wyszukiwania
+
+
+
+Struktura
+Zasób Point posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+name 
+
+String
+
+ID punktu. Jest to jego unikalna nazwa, np. KRA007 (Dla Paczkomat®)
+
+type
+
+Array
+
+Tablica określająca jakie rodzaje punktów mieszczą się w danej lokalizacji.
+
+Możliwe typy punktów:
+
+parcel_locker - Fizyczne Paczkomat® i paczkopunkty do których można nadać przesyłkę Paczkomat®.
+
+pop - Paczkopunkty.
+
+parcel_locker_only - Tylko fizyczne Paczkomat®.
+
+parcel_locker_superpop - Paczkopunkty do których można nadać przesyłkę Paczkomat®.
+
+status 
+
+String
+
+Status punktu. (Operating, NonOperating, Disabled)
+
+location
+
+Object
+
+Obiekt Location zawierający informacje o położeniu geograficznym: latitude (szerokość) i longitude (długość).
+
+Przykład obiektu Location w formacie JSON:
+
+
+
+"latitude": 50.03988,
+"longitude": 19.92485
+
+
+
+location_type 
+
+
+String
+
+Typ lokalizacji.
+
+location_description
+
+String
+
+Informacje dodatkowe o lokalizacji punktu, które mogą ułatwić dotarcie do niego.
+
+location_description_1 
+
+
+String
+
+Dodatkowy opis.
+
+location_description_2 
+
+
+String
+
+Dodatkowy opis.
+
+distance 
+
+
+Integer
+
+Odległość od punktu relatywnego podanego w wyszukiwaniu. Jeśli punkt relatywny nie został podany, wtedy przyjmuje wartość  null .
+
+opening_hours 
+
+String
+
+Godziny otwarcia punktu.
+
+address
+
+Object
+
+Obiekt Address zawierający informacje adresowe o punkcie, takie jak: ulica, kod pocztowy, miasto.
+
+Przykład obiektu Address w formacie JSON:
+
+
+
+"line1": "Kapelanka 14",
+"line2": null
+
+
+
+address_details
+
+Object
+
+Dokładne dane adresowe punktu:
+
+
+
+"city": "Bartoszyce",
+"province": "Warmińsko-Mazurskie",
+"post_code": "11-200",
+"street": null,
+"building_number": null,
+"flat_number": null
+
+
+
+phone_number 
+
+String
+
+Numer telefonu punktu.
+
+payment_point_descr 
+
+String
+
+Informacje dodatkowe o punkcie.
+
+functions
+
+Array
+
+Tablica określające jakie funkcje posiada punkt. Możliwe funkcje:
+
+Identyfikator
+
+Opis funkcji
+
+parcel
+
+Send and collect standard parcel 
+
+parcel_send
+
+Standard parcel send 
+
+parcel_collect
+
+Standard parcel collect 
+
+parcel_reverse_return_send
+
+Standard parcel reverse return to sender 
+
+standard_letter_collect
+
+Standard letter collect 
+
+standard_letter_send
+
+Standard letter send 
+
+allegro_parcel_collect
+
+Allegro parcel collect 
+
+allegro_parcel_send
+
+Allegro parcel send 
+
+allegro_parcel_reverse_return_send
+
+Allegro parcel return to sender 
+
+allegro_letter_collect
+
+Allegro letter collect 
+
+allegro_letter_send
+
+Allegro letter send 
+
+allegro_letter_reverse_return_send
+
+Allegro letter return to sender 
+
+allegro_courier_collect
+
+Allegro courier parcel collect 
+
+allegro_courier_send
+
+Allegro courier parcel send 
+
+allegro_courier_reverse_return_send
+
+Allegro courier parcel return to sender 
+
+standard_courier_collect
+
+Courier parcel collect 
+
+standard_courier_send
+
+Courier parcel send 
+
+standard_courier_reverse_return_send
+
+Courier parcel return to sender 
+
+air_on_airport
+
+Send and collect baggage from machine on airport 
+
+air_outside_airport
+
+Send and collect baggage from machine outside of airport 
+
+cool_parcel_collect
+
+Reservation collect from cooling machine 
+
+laundry
+
+Send and collect laundry 
+
+avizo
+
+Avizo collect
+
+ 
+
+partner_id
+
+Integer
+
+ID partnera.
+"partner_id":0 - Paczkomat®
+
+"partner_id": 33 - PaczkoPunkt z funkcją odbioru przesyłki Paczkomat®
+
+"partner_id": 30 - PaczkoPunkt bez funkcji odbioru przesyłki Paczkomat®, posiada tylko funkcję nadania przesyłek.
+
+is_next 
+
+Boolean
+
+Czy jest to Paczkomat® typu NEXT.
+
+payment_available 
+
+Boolean
+
+Dostępność płatności w danym punkcie.
+
+Istnieje możliwość wystąpienia payment_available=true razem z payment_type=0, oznacza to, że płatność jest dostępna.
+
+payment_type 
+
+String
+
+virtual.
+
+virtual 
+
+Integer
+
+Wirtualność punktu.
+
+recommended_low_interest_box_machines_list 
+
+Array
+
+Rekomendowane inne punkty w pobliżu.
+
+location_247 
+
+Boolean
+
+Czy Paczkomat® dostępny jest 24/7 (Paczkomat® z parametrem ustawionym na true są dedykowanymi punktami do obsługi usługi Paczka w Weekend).
+
+easy_access_zone
+
+Boolean
+
+Czy Paczkomat® posiada strefę ułatwionego dostępu.
+
+physical_type_mapped
+
+String
+
+Typ Paczkomat®
+
+physical_type_description
+
+String
+
+Opis typu Paczkomat®
+
+supported_locker_temperatures
+
+Integer
+
+Paczkomat® z kontrolowaną temperaturą. 
+Dostępne wartości:
+"supported_locker_temperatures": [4]
+"supported_locker_temperatures": [20]
+"supported_locker_temperatures": [4, 20]
+
+Przykład zasobu Point w formacie JSON:
+
+
+
+       {
+            "href": "https://api-pl-points.easypack24.net/v1/points/KRA02APP",
+            "name": "KRA02APP",
+            "type": [
+                "parcel_locker"
+            ],
+            "status": "Operating",
+            "location": {
+                "longitude": 19.87325,
+                "latitude": 50.00919
+            },
+            "location_type": "Outdoor",
+            "location_date": null,
+            "location_description": "Prywatna posesja wjazd od strony Dobrowolskiego",
+            "location_description_1": null,
+            "location_description_2": null,
+            "distance": null,
+            "opening_hours": "24/7",
+            "address": {
+                "line1": "Dobrowolskiego",
+                "line2": "30-394 Kraków"
+            },
+            "address_details": {
+                "city": "Kraków",
+                "province": "małopolskie",
+                "post_code": "30-394",
+                "street": "Dobrowolskiego",
+                "building_number": null,
+                "flat_number": null
+            },
+            "phone_number": null,
+            "payment_point_descr": "Płatność apką InPost oraz PayByLink",
+            "functions": [
+                "allegro_courier_collect",
+                "allegro_courier_reverse_return_send",
+                "allegro_courier_send",
+                "allegro_letter_reverse_return_send",
+                "allegro_letter_send",
+                "allegro_parcel_collect",
+                "allegro_parcel_reverse_return_send",
+                "allegro_parcel_send",
+                "parcel",
+                "parcel_collect",
+                "parcel_reverse_return_send",
+                "parcel_send",
+                "standard_courier_reverse_return_send",
+                "standard_courier_send"
+            ],
+            "partner_id": 0,
+            "is_next": false,
+            "payment_available": true,
+            "payment_type": {
+                "0": "Payments are not supported"
+            },
+            "virtual": "0",
+            "recommended_low_interest_box_machines_list": [
+                "KRA106M",
+                "KRA20M",
+                "KRA208M",
+                "KRA197M",
+                "KRA356M"
+            ],
+            "apm_doubled": null,
+            "location_247": true,
+            "operating_hours_extended": {
+                "customer": null
+            },
+            "agency": "IPM9988771",
+            "image_url": "https://static.easypack24.net/points/pl/images/KRA02APP.jpg",
+            "easy_access_zone": true,
+            "air_index_level": "GOOD",
+            "physical_type_mapped": "006",
+            "physical_type_description": "Appkomat InPost – swoją paczkę odbierzesz wygodniej z aplikacją InPost"
+        }
+ 
+
+Lista punktów
+Pobieranie listy punktów. Kolekcja wspiera stronicowanie, które opisane jest na stronie Informacje ogólne.
+
+
+
+GET /v1/points
+Przykład zapytania
+
+
+
+curl -X GET https://api.inpost.pl/v1/points -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+{
+    "href": "https://api-pl-points.easypack24.net/v1/points",
+    "count": 24797,
+    "page": 1,
+    "per_page": 25,
+    "total_pages": 992,
+    "items": [
+        {
+            "href": "https://api-pl-points.easypack24.net/v1/points/ADA01M",
+            "name": "ADA01M",
+            "type": [
+                "parcel_locker"
+            ],
+            "status": "Operating",
+            "location": {
+                "longitude": 22.26405,
+                "latitude": 51.73834
+            },
+            "location_type": "Outdoor",
+            "location_date": null,
+            "location_description": "Przy sklepie Lewiatan",
+            "location_description_1": null,
+            "location_description_2": null,
+            "distance": null,
+            "opening_hours": "24/7",
+            "address": {
+                "line1": "Kościuszki 27",
+                "line2": "21-412 Adamów"
+            },
+            "address_details": {
+                "city": "Adamów",
+                "province": "lubelskie",
+                "post_code": "21-412",
+                "street": "Kościuszki",
+                "building_number": "27",
+                "flat_number": null
+            },
+            "phone_number": null,
+            "payment_point_descr": "Płatność apką InPost oraz PayByLink",
+            "functions": [
+                "allegro_courier_collect",
+                "allegro_courier_reverse_return_send",
+                "allegro_courier_send",
+                "allegro_letter_reverse_return_send",
+                "allegro_letter_send",
+                "allegro_parcel_collect",
+                "allegro_parcel_reverse_return_send",
+                "allegro_parcel_send",
+                "parcel",
+                "parcel_collect",
+                "parcel_reverse_return_send",
+                "parcel_send",
+                "standard_courier_reverse_return_send",
+                "standard_courier_send"
+            ],
+            "partner_id": 0,
+            "is_next": false,
+            "payment_available": true,
+            "payment_type": {
+                "0": "Payments are not supported"
+            },
+            "virtual": "0",
+            "recommended_low_interest_box_machines_list": null,
+            "apm_doubled": null,
+            "location_247": true,
+            "operating_hours_extended": {
+                "customer": null
+            },
+            "agency": "IPM4633224",
+            "image_url": "https://static.easypack24.net/points/pl/images/ADA01M.jpg",
+            "easy_access_zone": true,
+            "air_index_level": null,
+            "physical_type_mapped": "004",
+            "physical_type_description": null
+        },
+    {...},
+    {...},
+  ]
+}
+ 
+
+Szczegóły punktu
+Pobieranie szczegółów punktu.
+
+
+
+GET /v1/points?name=point_name
+Przykład zapytania
+
+
+
+curl -X GET https://api.inpost.pl/v1/points?name=KRA02APP -H 'Content-Type: application/json'
+ 
+
+Odpowiedź
+
+
+
+{
+    "href": "https://api-pl-points.easypack24.net/v1/points",
+    "count": 1,
+    "page": 1,
+    "per_page": 25,
+    "total_pages": 1,
+    "items": [
+        {
+            "href": "https://api-pl-points.easypack24.net/v1/points/KRA02APP",
+            "name": "KRA02APP",
+            "type": [
+                "parcel_locker"
+            ],
+            "status": "Operating",
+            "location": {
+                "longitude": 19.87325,
+                "latitude": 50.00919
+            },
+            "location_type": "Outdoor",
+            "location_date": null,
+            "location_description": "Prywatna posesja wjazd od strony Dobrowolskiego",
+            "location_description_1": null,
+            "location_description_2": null,
+            "distance": null,
+            "opening_hours": "24/7",
+            "address": {
+                "line1": "Dobrowolskiego",
+                "line2": "30-394 Kraków"
+            },
+            "address_details": {
+                "city": "Kraków",
+                "province": "małopolskie",
+                "post_code": "30-394",
+                "street": "Dobrowolskiego",
+                "building_number": null,
+                "flat_number": null
+            },
+            "phone_number": null,
+            "payment_point_descr": "Płatność apką InPost oraz PayByLink",
+            "functions": [
+                "allegro_courier_collect",
+                "allegro_courier_reverse_return_send",
+                "allegro_courier_send",
+                "allegro_letter_reverse_return_send",
+                "allegro_letter_send",
+                "allegro_parcel_collect",
+                "allegro_parcel_reverse_return_send",
+                "allegro_parcel_send",
+                "parcel",
+                "parcel_collect",
+                "parcel_reverse_return_send",
+                "parcel_send",
+                "standard_courier_reverse_return_send",
+                "standard_courier_send"
+            ],
+            "partner_id": 0,
+            "is_next": false,
+            "payment_available": true,
+            "payment_type": {
+                "0": "Payments are not supported"
+            },
+            "virtual": "0",
+            "recommended_low_interest_box_machines_list": [
+                "KRA106M",
+                "KRA20M",
+                "KRA208M",
+                "KRA197M",
+                "KRA356M"
+            ],
+            "apm_doubled": null,
+            "location_247": true,
+            "operating_hours_extended": {
+                "customer": null
+            },
+            "agency": "IPM9988771",
+            "image_url": "https://static.easypack24.net/points/pl/images/KRA02APP.jpg",
+            "easy_access_zone": true,
+            "air_index_level": "GOOD",
+            "physical_type_mapped": "006",
+            "physical_type_description": "Appkomat InPost – swoją paczkę odbierzesz wygodniej z aplikacją InPost"
+        }
+    ],
+    "meta": {
+        "href": "https://api-pl-points.easypack24.net/v1/points",
+        "count": 1,
+        "page": 1,
+        "per_page": 25,
+        "total_pages": 1
+    }
+}
+ 
+
+Kryteria wyszukiwania
+Parametr
+
+Typ
+
+Opis
+
+Przykład
+
+name
+
+String
+Array
+
+Wyszukuje punkt o podanej nazwie.
+Wyszukuje punkty o podanych nazwach.
+
+?name=KRA010
+?name=Kra010,ADA01N
+
+type
+
+String
+Array
+
+Wyszukuje punkty o podanym typie
+Wyszukuje punkty o podanych typach
+
+?type=parcel_locker
+?type=parcel_locker,pop
+
+functions
+
+String
+Array
+
+Wyszukuje punkty posiadające podaną funkcję.
+Wyszukuje punkty posiadające wszystkie wymienione funkcje.
+
+?functions=parcel
+?functions=parcel,parcel_send
+
+partner_id
+
+Integer
+Array
+
+Wyszukuje punkty o podanym partner_id.
+Wyszukuje punkty o podanych partner_id.
+
+?partner_id=1
+?partner_id=1,2 
+
+
+is_next
+
+Boolean
+
+Wyszukuje punkty, które są typu NEXT
+
+?is_next=true
+
+payment_available 
+
+Boolean
+
+Filtrowanie listy punktów po dostępności płatności dla punktu.
+
+?payment_available=true
+
+post_code
+
+String
+Array
+
+Wyszukuje punkty, które posiadają podany kod pocztowy.
+Wyszukuje punkty, które posiadają podane kody pocztowe.
+
+?post_code=11-111
+?post_code=11-111,22-222
+
+city
+
+String
+Array
+
+Wyszukuje punkty, które posiadają podane miasto.
+Wyszukuje punkty, które posiadają podane miasta.
+
+?city=Kraków
+
+?city=Kraków,Warszawa
+
+province
+
+String
+Array
+
+Wyszukuje punkty, które posiadają podane województwo. 
+Wyszukuje punkty, które posiadają podane województwa.
+
+?province=Małopolska
+
+?province=Małopolska,Śląsk
+
+virtual
+
+Integer
+Array
+
+Wyszukuje punkty o podanej wirtualności.
+Wyszukuje punkty o podanych wirtualnościach.
+
+?virtual=0
+?virtual=1,6
+
+updated_from 
+
+
+Date
+
+Wyszukiwanie punktów wg daty, po której nastąpiła aktualizacja punktu.
+
+Jeśli parametr updated_to nie został podany data nie może być wcześniejsza, niż 3 dni wstecz licząc od aktualnej daty.
+
+?updated_from=2018-04-24
+
+updated_to 
+
+
+Date
+
+Wyszukiwanie punktów wg daty, do której nastąpiła aktualizacja punktu.
+
+Wymaga podania updated_from.
+
+?updated_to=2018-04-26
+
+location_247
+
+Boolean
+
+Wyszukiwanie punktów które są dostępne 24/7. (Paczkomat® z parametrem ustawionym na true są dedykowanymi punktami do obsługi usługi Paczka w Weekend).
+
+?location_247=true
+
+supported_locker_temperatures
+
+Integer
+
+Wyszukiwanie punktów z kontrolowaną temperaturą. 
+
+?supported_locker_temperatures=20
+
+Wyszukiwanie wg. lokalizacji
+
+relative_point 
+
+String
+
+Wyszukuje punkty położone najbliżej podanych współrzędnych geograficznych.
+
+?relative_point=52.123,19.321
+
+relative_post_code 
+
+String
+
+Wyszukuje punkty położone najbliżej podanego kodu pocztowego.
+
+?relative_post_code=11-111
+
+max_distance 
+
+Double
+
+Określa odległość w metrach od podanego w relative_point lub relative_post_code punktu.
+
+Użycie parametru wymusza sortowanie wg odległości.
+
+Domyślna wartość: 10000 (10km)
+Maksymalna wartość: 50000 (50 km).
+
+?relative_point=52.123,19.321&max_distance=10000
+
+limit 
+
+Integer
+
+Limit zwracanych punktów w przypadku użycia parametrów w relative_point lub relative_post_code.
+
+?limit=10
+
+Sortowanie wyników
+
+name 
+
+Sortowanie po nazwie punktów.
+
+?sort_by=name
+
+distance_to_relative_point
+
+Sortowanie wg. odległości od punktu relatywnego (relative_point lub relative_post_code)
+
+?sort_by=distance_to_relative_point
+
+status
+
+Sortowanie wg. statusu
+
+?sort_by=status
+
+Sortowanie może odbywać się w dwóch kierunkach, poprzez użycie parametru sort_order. Domyślnie wyniki sortowane są rosnąco (asc) wg nazwy punktów(name).
+
+asc
+
+Sortuje punkty rosnąco
+
+?sort_order=asc&sort_by=status
+
+desc
+
+Sortuje punkty malejąco
+
+?sort_order=desc&sort_by=status
+
+Stronicowanie
+
+page
+
+Określa stronę wyników, która powinna zostać zwrócona.
+
+?page=2
+
+per_page
+
+Określa liczbę wyników wyświetlanych na stronie.
+
+Domyślna wartość: 25
+Maksymalna wartość: 500
+
+?per_page=100
+
+Filtrowanie wyświetlanych pól
+
+fields
+
+Określa listę atrybutów punktu, która ma zostać wyświetlona na stronie.
+
+?fields=name,type
+
+ 
+
+ 

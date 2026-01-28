@@ -1,0 +1,302 @@
+
+W artykule znajdują się informację w jaki sposób należy poprawnie prezentować punkty dostawy do: Paczkomat® InPost, Paczkomat® Appkomat, PaczkoPunktów.
+
+ 
+
+Aby poprawnie umożliwić Klientowi wybór Paczkomat® oraz zaciągnąć dane, które później będą służyć do utworzenia przesyłki, można skorzystać z dwóch rozwiązań:
+
+Geowidget
+
+Zasób Points w API ShipX
+
+Zalecanym rozwiązaniem jest korzystanie z Geowidgetu. W przypadku gdy Klient nie ma możliwość skorzystania z tej funkcjonalności, dopuszcza się użycie listy punktów, autorskiego Geowidgetu wykonanego na podstawie zasobu Points w API ShipX.
+
+Na tej stronie
+
+Geowidget
+Geowidget posiada dedykowane konfiguracje dla opcji dostaw w koszyku:
+Przykłady integracji
+Zasób Points
+Dedykowane konfiguracje dla opcji dostaw w koszyku
+Dobre Praktyki
+Oznaczenie na mapie
+ 
+
+Geowidget
+
+
+Geowidget v5 to lokalizator i selektor punktów zaprojektowany przez InPost.
+
+Jego główne zadania to:
+
+ Wyświetlanie mapy z punktami o różnych typach (np. Paczkomat®, PaczkoPunkty)
+
+ Dostarczenie informacji o tych punktach i umożliwienie integracji z zewnętrznymi systemami Klientów
+
+Jest to oprogramowanie typu widget. Oznacza to, że cały kod i przetwarzanie odbywa się na serwerach InPost. Klienci zewnętrzni dołączają tylko link do tego kodu i określają konfigurację, która będzie używana w ich systemach.
+
+Geowidget posiada dedykowane konfiguracje dla opcji dostaw w koszyku:
+
+
+
+
+Opis
+
+Opcja
+
+functions
+
+Typ prezentowanych punktów
+
+InPost Paczkomat® 24/7
+
+config='parcelCollect'
+
+parcel_collect
+
+Paczkomat®, PaczkoPunkt,
+
+InPost Paczkomat® 24/7 COD
+
+config='parcelCollectPayment'
+
+parcel_collect
+
+Paczkomat®, PaczkoPunkt
+
+InPost Paczkomat® 24/7 Paczka w Weekend
+
+config='parcelCollect247'
+
+parcel_collect
+
+Paczkomat® dostępne 24/7
+
+Prezentowanie punktów nadań
+
+config='parcelSend'
+
+parcel_send
+
+Paczkomat®, PaczkoPunkt
+
+ 
+
+Szczegółowa dokumentacja znajduje się na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/50069505
+  
+
+ 
+
+Przykłady integracji
+
+Środowisko produkcyjne: https://geowidget.inpost.pl/examples/index.html 
+
+Środowisko testowe: https://sandbox-easy-geowidget-sdk.easypack24.net/examples/index.html 
+
+Przykłady geowidgetu
+
+Środowisko produkcyjne: https://geowidget.inpost.pl/  
+Środowisko testowe: https://sandbox-easy-geowidget-sdk.easypack24.net/ 
+
+ 
+
+Zasób Points
+ 
+
+Zasób Points jest dostępny w API ShipX.  Zasób ten skierowany jest do Klientów,  którzy chcą na podstawie API stworzyć swoją wersję Geowidgetu, zaproponować listy z  punktami odbioru, gdy nie mają technicznej możliwości skorzystania z Geowidgetu InPost.
+
+Ta opcja umożliwia:
+
+Pobieranie informacji na temat lokalizacji, w których dostępne są usługi firmy InPost. Punktami mogą być:  maszyny samoobsługowe (Paczkomat®) lub paczkopunkty;
+
+Pobieranie Paczkomat® na podstawie współrzędnych - można również podać maksymalną odległość, w jakiej znajdują się punkty od punktu relatywnego oraz nanieść te współrzędne na mapę Google.
+
+W praktyce, kiedy użytkownik wpisze np. nazwę miejscowości, lub kod pocztowy, Points wyszukuje Paczkomat® przypisane do niego, zwraca ich współrzędne i następnie na ich podstawie można umieścić je na mapie np. Google.
+
+Środowisko produkcyjne:
+
+https://api.inpost.pl/v1/points
+
+Środowisko testowe:
+https://sandbox-api-gateway-pl.easypack24.net/v1/points
+
+Szczegółowa dokumentacja znajduje się na stroniehttps://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/18153470
+ 
+
+Dedykowane konfiguracje dla opcji dostaw w koszyku
+ 
+
+InPost Paczkomat® 24/7
+
+Opis
+
+Konfiguracja za pomocą której należy pobrać pełną listę punktów
+
+Parametry za pomocą których klient będzie filtrował pobraną listę punktów
+
+Typ prezentowanych punktów
+
+InPost Paczkomat® 24/7
+
+/v1/points?type=parcel_locker
+
+ type=parcel_locker
+
+Paczkomat®, PaczkoPunkt
+
+InPost Paczkomat® 24/7 COD
+
+payment_available=true
+
+Paczkomat®, PaczkoPunkt
+
+InPost Paczkomat® 24/7 Paczka w Weekend
+
+location_247=true
+
+Paczkomat® dostępne 24/7
+
+Prezentowanie punktów nadań
+
+/v1/points?functions=parcel_send
+
+ functions=parcel_send
+
+Paczkomat®, PaczkoPunkt
+
+Dobre Praktyki
+Poniżej przedstawiamy listę parametrów za pomocą których należy umieścić informację w szczegółach punktu.
+
+Poniższe informacje zostały pobrane za pomocą zapytania:
+
+
+
+curl -X GET https://api.inpost.pl/v1/points?name=WAW94A -H 'Content-Type: application/json'
+ 
+
+Paczkomat® InPost
+
+Pola wyświetlane
+
+Pola w API
+
+Paczkomat®
+
+Jeśli "partner_id":0 ustaw "Paczkomat®"
+
+Nazwa Paczkomat®
+
+"name": "WAW94A"
+
+Dane adresowe
+
+"address": {
+         "line1": "Czerska 8/10",
+         "line2": "00-732 Warszawa"
+
+Dodatkowy opis
+
+"location_description": "Przy biurowcu Agory"
+
+Godziny otwarcia
+
+"opening_hours": "24/7"
+
+Pin
+
+Dedykowane piny znajdują się w dolnej części artykułu.
+
+ 
+
+PaczkoPunkt
+
+Pola wyświetlane
+
+Pola w API
+
+PaczkoPunkt
+
+Jeśli   "partner_id": 33 ustaw "PaczkoPunkt"
+
+Nazwa PaczkoPunktu
+
+"name": "POP-WAW206"
+
+Dane adresowe
+
+ "address": {
+              "line1": "Kierbedzia 8 LOK. U301",
+              "line2": "00-728 Warszawa"
+
+Dodatkowy opis
+
+"location_description": "EKOPARTY"
+
+Godziny otwarcia
+
+"opening_hours": "PN-PT 10-18 SB 10-14"
+
+Pin
+
+Dedykowane piny znajdują się w dolnej części artykułu.
+
+ 
+
+Paczkomat® Appkomat
+
+Dla nowego typu Paczkomat® należy wyświetlić w dymku dodatkową poniższą informację:
+
+Pola wyświetlane
+
+Pola w API
+
+Ważne! Swoją paczkę odbierzesz wygodniej z aplikacją InPost
+
+Jeśli   "physical_type_mapped": "006" wyświetl informację z pola "physical_type_description"
+
+ 
+
+ 
+
+Oznaczenie na mapie
+
+
+Logo do pobrania: https://inpost.pl/do-pobrania 
+
+Piny do pobrania
+
+Nazwa, rozszerzenie
+
+Paczkomat® Geo.png
+
+Paczkomat® max.png
+
+Paczkomat® min.png
+
+PaczkoPunkt Geo.png
+
+PaczkoPunkt max.png
+
+PaczkoPunkt min.png
+
+ 
+
+Paczkomat® max.pdf
+
+Paczkomat® min.pdf
+
+PaczkoPunkt max.pdf
+
+ 
+
+PaczkoPunkt min.pdf
+
+Paczkomat® max.svg
+
+Paczkomat® min.svg
+
+PaczkoPunkt max.svg
+
+PaczkoPunkt min.svg
+
+ 

@@ -1,0 +1,86 @@
+ 
+
+Możliwość wygenerowania etykiety zwrotnej tylko dla usług kurierskich (bez Allegro).
+
+Etykiety można pobrać dla przesyłek opłaconych - w statusie confirmed lub późniejszym.
+
+Aby pobrać etykiety, użytkownik musi być jej nadawcą.
+
+W przypadku jednej przesyłki zwracany jest pojedynczy plik .pdf, .epl/.epl2, .zpl.
+
+W przypadku wielu przesyłek:
+- jeżeli przesyłki są tego samego serwisu, zwracany jest pojedynczy plik z wszystkimi przesyłkami
+- jeżeli przesyłki są dla różnych serwisów, zwracany jest plik .zip z plikami .epl/.epl2 , .zpl, .pdf oddzielnie dla każdego serwisu.
+
+Maksymalnie można pobrać etykiety dla 100 przesyłek.
+
+Na tej stronie
+
+Uwierzytelnianie
+Pobieranie etykiet zwrotnych
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Pobieranie etykiet zwrotnych
+
+
+GET /v1/organizations/:organization_id/shipments/return_labels
+Parametry 
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+Domyślna wartość
+
+format
+
+String
+
+Format etykiety
+
+Dostępne formaty: Pdf, Epl, Zpl 
+
+Pdf
+
+shipment_ids
+
+Array[Integer]
+
+Identyfikatory przesyłek
+
+
+
+
+
+
+
+Przykładowe zapytanie
+
+
+
+curl -X GET "https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments/return_labels?shipment_ids[]=4257802&shipment_ids[]=4257803&format=zpl" -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+serwer zwróci plik .pdf/.epl/.epl2/.zpl/.zip
+Informacje o błędach
+
+Błędy jakie mogą wystąpić podczas pobierania etykiety przesyłki:
+
+label_generation_failed - nie udało się wygenerować etykiety, powód opisany jest w kluczu message oraz, ewentualnie, obiekcie details
+
+label_template_not_found - w systemie centralnym nie ma szablonu etykiety, więc nie można jej wygenerować
+
+invalid_action - przy próbie pobrania etykiety dla przesyłki nieopłaconej - w statusie wcześniejszym niż confirmed
+
+ 

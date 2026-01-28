@@ -1,0 +1,507 @@
+ 
+
+Webhook jest efektywną i prostą metodą komunikacji pomiędzy aplikacjami pozwalający na wysyłanie powiadomień pod ustalony adres URL, bezpośrednio po zmianie statusu przesyłki. Dzięki temu zintegrowane aplikacje zewnętrzne zostają natychmiast powiadomione o wystąpieniu zmian bez wymogu powtarzającego się odpytywania API o status przesyłki.
+
+ 
+
+
+Dla środowiska produkcyjnego adres webhook można dodać na stronie InPost - Manager paczek  w zakładce Moje konto > API > USTAWIENIA ORGANIZACJI.
+
+Dla środowiska sandbox adres webhook można dodać na stronie InPost - Manager paczek  w zakładce Moje konto >API > USTAWIENIA ORGANIZACJI.
+
+Na tej stronie
+
+Struktura
+Dane wysyłane w przypadku gdy przesyłka zostanie utworzona
+Dane wysłane w przypadku gdy status przesyłki uległ zmianie
+Dane wysyłane w przypadku gdy przesyłka zostanie utworzona w statusie offers_prepared (przesyłka tworzona w trybie ofertowym)
+Dane wysyłane w przypadku gdy przesyłka otrzyma status ZDN (Zwrot do Nadawcy - returned_to_sender)
+
+
+
+Struktura
+Przekazany adres musi spełniać 3 podstawowe warunki
+
+poprawna budowa adresu URL
+
+dostęp do zasobu, do którego kieruje wprowadzony adres URL
+
+zasób powinien odpowiedzieć kodem HTTP 200 na zapytanie GET
+
+
+Przykładowa struktura adresu:
+
+
+
+https://www.serwer.pl:8080/katalog1/katalog2/plik.xxx
+ 
+
+Gdzie:
+
+https (protokół)
+
+www.serwer.pl (adres)
+
+8080 (port)
+
+/katalog1/katalog2/plik.xxx (ścieżka do pliku, proszę podawać małą literą) 
+
+ 
+
+Należy pamiętać, że webhooki są wysyłane z zakresu adresów IP 91.216.25.0/24. Ten zakres adresów IP ma zastosowanie do webhooków wysyłanych w środowisku produkcujnym jak i sandbox.
+
+ 
+
+ 
+
+Dane wysyłane w przypadku gdy przesyłka zostanie utworzona
+
+
+{
+  "event_ts": "2020-03-20 15:08:06 +0100",
+  "event": "shipment_confirmed",
+  "organization_id": 1,
+  "payload": {
+    "shipment_id": 49,
+    "tracking_number": "602677439331630337653846"
+  }
+}
+ 
+
+Dane wysłane w przypadku gdy status przesyłki uległ zmianie
+
+
+{
+  "event_ts": "2020-03-20 15:08:42 +0100",
+  "event": "shipment_status_changed",
+  "organization_id": 1,
+  "payload": {
+    "shipment_id": 49,
+    "status": "delivered",
+    "tracking_number": "602677439331630337653846"
+  }
+}
+ 
+
+Dane wysyłane w przypadku gdy przesyłka zostanie utworzona w statusie offers_prepared (przesyłka tworzona w trybie ofertowym)
+
+
+{
+  "event_ts": "2023-12-18 12:31:58 +0100",
+  "event": "offers_prepared",
+  "organization_id": 1,
+  "payload": {
+    "shipment_id": 1234567890,
+    "offers": [
+      {
+        "id": 1421884561,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_locker",
+          "name": "InPost Paczkomaty",
+          "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+        },
+        "service": {
+          "id": "inpost_locker_allegro",
+          "name": "Allegro Paczkomaty24/7 InPost",
+          "description": "Przesyłka paczkomatowa Allegro Paczkomat 24/7 InPost"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          },
+          {
+            "key": "sending_method_required",
+            "message": "sending_method_required"
+          },
+          {
+            "key": "allegro_email_invalid",
+            "message": "allegro_email_invalid"
+          }
+        ]
+      },
+      {
+        "id": 1421884563,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_locker",
+          "name": "InPost Paczkomaty",
+          "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+        },
+        "service": {
+          "id": "inpost_locker_pass_thru",
+          "name": "Podaj dalej",
+          "description": "Przesyłka paczkomatowa Podaj Dalej"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          },
+          {
+            "key": "dropoff_and_target_points_must_be_equal",
+            "message": "Dropoff point and target point must be equal for selected service."
+          }
+        ]
+      },
+      {
+        "id": 1421884564,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_locker",
+          "name": "InPost Paczkomaty",
+          "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+        },
+        "service": {
+          "id": "inpost_locker_standard",
+          "name": "Paczkomatowa standardowa",
+          "description": "Przesyłka paczkomatowa standardowa"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          }
+        ]
+      },
+      {
+        "id": 1421884566,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_letter",
+          "name": "InPost Listy",
+          "description": "Inpost Letter - Przesyłki listowe"
+        },
+        "service": {
+          "id": "inpost_letter_allegro",
+          "name": "Allegro miniKurier24 InPost",
+          "description": "Przesyłka listowa Allegro miniKurier24 InPost"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          },
+          {
+            "key": "parcels_size_invalid",
+            "message": "Parcel is too large or too heavy."
+          },
+          {
+            "key": "sending_method_required",
+            "message": "sending_method_required"
+          },
+          {
+            "key": "allegro_email_invalid",
+            "message": "allegro_email_invalid"
+          }
+        ]
+      },
+      {
+        "id": 1421884567,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_locker",
+          "name": "InPost Paczkomaty",
+          "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+        },
+        "service": {
+          "id": "inpost_courier_allegro",
+          "name": "Allegro Kurier24 InPost",
+          "description": "Przesyłka kurierska Allegro Kurier24 InPost"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          },
+          {
+            "key": "parcels_size_invalid",
+            "message": "Parcel is too large or too heavy."
+          },
+          {
+            "key": "sending_method_required",
+            "message": "sending_method_required"
+          },
+          {
+            "key": "allegro_email_invalid",
+            "message": "allegro_email_invalid"
+          }
+        ]
+      },
+      {
+        "id": 1421884568,
+        "status": "available",
+        "expires_at": "2023-12-18T12:36:58.279+01:00",
+        "rate": null,
+        "currency": "PLN",
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_courier",
+          "name": "InPost Kurier",
+          "description": "InPost Express - Przesyłki kurierskie"
+        },
+        "service": {
+          "id": "inpost_courier_standard",
+          "name": "Kurier standard",
+          "description": "Przesyłka kurierska standardowa"
+        },
+        "unavailability_reasons": null
+      },
+      {
+        "id": 1421884569,
+        "status": "available",
+        "expires_at": "2023-12-18T12:36:58.279+01:00",
+        "rate": null,
+        "currency": "PLN",
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_courier",
+          "name": "InPost Kurier",
+          "description": "InPost Express - Przesyłki kurierskie"
+        },
+        "service": {
+          "id": "inpost_courier_express_1000",
+          "name": "Kurier doręczenie 10:00",
+          "description": "Przesyłka kurierska z doręczeniem do godziny 10:00 następnego dnia"
+        },
+        "unavailability_reasons": null
+      },
+      {
+        "id": 1421884570,
+        "status": "available",
+        "expires_at": "2023-12-18T12:36:58.279+01:00",
+        "rate": null,
+        "currency": "PLN",
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_courier",
+          "name": "InPost Kurier",
+          "description": "InPost Express - Przesyłki kurierskie"
+        },
+        "service": {
+          "id": "inpost_courier_express_1200",
+          "name": "Kurier doręczenie 12:00",
+          "description": "Przesyłka kurierska z doręczeniem do godziny 12:00 następnego dnia"
+        },
+        "unavailability_reasons": null
+      },
+      {
+        "id": 1421884572,
+        "status": "available",
+        "expires_at": "2023-12-18T12:36:58.279+01:00",
+        "rate": null,
+        "currency": "PLN",
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_courier",
+          "name": "InPost Kurier",
+          "description": "InPost Express - Przesyłki kurierskie"
+        },
+        "service": {
+          "id": "inpost_courier_express_1700",
+          "name": "Kurier doręczenie 17:00",
+          "description": "Przesyłka kurierska z doręczeniem do godziny 17:00 następnego dnia"
+        },
+        "unavailability_reasons": null
+      },
+      {
+        "id": 1421884574,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_locker",
+          "name": "InPost Paczkomaty",
+          "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+        },
+        "service": {
+          "id": "inpost_courier_c2c",
+          "name": "Kurier standard",
+          "description": "Przesyłka kurierska standardowa"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          },
+          {
+            "key": "sending_method_required",
+            "message": "sending_method_required"
+          }
+        ]
+      },
+      {
+        "id": 1421884576,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_locker",
+          "name": "InPost Paczkomaty",
+          "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+        },
+        "service": {
+          "id": "inpost_locker_standard_smart",
+          "name": "Paczkomatowa standardowa",
+          "description": "Przesyłka paczkomatowa standardowa"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          },
+          {
+            "key": "allegro_email_invalid",
+            "message": "allegro_email_invalid"
+          }
+        ]
+      },
+      {
+        "id": 1421884577,
+        "status": "unavailable",
+        "expires_at": null,
+        "rate": null,
+        "currency": null,
+        "additional_services": [
+          "email",
+          "sms"
+        ],
+        "carrier": {
+          "id": "inpost_locker",
+          "name": "InPost Paczkomaty",
+          "description": "InPost Paczkomaty - Przesyłki paczkomatowe"
+        },
+        "service": {
+          "id": "inpost_locker_allegro_smart",
+          "name": "Allegro Paczkomaty24/7 InPost",
+          "description": "Przesyłka paczkomatowa Allegro Paczkomat 24/7 InPost"
+        },
+        "unavailability_reasons": [
+          {
+            "key": "additional_service_email_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_email_unavailable"
+          },
+          {
+            "key": "additional_service_sms_unavailable",
+            "message": "translation missing: keys.errors.messages.additional_service_sms_unavailable"
+          },
+          {
+            "key": "sending_method_required",
+            "message": "sending_method_required"
+          },
+          {
+            "key": "allegro_email_invalid",
+            "message": "allegro_email_invalid"
+          }
+        ]
+      }
+    ]
+  }
+}
+ 
+
+Dane wysyłane w przypadku gdy przesyłka otrzyma status ZDN (Zwrot do Nadawcy - returned_to_sender)
+ 
+
+
+
+{
+"event_ts": "2023-05-23 14:56:01 +0200",
+"event": "shipment_status_changed",
+"organization_id": 12345,
+"payload": {
+"shipment_id": 709709700,
+"status": "returned_to_sender",
+"tracking_number": "630055758325001130630004",
+"return_tracking_number": "520107015145404000176000"
+ }
+}
+ 
+
+ 

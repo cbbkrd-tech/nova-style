@@ -1,0 +1,1620 @@
+Obiekt przesyłki wykorzystywany jest do uzyskania dostępnych ofert, a jednocześnie reprezentuje ona fizyczną paczkę (lub paczki), która będzie przesłana pomiędzy określonymi adresami. 
+
+Na tej stronie
+
+Uwierzytelnianie
+Tworzenie przesyłki w trybie uproszczonym 
+Przykładowe zapytania
+Pojedyncza paczka dla przesyłki kurierskiej:
+Zapytanie z wieloma paczkami (można tworzyć tylko dla inpost_courier)
+Przesyłka kurierska - InPost Kurier C2C (usługa dla klienta detalicznego - prepaid)
+Przesyłka kurierska Paleta Standard
+Przesyłka Paczkomat® standard
+Przesyłka Paczkomat® - Podaj Dalej
+Przesyłka Allegro Paczkomat® 24/7 InPost
+Przesyłka Allegro miniKurier24 InPost
+Przesyłka Allegro Kurier24 InPost:
+Informacje o błędach
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+
+
+
+Tworzenie przesyłki w trybie uproszczonym 
+Aby utworzyć przesyłkę w ramach określonej organizacji, użytkownik musi być jej członkiem.
+
+Klienci debetowi
+
+Po utworzeniu przesyłki nie zwracamy cen dla klientów debetowych. Atrybut rate przyjmuje wartość null
+
+ Działanie asynchroniczne
+
+Po utworzeniu przesyłki zostanie uruchomiony asynchroniczny proces przygotowywania ofert, manifestacji oraz kupienia oferty.
+
+ 
+
+
+
+POST /v1/organizations/:organization_id/shipments
+Parametry
+
+Wszystkie poniższe parametry powinny być zawarte w obiekcie shipment.
+
+ 
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+receiver
+
+Receiver
+
+Dane odbiorcy paczki
+
+Atrybut jest wymagany.
+
+Jeśli ma być przedstawiona oferta usługi kurierskiej (łącznie z inpost_courier_c2c), należy podać co najmniej receiver.phone, receiver.company_name i/lub receiver.first_name i receiver.last_name oraz obiekt address
+
+Jeśli ma być przedstawiona oferta Paczkomat® należy podać receiver.phone i receiver.email
+
+Podanie wszystkich danych umożliwi przedstawienie ofert obu typów
+
+Jeśli zostanie przekazany atrybut is_return = true, atrybut receiver nie będzie wymagany
+
+sender
+
+Sender
+
+Dane nadawcy paczki.
+
+Atrybut nie jest wymagany.
+
+Jeśli nie zostaną podane żadne dane, domyślnie zostaną użyte dane organizacji, w ramach której tworzona jest przesyłka.
+
+parcels
+
+Array[ParcelsSimple]
+
+Dane paczek zawartych w przesyłce.
+
+Atrybut jest wymagany.
+
+Kolekcja minimum 1, maksimum 99
+
+custom_attributes
+
+CustomAttributes
+
+Dodatkowe atrybuty przesyłki, np.
+
+"custom_attributes": {
+ "target_point": "KRA010"
+}
+
+Atrybut nie jest wymagany.
+
+Lista dodatkowych atrybutów została opisana we wstępie.
+
+Wymagane jest podanie Paczkomat® w przypadku przesyłki Paczkomat®.
+
+cod
+
+Cod
+
+Wartość pobrania.
+
+Atrybut nie jest wymagany.
+
+Walidacja oraz wymagalność przekazania atrybutu występuje w momencie przekazania serwisu.
+
+insurance
+
+Insurance
+
+Kwota ubezpieczenia przesyłki.
+
+Atrybut jest wymagany dla poniższych serwisów: 
+
+inpost_courier_standard, inpost_courier_express_1000, inpost_courier_express_1200, inpost_courier_express_1700, inpost_courier_palette w przypadku przekazania atrybutu COD.
+
+Walidacja oraz wymagalność przekazania atrybutu występuje w momencie przekazania serwisu.
+
+reference
+
+String
+
+Dodatkowy opis przesyłki, np. numer zamówienia.
+
+Atrybut nie jest wymagany.
+
+Minimum 3 znaki, maksimum 100 znaków, możliwość przekazania pustego atrybutu.
+
+is_return
+
+Bool
+
+Określa przesyłkę jako zwrotną.
+
+Atrybut nie jest wymagany.
+
+Dopuszczalne wartości (true, false)
+
+Możliwość przekazania pustego atrybutu.
+
+Jeśli ustawione na true, określa przesyłkę jako zwrotną. W takiej sytuacji dane nadawcy i odbiorcy zostaną automatycznie zamienione miejscami.
+
+service
+
+String
+
+Wybrana przez klienta usługa.
+
+Dostępne wartości patrz 
+Rozmiary i usługi dla przesyłek
+ .
+
+Atrybut jest wymagany.
+
+
+
+
+additional_services
+
+Array[String]
+
+Usługi dodatkowe.
+
+Dostępne usługi dodatkowe: sms, email, saturday.
+
+Rozmiary i usługi dla przesyłek
+.
+
+Atrybut nie jest wymagany.
+
+Atrybut walidowany w momencie przekazania wartości.
+
+Przekazując atrybut additional_services system sprawdza przekazanie atrybutu service, jeśli atrybut service nie zostanie przekazany lub przekazany atrybut additional_services nie mieści się w zakresie przekazanego serwisu, użytkownik otrzyma błąd.
+
+external_customer_id 
+
+String
+
+Identyfikator broker'a generującego przesyłki w ramach innej organizacji.
+
+Atrybut nie jest wymagany.
+
+only_choice_of_offer
+
+Bool
+
+Ustawienie parametru na true powoduje, że oferta zostanie wybrana dla podanego serwisu, ale nie zostanie automatycznie opłacona. Taką przesyłkę trzeba opłacić przed końcem wygaśnięcia oferty, wykonując operacje 
+Opłacanie przesyłki
+.
+
+Atrybut nie jest wymagany.
+
+
+
+
+mpk
+
+String
+
+Nazwa miejsca powstania kosztów.
+
+Atrybut nie jest wymagany.
+
+Maksymalnie 255 znaków
+
+Jeśli atrybut jest podany, weryfikujemy czy przynależy do organizacji, z której wykonywane jest żądanie
+
+Możliwość przekazania pustego atrybutu
+
+Miejsce powstania kosztów musi najpierw być dodane do organizacji, aby można je było przypisać do przesyłki, 
+Miejsce powstania kosztów (MPK)
+ 
+
+comments
+
+String
+
+Dowolny komentarz
+
+Atrybut nie jest wymagany
+
+Maksymalnie 100 znaków
+
+Minimalnie 3 znaki
+
+Możliwość przekazania pustego atrybutu
+
+Przykładowe zapytania
+ 
+
+Pojedyncza paczka dla przesyłki kurierskiej:
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5c...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "parcels": [
+        {
+            "id": "small package",
+            "dimensions": {
+                "length": "80",
+                "width": "360",
+                "height": "640",
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": "25",
+                "unit": "kg"
+            },
+            "is_non_standard": false
+        }
+    ],
+    "insurance": {
+        "amount": 25,
+        "currency": "PLN"
+    },
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+    },
+    "service": "inpost_courier_standard",
+    "additional_services": [
+        "email",
+        "sms"
+    ],
+    "reference": "Test",
+    "comments": "dowolny komentarz"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 201 CREATED
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/1234",
+    "id": 1234,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_courier_standard",
+    "reference": "Test",
+    "is_return": false,
+    "application_id": 25,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": null,
+    "end_of_week_collection": false,
+    "comments": "dowolny komentarz",
+    "mpk": null,
+    "additional_services": [
+        "email",
+        "sms"
+    ],
+    "custom_attributes": {},
+    "cod": {
+        "amount": 12.5,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 25.0,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": 2798153592,
+        "name": null,
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 1970664224,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 2798153591,
+        "name": null,
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "id": 1970664223,
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 1404043193,
+            "identify_number": "small package",
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": null,
+            "dimensions": {
+                "length": 80.0,
+                "width": 360.0,
+                "height": 640.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-12-18T23:52:42.375+01:00",
+    "updated_at": "2023-12-18T23:52:42.375+01:00"
+}
+ 
+
+Zapytanie z wieloma paczkami (można tworzyć tylko dla inpost_courier)
+ 
+
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/115/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+     "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+"receiver": {
+        "company_name": "Company name",
+    	"first_name": "Jan",
+        "last_name": "Kowalski",  
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "parcels": [
+        {
+            "id": "small package",
+            "dimensions": {
+                "length": "80",
+                "width": "360",
+                "height": "640",
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": "25",
+                "unit": "kg"
+            },
+             "is_non_standard": true
+        },
+        {
+            "id": "big package",
+            "dimensions": {
+                "length": "80",
+                "width": "360",
+                "height": "640",
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": "25",
+                "unit": "kg"
+            },
+             "is_non_standard": true
+        }
+    ],
+    "insurance": {
+        "amount": 25,
+        "currency": "PLN"
+    },
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+    },
+    "service": "inpost_courier_standard",
+    "additional_services": ["email", "sms"],
+    "reference": "Test",
+    "comments": "dowolny komentarz"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/12345",
+    "id": 12345,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_courier_standard",
+    "reference": "Test",
+    "is_return": false,
+    "application_id": 25,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": null,
+    "end_of_week_collection": false,
+    "comments": "dowolny komentarz",
+    "mpk": null,
+    "additional_services": [
+        "email",
+        "sms"
+    ],
+    "custom_attributes": {},
+    "cod": {
+        "amount": 12.5,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 25.0,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": 2798157080,
+        "name": null,
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 1970666604,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 2798157079,
+        "name": null,
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "id": 1970666603,
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 1404044945,
+            "identify_number": "small package",
+            "tracking_number": null,
+            "is_non_standard": true,
+            "template": null,
+            "dimensions": {
+                "length": 80.0,
+                "width": 360.0,
+                "height": 640.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        },
+        {
+            "id": 1404044946,
+            "identify_number": "big package",
+            "tracking_number": null,
+            "is_non_standard": true,
+            "template": null,
+            "dimensions": {
+                "length": 80.0,
+                "width": 360.0,
+                "height": 640.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-12-18T23:55:30.620+01:00",
+    "updated_at": "2023-12-18T23:55:30.620+01:00"
+}
+ 
+
+Przesyłka kurierska - InPost Kurier C2C (usługa dla klienta detalicznego - prepaid)
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlp...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+     "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+ "receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",  
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+    }
+    },
+    "parcels": {
+        "template": "small"
+    },
+    "insurance": {
+        "amount": 25,
+        "currency": "PLN"
+    },
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+   },
+    "custom_attributes": {
+        "sending_method": "parcel_locker",
+        "dropoff_point": "BTO02M"
+    },
+    "service": "inpost_courier_c2c",
+    "reference": "Test"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/12345",
+    "id": 12345,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_courier_c2c",
+    "reference": "Test",
+    "is_return": false,
+    "application_id": 25,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": "parcel_locker",
+    "end_of_week_collection": false,
+    "comments": null,
+    "mpk": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "dropoff_point": "BTO02M",
+        "sending_method": "parcel_locker"
+    },
+    "cod": {
+        "amount": 12.5,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 25.0,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": 2798158940,
+        "name": null,
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 1970667852,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 2798158939,
+        "name": null,
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "id": 1970667851,
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 1404045876,
+            "identify_number": null,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": "small",
+            "dimensions": {
+                "length": 380.0,
+                "width": 640.0,
+                "height": 80.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-12-18T23:57:12.508+01:00",
+    "updated_at": "2023-12-18T23:57:12.508+01:00"
+}
+ 
+
+Przesyłka kurierska Paleta Standard
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+     "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+"receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",  
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "parcels": {
+                "dimensions": {
+                "length": "800",
+                "width": "800",
+                "height": "800",
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": "50.1",
+                "unit": "kg"
+                }
+           },
+    "service": "inpost_courier_palette",
+    "additional_services": ["email", "sms"],
+    "reference": "Test",
+    "comments": "dowolny komentarz"
+    }'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/12345",
+    "id": 12345,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_courier_palette",
+    "reference": "Test",
+    "is_return": false,
+    "application_id": 25,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": null,
+    "end_of_week_collection": false,
+    "comments": "dowolny komentarz",
+    "mpk": null,
+    "additional_services": [
+        "email",
+        "sms"
+    ],
+    "custom_attributes": {},
+    "cod": {
+        "amount": null,
+        "currency": null
+    },
+    "insurance": {
+        "amount": null,
+        "currency": null
+    },
+    "sender": {
+        "id": 2798161130,
+        "name": null,
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 1970669350,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 2798161129,
+        "name": null,
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "receiver@example.com",
+        "phone": "888000000",
+        "address": {
+            "id": 1970669349,
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 1404046973,
+            "identify_number": null,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": null,
+            "dimensions": {
+                "length": 800.0,
+                "width": 800.0,
+                "height": 800.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 50.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-12-18T23:59:46.509+01:00",
+    "updated_at": "2023-12-18T23:59:46.509+01:00"
+}
+ 
+
+Przesyłka Paczkomat® standard
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "test@inpost.pl",
+        "phone": "111222333"
+    },
+    "parcels": {
+        "template": "small"
+    },
+    "insurance": {
+        "amount": 25,
+        "currency": "PLN"
+    },
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+    },
+    "custom_attributes": {
+        "sending_method": "dispatch_order",
+        "target_point": "BTO02M"
+    },
+    "service": "inpost_locker_standard",
+    "reference": "Test"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/12345",
+    "id": 12345,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_locker_standard",
+    "reference": "Test",
+    "is_return": false,
+    "application_id": 25,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": "dispatch_order",
+    "end_of_week_collection": false,
+    "comments": null,
+    "mpk": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "target_point": "BTO02M",
+        "sending_method": "dispatch_order"
+    },
+    "cod": {
+        "amount": 12.5,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 25.0,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": 2798165704,
+        "name": null,
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 1970672593,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 2798165703,
+        "name": null,
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "test@inpost.pl",
+        "phone": "111222333",
+        "address": null
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 1404049260,
+            "identify_number": null,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": "small",
+            "dimensions": {
+                "length": 380.0,
+                "width": 640.0,
+                "height": 80.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-12-19T00:02:05.991+01:00",
+    "updated_at": "2023-12-19T00:02:05.991+01:00"
+}
+ 
+
+Przesyłka Paczkomat® - Podaj Dalej
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/115/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "test@inpost.pl",
+        "phone": "111222333"
+    },
+    "parcels": {
+        "template": "large"
+    },
+    "insurance": {
+        "amount": 25,
+        "currency": "PLN"
+    },
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+    },
+    "custom_attributes": {
+        "sending_method": "parcel_locker",
+        "target_point": "BTO02M",
+        "dropoff_point": "BTO02M"
+    },
+    "service": "inpost_locker_pass_thru",
+    "reference": "Test"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK 
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/1399066065",
+    "id": 1399066065,
+    "status": "created",
+    "tracking_number": null,
+    "return_tracking_number": null,
+    "service": "inpost_locker_pass_thru",
+    "reference": "Test",
+    "is_return": false,
+    "application_id": 25,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": "parcel_locker",
+    "end_of_week_collection": false,
+    "comments": null,
+    "mpk": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "target_point": "BTO02M",
+        "dropoff_point": "BTO02M",
+        "sending_method": "parcel_locker"
+    },
+    "cod": {
+        "amount": 12.5,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 25.0,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": 2798170636,
+        "name": null,
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "id": 1970675960,
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 2798170635,
+        "name": null,
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "test@inpost.pl",
+        "phone": "111222333",
+        "address": null
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 1404051726,
+            "identify_number": null,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": "large",
+            "dimensions": {
+                "length": 380.0,
+                "width": 640.0,
+                "height": 410.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 25.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "created_at": "2023-12-19T00:03:52.099+01:00",
+    "updated_at": "2023-12-19T00:03:52.099+01:00"
+}
+ 
+
+ 
+
+Przesyłka Allegro Paczkomat® 24/7 InPost
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "123abc+123abc@user.allegrogroup.pl",
+        "phone": "111222333"
+    },
+    "parcels": {
+        "template": "small"
+    },
+    "custom_attributes": {
+        "target_point": "BTO02M",
+        "sending_method": "dispatch_order"
+    },
+    "service": "inpost_locker_allegro",
+    "reference": "Test"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 201 CREATED
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/1234567890",
+    "id": 1234567890,
+    "status": "created",
+    "tracking_number": null,
+    "service": "inpost_locker_allegro",
+    "reference": null,
+    "is_return": false,
+    "application_id": 123,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": "dispatch_order",
+    "mpk": null,
+    "comments": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "sending_method": "dispatch_order",
+        "target_point": "KRA012"
+    },
+    "cod": {
+        "amount": null,
+        "currency": null
+    },
+    "insurance": {
+        "amount": 5000,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": "123",
+        "name": "Nazwa",
+        "company_name": "InPost S.A.",
+        "first_name": "Jan",
+        "last_name": "Nowak",
+        "email": "sender@email.com",
+        "phone": "888000000",
+        "address": {
+            "id": "123",
+            "street": "Malborska",
+            "building_number": "130",
+		    "line1": null,
+            "line2": null
+            "city": "Kraków",
+            "post_code": "30-624",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 123,
+        "name": "Name",
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "123abc+123abc@user.allegrogroup.pl",
+        "phone": "111222333",
+        "address": null
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 123,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": "small",
+            "dimensions": {
+                "length": 380.0,
+                "width": 640.0,
+                "height": 80.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 10.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "end_of_week_collection": false,
+    "created_at": "2020-02-23T18:52:25.100+01:00",
+    "updated_at": "2020-02-23T18:52:25.100+01:00"
+}
+ 
+
+Przesyłka Allegro miniKurier24 InPost
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "123abc+123abc@user.allegrogroup.pl",
+        "phone": "312312321",
+        "address": {
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "parcels": {
+        "template": "letter_a"
+    },
+    "custom_attributes": {
+        "sending_method": "dispatch_order"
+    },
+    "service": "inpost_letter_allegro",
+    "reference": "Test"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 201 CREATED
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/1234567890",
+    "id": 1234567890
+    "status": "created",
+    "tracking_number": null,
+    "service": "inpost_letter_allegro",
+    "reference": null,
+    "is_return": false,
+    "application_id": 123,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": "dispatch_order",
+    "mpk": null,
+    "comments": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "sending_method": "dispatch_order"
+    },
+    "cod": {
+        "amount": null,
+        "currency": null
+    },
+    "insurance": {
+        "amount": 5000,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": "123",
+        "name": "Nazwa",
+        "company_name": "InPost S.A.",
+        "first_name": "Jan",
+        "last_name": "Nowak",
+        "email": "sender@email.com",
+        "phone": "888000000",
+        "address": {
+            "id": "123",
+            "street": "Malborska",
+            "building_number": "130",
+		    "line1": null,
+            "line2": null
+            "city": "Kraków",
+            "post_code": "30-624",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 123,
+        "name": "Name",
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "123abc+123abc@user.allegrogroup.pl",
+        "phone": "888000000",
+        "address": {
+            "id": 123,
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 123,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": "letter_a",
+            "dimensions": {
+                "length": 380.0,
+                "width": 640.0,
+                "height": 80.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 10.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "end_of_week_collection": false,
+    "created_at": "2020-02-23T19:24:51.120+01:00",
+    "updated_at": "2020-02-23T19:24:51.120+01:00"
+}
+ 
+
+Przesyłka Allegro Kurier24 InPost:
+
+
+curl --location 'https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI...' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender": {
+        "company_name": "Company_name",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "test@grupainteger.pl",
+        "phone": "321321321",
+        "address": {
+            "street": "Czerniakowska",
+            "building_number": "87A",
+            "city": "Warszawa",
+            "post_code": "00-718",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "gtcc1rh559+4fe361dc5@user.allegrogroup.pl",
+        "phone": "888000000",
+        "address": {
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "parcels": {
+        "dimensions": {
+            "length": "10",
+            "width": "10",
+            "height": "10",
+            "unit": "mm"
+        },
+        "weight": {
+            "amount": "10",
+            "unit": "kg"
+        }
+    },
+    "cod": {
+        "amount": 12.50,
+        "currency": "PLN"
+    },
+    "custom_attributes": {
+        "sending_method": "dispatch_order"
+    },
+    "service": "inpost_courier_allegro",
+    "reference": "Test"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 201 CREATED
+Content-Type: application/json
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/shipments/1234567890",
+    "id": 1234567890,
+    "status": "created",
+    "tracking_number": null,
+    "service": "inpost_courier_allegro",
+    "reference": null,
+    "is_return": false,
+    "application_id": 123,
+    "created_by_id": null,
+    "external_customer_id": null,
+    "sending_method": "dispatch_order",
+    "mpk": null,
+    "comments": null,
+    "additional_services": [],
+    "custom_attributes": {
+        "sending_method": "dispatch_order"
+    },
+    "cod": {
+        "amount": 12.5,
+        "currency": "PLN"
+    },
+    "insurance": {
+        "amount": 5000,
+        "currency": "PLN"
+    },
+    "sender": {
+        "id": "123",
+        "name": "Nazwa",
+        "company_name": "InPost S.A.",
+        "first_name": "Jan",
+        "last_name": "Nowak",
+        "email": "sender@email.com",
+        "phone": "888000000",
+        "address": {
+            "id": "123",
+            "street": "Malborska",
+            "building_number": "130",
+		    "line1": null,
+            "line2": null
+            "city": "Kraków",
+            "post_code": "30-624",
+            "country_code": "PL"
+        }
+    },
+    "receiver": {
+        "id": 123,
+        "name": "Name",
+        "company_name": "Company name",
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "email": "123abc+123abc@user.allegrogroup.pl",
+        "phone": "888000000",
+        "address": {
+            "id": 123,
+            "street": "Cybernetyki",
+            "building_number": "10",
+            "line1": null,
+            "line2": null,
+            "city": "Warszawa",
+            "post_code": "02-677",
+            "country_code": "PL"
+        }
+    },
+    "selected_offer": null,
+    "offers": [],
+    "transactions": [],
+    "parcels": [
+        {
+            "id": 123,
+            "tracking_number": null,
+            "is_non_standard": false,
+            "template": null,
+            "dimensions": {
+                "length": 10.0,
+                "width": 10.0,
+                "height": 10.0,
+                "unit": "mm"
+            },
+            "weight": {
+                "amount": 10.0,
+                "unit": "kg"
+            }
+        }
+    ],
+    "end_of_week_collection": false,
+    "created_at": "2020-02-23T19:09:25.712+01:00",
+    "updated_at": "2020-02-23T19:09:25.712+01:00"
+}
+ 
+
+Informacje o błędach
+Błędy, jakie mogą wystąpić podczas tworzenia przesyłki (poniższe błędy są wysyłane do aplikacji która wysłała żądanie, nie na webhook):
+
+validation_failed - przesyłane parametry są niepoprawne. Szczegóły zawarte w polu details,
+
+resource_not_found - w przypadku gdy użytkownik próbuje utworzyć przesyłkę dla organizacji, która nie istnieje lub nie ma uprawnień do jej utworzenia,
+
+no_carriers - w przypadku gdy organizacja nie ma podpisanej umowy z żadnym przewoźnikiem,
+
+carrier_unavailable - w przypadku gdy organizacja nie ma podpisanej umowy z przewoźnikiem świadczącym wybraną usługę wskazaną w atrybucie service
+
+ 

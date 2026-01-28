@@ -1,0 +1,295 @@
+Na potrzeby rozliczeń miejsc powstawania kosztów widoczne jest w Raportu COD dotyczy tylko przesyłek kurierskich.
+
+ 
+
+Zasób MPK - miejsce powstania kosztu - wartość słownikowa definiowana przez użytkownika, z założenia oznacza np. dział, który wygenerował koszt (np. wysłał przesyłkę) - Dział Marketingu, Dział Logistyki itp. Wartości można dowolnie definiować. Numer MPK powinien być unikalny. Numer MPK przypisujemy do przesyłki tak, by po zmianie nazwy MPK nie zmieniała się ona w danych historycznych.
+
+Na tej stronie
+
+Uwierzytelnianie
+Struktura
+Lista miejsc powstania kosztów
+Szczegóły miejsca powstania kosztu
+Tworzenie miejsca powstania kosztów
+Aktualizowanie miejsca powstania kosztu
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Struktura
+Zasób MPK  posiada następujące atrybuty:
+
+Atrybut
+
+Typ
+
+Opis
+
+id
+
+Integer
+
+Unikalny identyfikator
+
+name
+
+String
+
+Nazwa miejsca powstania kosztów
+
+description
+
+String
+
+Opis miejsca powstania kosztów
+
+updated_at
+
+DateTime
+
+Ostatnia aktualizacja  
+
+created_at
+
+DateTime
+
+Data utworzenia  
+
+Przykład zasobu MPK w formacie JSON:
+
+
+
+{
+    "href": "https://api-shipx-pl.easypack24.net/v1/mpks/1",
+    "id": 1,
+    "name": "Nazwa miejsca powstania kosztów",
+    "description": "Opis miejsca powstania kosztów",
+    "created_at": "2018-05-15T21:58:49.427+02:00",
+    "updated_at": "2018-05-17T10:35:59.644+02:00"
+}
+ 
+
+Lista miejsc powstania kosztów
+ 
+
+Pobieranie listy wszystkich miejsc powstania kosztów dla wybranej organizacji.
+
+Zasób jest stronicowany. Więcej informacji na stronie https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/11731055
+
+
+
+GET /v1/organizations/:organization_id/mpks
+Sortowanie wyników
+
+Parametr
+
+Opis
+
+sort_by
+
+Określa atrybut po którym mają zostać posortowane wyniki.
+
+sort_order
+
+Określa rodzaj sortowania - w kolejności malejącej (desc) lub rosnącej (asc).
+
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/organizations/1/mpks -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+ {
+    "href": "http://api-shipx-pl.easypack24.net:3000/v1/organizations/1/mpks",
+    "count": 3,
+    "page": 1,
+    "per_page": 30,
+    "items": [
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/mpks/3",
+            "id": 3,
+            "name": "First",
+            "description": "Some New Description 1",
+            "created_at": "2018-05-16T13:36:28.332+02:00",
+            "updated_at": "2018-05-16T13:36:28.332+02:00"
+        },
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/mpks/2",
+            "id": 2,
+            "name": "Second",
+            "description": "Some New Description 2",
+            "created_at": "2018-05-16T13:33:03.745+02:00",
+            "updated_at": "2018-05-17T09:56:11.500+02:00"
+        },
+        {
+            "href": "https://api-shipx-pl.easypack24.net/v1/mpks/1",
+            "id": 1,
+            "name": "Third",
+            "description": "Some New Description 3",
+            "created_at": "2018-05-15T21:58:49.427+02:00",
+            "updated_at": "2018-05-15T22:31:04.316+02:00"
+        }
+    ]
+}
+ 
+
+Szczegóły miejsca powstania kosztu
+
+
+GET /v1/mpks/:id
+Przykład zapytania
+
+
+
+curl -X GET https://api-shipx-pl.easypack24.net/v1/mpks/1 -H 'Authorization: Bearer token' -H 'Content-Type: application/json'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+ {
+    "href": "https://api-shipx-pl.easypack24.net/v1/mpks/1",
+    "id": 1,
+    "name": "Nowa nazwa miejsca powstania kosztów",
+    "description": "Nowy opis miejsca powstania kosztów",
+    "created_at": "2018-05-15T21:58:49.427+02:00",
+    "updated_at": "2018-05-15T22:31:04.316+02:00"
+}
+ 
+
+Tworzenie miejsca powstania kosztów
+
+
+POST /v1/organizations/:organization_id/mpks
+Parametry
+
+Parametr
+
+Typ
+
+Opis
+
+Wymagania
+
+name
+
+String
+
+Nazwa miejsca powstania kosztów
+
+Atrybut jest wymagany
+
+Wartość atrybutu jest unikatowa w ramach organizacji
+
+Maksymalna długość 255 znaków
+
+description
+
+String
+
+Opis miejsca powstania kosztów
+
+Atrybut jest wymagany
+
+Przykładowe zapytanie
+
+
+
+curl -X PUT https://api-shipx-pl.easypack24.net/v1/organizations/1/mpks -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+  "name": "Nazwa miejsca powstania kosztów", 
+  "description": "Opis miejsca powstania kosztów"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+ {
+    "href": "https://api-shipx-pl.easypack24.net/v1/mpks/3",
+    "id": 3,
+    "name": "Nazwa miejsca powstania kosztów",
+    "description": "Opis miejsca powstania kosztów",
+    "created_at": "2018-05-16T13:36:28.332+02:00",
+    "updated_at": "2018-05-16T13:36:28.332+02:00"
+}
+ 
+
+Informacja o błędach:
+
+resource_not_found - organizacja o podanym ID nie istnieje
+
+ 
+
+Aktualizowanie miejsca powstania kosztu
+
+
+PUT /v1/mpks/:id
+Parametry
+
+Parametr
+
+Typ
+
+Opis
+
+Wymagania
+
+name
+
+String
+
+Nazwa miejsca powstania kosztów
+
+Atrybut jest wymagany
+
+Wartość atrybutu jest unikatowa w ramach organizacji
+
+Maksymalna długość 255 znaków
+
+description
+
+String
+
+Opis miejsca powstania kosztów
+
+Atrybut jest wymagany
+
+Przykładowe zapytanie
+
+
+
+curl -X PUT https://api-shipx-pl.easypack24.net/v1/mpks/1 -H 'Authorization: Bearer token' -H 'Content-Type: application/json' -d '{
+  "name": "Nazwa miejsca powstania kosztów", 
+  "description": "Opis miejsca powstania kosztów"
+}'
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+ {
+    "href": "https://api-shipx-pl.easypack24.net/v1/mpks/1",
+    "id": 1,
+    "name": "Nazwa miejsca powstania kosztów",
+    "description": "Opis miejsca powstania kosztów",
+    "created_at": "2018-05-15T21:58:49.427+02:00",
+    "updated_at": "2018-05-17T10:35:59.644+02:00"
+}
+ 
+
+Informacje o błędach:
+
+resource_not_found - webhook o podanym ID nie istnieje
+
+ 
+
+ 

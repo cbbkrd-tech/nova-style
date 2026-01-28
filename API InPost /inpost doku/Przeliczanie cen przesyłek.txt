@@ -1,0 +1,252 @@
+Zasób odpowiada za generowanie cen za przesyłki, na podstawie ich atrybutów, bez konieczności tworzenia w ShipX.
+Można przesłać wiele przesyłek i dla każdej z osobna zostanie zwrócona cena.
+
+ 
+
+Klienci debetowi
+
+Zasób do przeliczania cen przesyłek działa tylko dla klientów prepiad. Ceny nie są zwracane dla klientów postpaid (debetowych) lub mogą zostać zwrócone domyślne. 
+
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Przeliczanie cen za przesyłek
+ 
+
+Struktura
+Zasób z cenami za przesyłki posiada następujące atrybuty:
+
+Atrybut
+
+Opis
+
+ 
+
+id
+
+Identyfikator przesyłki. Wymagane podanie przy przeliczaniu cen dla więcej niż jednej przesyłki.
+
+ 
+
+calculated_charge_amount
+
+Łączna cena za przesyłkę.
+
+ 
+
+fuel_charge_amount
+
+Opłata Paliwowa
+
+ 
+
+notification_charge_amount
+
+Opłata za dodatkowe powiadomienie
+
+ 
+
+cod_charge_amount
+
+Opłata dla paczki za pobraniem
+
+ 
+
+insurance_charge_amount
+
+Opłata za ubezpieczenie przesyłki
+
+ 
+
+calculated_charge_amount_non_commission
+
+Opłata obliczona na podstawie cennika nadawcy paczki (PRICE) i określa ona Kwotę bez naliczonych Marż za opcjonalne usługi - Kwota ta wynika obecnie wprost z gabarytu przesyłki.
+
+ 
+
+Przykład zasobu w formacie JSON:
+
+
+
+[
+    {
+		"id": "SHIPMENT1",
+        "calculated_charge_amount": "27.20",
+        "fuel_charge_amount": "0.00",
+        "notification_charge_amount": "0.00",
+        "cod_charge_amount": "0.00",
+        "insurance_charge_amount": "20.00",
+        "calculated_charge_amount_non_commission": "7.20",
+    },
+    {
+		"id": "SHIPMENT2",
+        "calculated_charge_amount": "18.00",
+        "fuel_charge_amount": null,
+        "notification_charge_amount": null,
+        "cod_charge_amount": null,
+        "insurance_charge_amount": null,
+        "calculated_charge_amount_non_commission": null,
+    }
+]
+ 
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Przeliczanie cen za przesyłek
+
+
+POST /v1/organizations/:organization_id/shipments/calculate
+Parametry
+
+Parametr
+
+Typ
+
+Opis
+
+shipments
+
+Array[Hash]
+
+Zawiera atrybuty przesyłek dla których należy obliczyć cenę.
+
+Przykład zapytania
+
+
+
+curl -X POST https://api-shipx-pl.easypack24.net/v1/organizations/1/shipments/calculate -H 'Authorization: Bearer token' -H 'content-type: application/json' -d '
+{
+"shipments": [
+  {
+  	"id": "SHIPMENT1",
+    "receiver": {
+      "email": "receiverrro32969504293051@example.com",
+      "phone": "329695042",
+      "first_name": "John Receiver32969504293051",
+      "last_name": "Mc'Receiver32969504293051",
+      "address":{
+        "line1":"Ulica jakaś32969504293051",
+        "line2":"Budynek32969504293051",
+        "city":"Szczecin32969504293051",
+        "post_code":"00-001",
+        "country_code":"PL"
+      }
+    },
+    "parcels": {
+      "dimensions": {
+        "length": "50",
+        "width": "50",
+        "height": "50",
+        "unit": "mm"
+      },
+      "weight": {
+        "amount": "5",
+        "unit": "kg"
+      }
+    },
+    "custom_attributes": {
+          "target_point": "KRA010"
+      },
+      "insurance": {
+          "amount": 25,
+          "currency": "PLN"
+    },
+      "cod": {
+          "amount": 10,
+          "currency": "PLN"
+      },
+    "service": "inpost_locker_standard"
+   },
+   {
+   	"id": "SHIPMENT2",
+    "receiver": {
+      "email": "receiverrro32969504293051@example.com",
+      "phone": "329695042",
+      "first_name": "John Receiver32969504293051",
+      "last_name": "Mc'Receiver32969504293051",
+      "address":{
+        "line1":"Ulica jakaś32969504293051",
+        "line2":"Budynek32969504293051",
+        "city":"Szczecin32969504293051",
+        "post_code":"00-001",
+        "country_code":"PL"
+      }
+    },
+    "parcels": {
+      "dimensions": {
+        "length": "50",
+        "width": "50",
+        "height": "50",
+        "unit": "mm"
+      },
+      "weight": {
+        "amount": "5",
+        "unit": "kg"
+      }
+    },
+    "custom_attributes": {
+          "target_point": "KRA010"
+      },
+      "insurance": {
+          "amount": 25,
+          "currency": "PLN"
+    },
+      "cod": {
+          "amount": 10,
+          "currency": "PLN"
+      },
+    "service": "inpost_courier_standard"
+   }
+ ]
+}
+Odpowiedź
+
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+    {
+		"id": "SHIPMENT1",
+        "calculated_charge_amount": "27.20",
+        "fuel_charge_amount": "0.00",
+        "notification_charge_amount": "0.00",
+        "cod_charge_amount": "0.00",
+        "insurance_charge_amount": "20.00",
+        "calculated_charge_amount_non_commission": "7.20",
+    },
+    {
+		"id": "SHIPMENT2",
+        "calculated_charge_amount": "18.00",
+        "fuel_charge_amount": null,
+        "notification_charge_amount": null,
+        "cod_charge_amount": null,
+        "insurance_charge_amount": null,
+        "calculated_charge_amount_non_commission": null,
+    }
+]
+W przypadku gdy system logistyczny nie zwróci cen dla wysłanych danych, zostanie zwrócony komunikat o błędzie dla pojedynczej przesyłki:
+
+
+
+[
+    {
+        "id": "SHIPMENT1",
+        "calculated_charge_amount": "27.20",
+        "fuel_charge_amount": "0.00",
+        "notification_charge_amount": "0.00",
+        "cod_charge_amount": "0.00",
+        "insurance_charge_amount": "20.00",
+        "calculated_charge_amount_non_commission": "7.20"
+    },
+    {
+        "id": "SHIPMENT2",
+        "key": "no_offers",
+        "message": "External logistic system responded with no offers."
+    }
+]
+ 

@@ -1,0 +1,172 @@
+Funkcjonalność umożliwia generowanie potwierdzenia nadania, zarówno dla przesyłek posiadających zlecenie odbioru, oraz przesyłek nieposiadających zleceń odbioru.
+
+Dostępne są 2 metody:
+
+Metoda generująca manifest dla zlecenia odbioru (printout)
+
+Metoda generująca manifest dla wskazanych numerów paczek (printouts)
+
+Na tej stronie
+
+Struktura
+Uwierzytelnianie
+Drukowanie potwierdzenia nadania dla utworzonego zlecenia odbioru
+Drukowanie potwierdzenia nadania dla utworzonych przesyłek
+Struktura
+W przypadku jednej przesyłki zwracany jest pojedynczy plik *.pdf
+
+W przypadku wielu przesyłek:
+- jeżeli przesyłki są tego samego serwisu, zwracany jest pojedynczy plik *.pdf z wszystkimi przesyłkami
+- jeżeli przesyłki są dla różnych serwisów, zwracany jest plik *.zip z plikami *.pdf (oddzielnie dla każdego serwisu).
+
+Maksymalnie można pobrać manifest dla 100 przesyłek
+
+
+
+
+Uwierzytelnianie
+Dostęp do zasobu wymaga podania prawidłowego i ważnego access tokenu.
+
+ 
+
+Drukowanie potwierdzenia nadania dla utworzonego zlecenia odbioru
+Aby pobrać manifest, użytkownik musi być nadawcą przesyłki. Wygenerować potwierdzenie nadania można tylko dla przesyłek utworzonych w API ShipX.
+
+
+
+GET /v1/dispatch_orders/:id/printout
+Parametry 
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+Domyślna wartość
+
+format
+
+string
+
+Format etykiety
+
+Dostępne formaty: Pdf 
+
+Pdf
+
+Przykładowe zapytanie
+
+
+
+curl -X GET "https://api-shipx-pl.easypack24.net/v1/dispatch_orders/1/printout?format=Pdf" -H "Content-Type: application/json" -H "Authorization: Bearer token"
+Odpowiedź
+
+
+
+Plik w wybranym formacie
+Informacje o błędach
+
+Błędy jakie mogą wystąpić podczas pobierania manifestu:
+
+resource_not_found - organizacja, dla której użytkownik chce pobrać listę zleceń odbioru nie istnieje
+
+token_invalid - token nie uprawnia do pobrania listy zleceń odbioru dla wybranej organizacji
+
+printout_generation_failed - wystąpił błąd podczas komunikacji z systemem logistycznym
+
+invalid_status - przekazana w żądaniu przesyłka ma nieprawidłowy status
+
+does_not_exist - przekazana w żądaniu przesyłka nie jest dostępna dla danej organizacji
+
+invalid_range - podano nieprawidłowy zakres identyfikatora przesyłki
+
+ 
+
+Drukowanie potwierdzenia nadania dla utworzonych przesyłek
+Aby pobrać manifest, użytkownik musi być nadawcą przesyłki. Wygenerować potwierdzenie nadania można tylko dla przesyłek utworzonych w API ShipX.
+
+
+
+GET /v1/organizations/:organization_id/dispatch_orders/printouts
+Parametry 
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+Domyślna wartość
+
+format
+
+string
+
+Format etykiety
+
+Dostępne formaty: Pdf 
+
+Pdf
+
+dispatch_order_id
+
+Integer
+
+Id zlecenia odbioru
+
+
+
+
+
+
+
+shipment_ids
+
+Array[Integer]
+
+Identyfikatory przesyłek
+
+Wymagane, jeśli nie podamy parametru dispatch_order_id
+
+
+Przekazane przesyłki kurierskie muszą posiadać status confirmed
+
+Przekazane przesyłki nie mogą posiadać statusu prepared
+
+Należy przekazać przynajmniej jeden numer paczki
+
+
+
+
+Przykładowe zapytanie
+
+
+
+curl -X GET "https://api-shipx-pl.easypack24.net/v1/organizations/1/dispatch_orders/printouts?shipment_ids[]=123&shipment_ids[]=124&shipment_ids[]=125&format=Pdf" -H "Authorization: Bearer token" -H "Content-Type: application/json" -o test.zip
+Odpowiedź
+
+
+
+Plik zip w wybranym formacie
+Informacje o błędach
+
+Błędy jakie mogą wystąpić podczas pobierania manifestu:
+
+resource_not_found - organizacja, dla której użytkownik chce pobrać listę zleceń odbioru nie istnieje
+
+token_invalid - token nie uprawnia do pobrania listy zleceń odbioru dla wybranej organizacji
+
+printout_generation_failed - wystąpił błąd podczas komunikacji z systemem logistycznym
+
+invalid_status - przekazana w żądaniu przesyłka posiada nieprawidłowy status
+
+does_not_exist - przekazana w żądaniu przesyłka nie jest dostępna dla danej organizacji
+
+invalid_range - podano nieprawidłowy zakres identyfikatora przesyłki
+
+ 

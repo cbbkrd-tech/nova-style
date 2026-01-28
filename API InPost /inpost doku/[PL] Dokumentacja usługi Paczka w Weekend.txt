@@ -1,0 +1,170 @@
+ 
+
+Informacje ogólne
+Podstawowe cechy usługi:
+
+Usługa będzie dostępna w określonym oknie czasowym, np. od czwartku od godziny 20:00 do piątku do godziny 18:00. Nie uwzględniamy świąt ani dni wolnych
+
+Usługa nie jest dostępna dla Punktów Obsługi Przesyłek (POP)
+
+Usługa dostępna jest dla klientów postpaid/prepaid
+
+Usługa jest obsługiwana przez Paczkomat® dostępne 24/7
+
+Na tej stronie
+
+Informacje ogólne
+Pobieranie listy punktów dostępnych dla usługi
+Implementacja usługi w API v2
+Standardowy cennik przesyłek (https://api.paczkomaty.pl/?do=pricelist)
+Tworzenie przesyłek (https://api.paczkomaty.pl/?do=createdeliverypacks)
+Informacje o błędach
+Implementacja usługi w API ShipX 
+Pobieranie listy punktów dostępnych dla usługi
+Aby pobrać listę punktów obsługujących usługę, należy wywołać metodę do pobierania maszyn z parametrem type=parcel_locker_only np.: https://api-shipx-pl.easypack24.net/v1/points?type=parcel_locker_only  następnie należy odfiltrować maszyny które nie są dostępne 24/7 za pomocą parametr location_247 ustawiony jest na true (location_247": true) 
+
+ 
+
+Implementacja usługi w API v2
+ 
+
+Implementacja zmian w apiv2 będzie wymagała modyfikacji w dwóch metodach:
+
+https://api.paczkomaty.pl/?do=pricelist
+
+https://api.paczkomaty.pl/?do=createdeliverypacks
+
+ 
+
+Standardowy cennik przesyłek (https://api.paczkomaty.pl/?do=pricelist)
+
+
+Wprowadzony zostanie nowy cennik dla usługi pod nazwą  endOfWeekCollection.
+
+ 
+
+Przykład:
+
+
+
+<paczkomaty>
+<on_delivery_payment>minimalny_koszt_pobrania</on_delivery_payment>
+<packtype>
+<type>typ_przesyłki</type>
+<price>cena_przesyłki</price>
+</packtype>
+<packtype>
+<type>typ_przesyłki</type>
+<price>cena_przesyłki</price>
+</packtype>
+<packtype>
+<type>typ_przesyłki</type>
+<price>cena_przesyłki</price>
+</packtype>
+<insurance>
+<limit>górny_limit_kwoty_ubezpieczenia</limit>
+<price>koszt_ubezpieczenia</price>
+</insurance>
+<endOfWeekCollection>
+<price>cena_dostawy_weekendowej</price>
+</endOfWeekCollection>
+</paczkomaty>
+ 
+
+Tworzenie przesyłek (https://api.paczkomaty.pl/?do=createdeliverypacks)
+ 
+
+Możliwość wyboru usługi dostępna tylko w określonym przedziale czasowym opisanym w informacjach ogólnych usługi.
+
+Parametry
+
+Parametr
+
+Typ
+
+Opis
+
+Walidacja
+
+endOfWeekCollection
+
+Boolean
+
+Wartość true będzie oznaczać, że wybieramy usługę dodatkową.
+
+Atrybut nie jest wymagany.
+
+ 
+
+Przykład tworzenia przesyłki:
+
+
+
+<paczkomaty>
+<autoLabels>automatyczne_etykiety</autoLabels>
+<selfSend>nadawanie_w_paczkomacie</selfSend>
+<pack>
+             <id>tymczasowy_identyfikator_paczki</id>
+            <addresseeEmail>adres_email_odbiorcy</addresseeEmail>
+             <senderEmail>adres_email_nadawcy</senderEmail>
+             <phoneNum>numer_telefonu_odbiorcy</phoneNum>
+            <boxMachineName>oznaczenie_paczkomatu</boxMachineName>
+             <packType>typ_paczki</packType>
+             <endOfWeekCollection>true</endOfWeekCollection>
+      </pack>
+</paczkomaty>
+ 
+
+Informacje o błędach
+w przypadku wybrania usługi dodatkowej poza wskazanym przedziałem czasowym spowoduje zwrócenie wyjątku przez aplikację
+
+Przykład:
+
+
+
+
+<paczkomaty>
+<pack>
+             <id>tymczasowy_identyfikator_paczki</type>
+<error key=”invalidEndOfWeekCollection”>Wybrana usługa dodatkowa jest poza określonym przedziałem czasowym. Przedziały czasowe w których można skorzystać z usługi opisane są w regulaminie.</error>
+</pack>
+</paczkomaty>
+ 
+
+W przypadku wybrania Punktu Obsługi Klienta jako sposobu odbioru przesyłki zostanie zwrócony wyjątek. Tylko maszyny z kategoria parcel_locker_only dostępne 24/7 obsługują Dostawy Weekendowe
+
+
+Przykład:
+
+
+
+<paczkomaty>
+<pack>
+             <id>tymczasowy_identyfikator_paczki</type>
+<error key=”invalidBoxMachineNameForEndOfWeekCollection”>Wybrany punkt odbioru nie może być Punktem Obsługi Przesyłek.</error>
+</pack>
+</paczkomaty>
+ 
+
+Dla przesyłek Allegro usługa nie jest dostępna. Próba utworzenia przesyłki Allegro z usługą Dostawy Weekendowej spowoduje zwrócenie wyjątku przez aplikację
+
+Przykład:
+
+
+
+<paczkomaty>
+<pack>
+             <id>tymczasowy_identyfikator_paczki</type>
+<error key=”invalidAllegroForEndOfWeekCollection”>Usługa Dostawy Weekendowej nie jest dostępna dla przesyłek Allegro.</error>
+</pack>
+</paczkomaty>
+ 
+
+Implementacja usługi w API ShipX 
+ 
+
+Dokumentacja dostępna jest na stronie [1.9.0] Paczka w Weekend
+
+ 
+
+ 
