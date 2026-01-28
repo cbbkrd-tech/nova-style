@@ -183,7 +183,7 @@ export default function AdminApp() {
                 currentView === 'orders' ? 'bg-white text-black' : 'bg-transparent border border-gray-500 hover:border-white text-gray-300'
               }`}
             >
-              Zamówienia ({orders.filter(o => o.status === 'paid').length})
+              Zamówienia ({orders.filter(o => o.status === 'paid' || o.status === 'verified').length})
             </button>
           </div>
           <button
@@ -1270,7 +1270,8 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
 
   const filteredOrders = orders.filter(o => {
     if (statusFilter === 'all') return true;
-    if (statusFilter === 'paid') return o.status === 'paid' && !o.inpost_shipment_id;
+    // Include both 'paid' and 'verified' status (verified = after P24 verification)
+    if (statusFilter === 'paid') return (o.status === 'paid' || o.status === 'verified') && !o.inpost_shipment_id;
     if (statusFilter === 'shipped') return o.inpost_shipment_id !== null;
     return true;
   });
@@ -1360,7 +1361,7 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
     if (order.inpost_shipment_id) {
       return <span className="px-2 py-1 bg-green-600 text-white text-xs">Wysłane</span>;
     }
-    if (order.status === 'paid') {
+    if (order.status === 'paid' || order.status === 'verified') {
       return <span className="px-2 py-1 bg-yellow-600 text-white text-xs">Opłacone</span>;
     }
     if (order.status === 'pending') {
@@ -1389,7 +1390,7 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
             statusFilter === 'paid' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
           }`}
         >
-          Do wysłania ({orders.filter(o => o.status === 'paid' && !o.inpost_shipment_id).length})
+          Do wysłania ({orders.filter(o => (o.status === 'paid' || o.status === 'verified') && !o.inpost_shipment_id).length})
         </button>
         <button
           onClick={() => setStatusFilter('shipped')}
@@ -1502,7 +1503,7 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
 
               {/* Actions */}
               <div className="flex gap-2">
-                {order.status === 'paid' && !order.inpost_shipment_id && (order.shipping_method === 'paczkomat' || order.shipping_method === 'courier') && (
+                {(order.status === 'paid' || order.status === 'verified') && !order.inpost_shipment_id && (order.shipping_method === 'paczkomat' || order.shipping_method === 'courier') && (
                   <button
                     onClick={() => handleCreateShipment(order.id)}
                     disabled={creatingShipment === order.id}
