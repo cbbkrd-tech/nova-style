@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
         reference: `Nova Style #${order.id}`,
         custom_attributes: {
           target_point: paczkomatCode,
-          sending_method: 'dispatch_order', // Courier will pick up from our address
+          sending_method: 'any_point', // Drop at any Paczkomat or PaczkoPunkt
         },
       };
     } else {

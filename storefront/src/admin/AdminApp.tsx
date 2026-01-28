@@ -43,13 +43,21 @@ interface Order {
 
 export default function AdminApp() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState<AdminView>('products');
+  const [currentView, setCurrentView] = useState<AdminView>(() => {
+    const saved = localStorage.getItem('admin_view');
+    return (saved === 'orders' || saved === 'products') ? saved : 'products';
+  });
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'women' | 'men'>('all');
+
+  // Persist view to localStorage
+  useEffect(() => {
+    localStorage.setItem('admin_view', currentView);
+  }, [currentView]);
 
   // Check auth on mount
   useEffect(() => {
@@ -1267,6 +1275,7 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'shipped'>('paid');
   const [creatingShipment, setCreatingShipment] = useState<number | null>(null);
   const [selectedSize, setSelectedSize] = useState<'small' | 'medium' | 'large'>('small');
+  const [shipmentStatus, setShipmentStatus] = useState<{ orderId: number; message: string; type: 'success' | 'error' } | null>(null);
 
   const filteredOrders = orders.filter(o => {
     if (statusFilter === 'all') return true;
@@ -1276,15 +1285,48 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
     return true;
   });
 
-  const handleCreateShipment = async (orderId: number) => {
-    if (!confirm('Czy na pewno chcesz utworzyć przesyłkę InPost dla tego zamówienia?')) return;
+  const downloadLabel = async (shipmentId: number): Promise<boolean> => {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/inpost-get-label?shipmentId=${shipmentId}&format=pdf`,
+        {
+          headers: {
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `etykieta-${shipmentId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCreateShipmentAndDownload = async (orderId: number) => {
     setCreatingShipment(orderId);
+    setShipmentStatus(null);
 
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+      // Step 1: Create shipment
       const response = await fetch(`${supabaseUrl}/functions/v1/inpost-create-shipment`, {
         method: 'POST',
         headers: {
@@ -1303,48 +1345,46 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
         throw new Error(data.error || 'Błąd przy tworzeniu przesyłki');
       }
 
-      alert(data.trackingNumber
-        ? `Przesyłka utworzona!\nNumer śledzenia: ${data.trackingNumber}`
-        : `Przesyłka utworzona (ID: ${data.shipmentId})\n\nNumer śledzenia pojawi się wkrótce - odśwież za chwilę.`);
+      // Step 2: Download label automatically
+      const shipmentId = data.shipmentId;
+      let labelDownloaded = false;
+
+      if (shipmentId) {
+        // Try to download label (might need a short delay for InPost to process)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        labelDownloaded = await downloadLabel(shipmentId);
+      }
+
+      setShipmentStatus({
+        orderId,
+        message: labelDownloaded
+          ? `Przesyłka utworzona! Tracking: ${data.trackingNumber || '(w przygotowaniu)'}`
+          : `Przesyłka utworzona (ID: ${shipmentId}). Etykieta dostępna po odświeżeniu.`,
+        type: 'success'
+      });
+
+      // Refresh orders list
       onRefresh();
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setShipmentStatus(null), 5000);
+
     } catch (err) {
       console.error('Create shipment error:', err);
-      alert('Błąd: ' + (err instanceof Error ? err.message : 'Nieznany błąd'));
+      setShipmentStatus({
+        orderId,
+        message: err instanceof Error ? err.message : 'Nieznany błąd',
+        type: 'error'
+      });
     } finally {
       setCreatingShipment(null);
     }
   };
 
   const handleDownloadLabel = async (shipmentId: number) => {
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/inpost-get-label?shipmentId=${shipmentId}&format=pdf`,
-        {
-          headers: {
-            'Authorization': `Bearer ${supabaseAnonKey}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Nie można pobrać etykiety');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `etykieta-${shipmentId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error('Download label error:', err);
-      alert('Błąd pobierania etykiety: ' + (err instanceof Error ? err.message : 'Nieznany błąd'));
+    const success = await downloadLabel(shipmentId);
+    if (!success) {
+      alert('Nie można pobrać etykiety - spróbuj ponownie za chwilę');
     }
   };
 
@@ -1503,15 +1543,24 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
                 </div>
               )}
 
+              {/* Status message */}
+              {shipmentStatus && shipmentStatus.orderId === order.id && (
+                <div className={`mb-3 p-3 text-sm ${
+                  shipmentStatus.type === 'success' ? 'bg-green-900/50 border border-green-600' : 'bg-red-900/50 border border-red-600'
+                }`}>
+                  {shipmentStatus.message}
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex gap-2">
                 {(order.status === 'paid' || order.status === 'verified') && !order.inpost_shipment_id && (order.shipping_method === 'paczkomat' || order.shipping_method === 'courier') && (
                   <button
-                    onClick={() => handleCreateShipment(order.id)}
+                    onClick={() => handleCreateShipmentAndDownload(order.id)}
                     disabled={creatingShipment === order.id}
-                    className="px-4 py-2 bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors disabled:opacity-50"
+                    className="px-4 py-2 bg-yellow-500 text-black hover:bg-yellow-400 text-sm font-medium transition-colors disabled:opacity-50"
                   >
-                    {creatingShipment === order.id ? 'Tworzenie...' : 'Utwórz przesyłkę InPost'}
+                    {creatingShipment === order.id ? 'Tworzenie przesyłki...' : 'Utwórz przesyłkę i pobierz etykietę'}
                   </button>
                 )}
                 {order.inpost_shipment_id && (
