@@ -45,6 +45,14 @@ const SHIPPING_OPTIONS = {
 // Geowidget token - works only on novastylebutik.pl
 const GEOWIDGET_TOKEN = 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlpXVzFNZzVlQnpDYU1XU3JvTlBjRWFveFpXcW9Ua2FuZVB3X291LWxvIn0.eyJleHAiOjIwODQ5ODE1MzYsImlhdCI6MTc2OTYyMTUzNiwianRpIjoiYTk5ODNmZjItNmYyNS00NjcwLWJkODUtNGMzZWI0N2VlOTc4IiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5pbnBvc3QucGwvYXV0aC9yZWFsbXMvZXh0ZXJuYWwiLCJzdWIiOiJmOjEyNDc1MDUxLTFjMDMtNGU1OS1iYTBjLTJiNDU2OTVlZjUzNTo4SWNTRVpLQ3NpSXIwWG5RNUxtSE5DeGVOSmRPRmFTRmhkSUM5ZG8zTHBJIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2hpcHgiLCJzZXNzaW9uX3N0YXRlIjoiMmFjYmRjYmMtMGM0My00YjcwLThkZGYtODZjNjhiY2U4N2QyIiwic2NvcGUiOiJvcGVuaWQgYXBpOmFwaXBvaW50cyIsInNpZCI6IjJhY2JkY2JjLTBjNDMtNGI3MC04ZGRmLTg2YzY4YmNlODdkMiIsImFsbG93ZWRfcmVmZXJyZXJzIjoid3d3Lm5vdmFzdHlsZWJ1dGlrLnBsIiwidXVpZCI6ImZlZDRlNjY2LWE1MmEtNDBlNy1hMTljLWIzMWI2MjIzMzQ0MSJ9.DzM2HZnmhWG5LuBkMHthuKUmZgZcsegfcTk-Nwd727La04YQBVVq8OsU1_A_CQfTJrJRLRVmHTrbd8EQzP92sE_cgeMw7VCrAIKLoa2D9BXFmb91ki9BYD7oLsaKngOMqQxgBM5hBad5fj55jHFPpYxAkLvoPtznP7g72tZMneSGdI_zxGl0SzM7IH5KV7Ob19g0M_M2TjTHc8xAaWBVuQGeVAYIwvD3GhX6wDZfo5b8tDjiNetFzDZ5BuQ7_2ih8mlXnCcVyVSseE4GNzHLpgeCL9te2xX3u_ifKhxe5eK01T5K4MvpQN8E4cMQqELXMBo81voAH-__cfp8QEqaSA';
 
+// Test product price in grosze (1 PLN = 100 groszy)
+const TEST_PRODUCT_PRICE = 100;
+
+// Check if cart contains only test products (free shipping for testing)
+const isTestOrderOnly = (items: CartItem[]): boolean => {
+  return items.length > 0 && items.every(item => item.price === TEST_PRODUCT_PRICE);
+};
+
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   items,
   subtotal,
@@ -93,7 +101,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     };
   }, []);
 
-  const shippingCost = SHIPPING_OPTIONS[shippingMethod].price;
+  // Free shipping for test products only (1 PLN items)
+  const isFreeShipping = isTestOrderOnly(items);
+  const shippingCost = isFreeShipping ? 0 : SHIPPING_OPTIONS[shippingMethod].price;
   const total = subtotal + shippingCost;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -277,34 +287,37 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </h3>
 
           <div className="space-y-2">
-            {(Object.entries(SHIPPING_OPTIONS) as [ShippingMethod, typeof SHIPPING_OPTIONS.paczkomat][]).map(([key, option]) => (
-              <label
-                key={key}
-                className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${
-                  shippingMethod === key
-                    ? 'border-charcoal bg-warm-beige/20'
-                    : 'border-light-grey hover:border-charcoal/30'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="shippingMethod"
-                    value={key}
-                    checked={shippingMethod === key}
-                    onChange={() => setShippingMethod(key)}
-                    className="w-4 h-4 accent-charcoal"
-                  />
-                  <div>
-                    <span className="text-sm font-medium text-charcoal">{option.label}</span>
-                    <p className="text-xs text-charcoal/60">{option.description}</p>
+            {(Object.entries(SHIPPING_OPTIONS) as [ShippingMethod, typeof SHIPPING_OPTIONS.paczkomat][]).map(([key, option]) => {
+              const displayPrice = isFreeShipping ? 0 : option.price;
+              return (
+                <label
+                  key={key}
+                  className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${
+                    shippingMethod === key
+                      ? 'border-charcoal bg-warm-beige/20'
+                      : 'border-light-grey hover:border-charcoal/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="shippingMethod"
+                      value={key}
+                      checked={shippingMethod === key}
+                      onChange={() => setShippingMethod(key)}
+                      className="w-4 h-4 accent-charcoal"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-charcoal">{option.label}</span>
+                      <p className="text-xs text-charcoal/60">{option.description}</p>
+                    </div>
                   </div>
-                </div>
-                <span className="text-sm font-medium text-charcoal">
-                  {option.price === 0 ? 'Gratis' : `${option.price} PLN`}
-                </span>
-              </label>
-            ))}
+                  <span className="text-sm font-medium text-charcoal">
+                    {displayPrice === 0 ? 'Gratis' : `${displayPrice} PLN`}
+                  </span>
+                </label>
+              );
+            })}
           </div>
         </div>
 
