@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CartItem } from '../types/types';
 
 type ShippingMethod = 'paczkomat' | 'courier' | 'pickup';
@@ -15,10 +15,25 @@ interface FormData {
   name: string;
   phone: string;
   paczkomatCode: string;
-  // Courier fields (for future use)
+  paczkomatAddress: string;
+  // Courier fields
   street: string;
   city: string;
   postalCode: string;
+}
+
+interface InPostPoint {
+  name: string;
+  address: {
+    line1: string;
+    line2: string;
+  };
+  address_details?: {
+    city: string;
+    post_code: string;
+    street: string;
+    building_number: string;
+  };
 }
 
 const SHIPPING_OPTIONS = {
@@ -26,6 +41,9 @@ const SHIPPING_OPTIONS = {
   courier: { label: 'Kurier InPost', price: 20, description: 'Dostawa pod drzwi w 1-2 dni robocze' },
   pickup: { label: 'Odbiór osobisty', price: 0, description: 'Nowa Sól - darmowy odbiór' },
 };
+
+// Geowidget token - works only on novastylebutik.pl
+const GEOWIDGET_TOKEN = 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlpXVzFNZzVlQnpDYU1XU3JvTlBjRWFveFpXcW9Ua2FuZVB3X291LWxvIn0.eyJleHAiOjIwODQ5ODE1MzYsImlhdCI6MTc2OTYyMTUzNiwianRpIjoiYTk5ODNmZjItNmYyNS00NjcwLWJkODUtNGMzZWI0N2VlOTc4IiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5pbnBvc3QucGwvYXV0aC9yZWFsbXMvZXh0ZXJuYWwiLCJzdWIiOiJmOjEyNDc1MDUxLTFjMDMtNGU1OS1iYTBjLTJiNDU2OTVlZjUzNTo4SWNTRVpLQ3NpSXIwWG5RNUxtSE5DeGVOSmRPRmFTRmhkSUM5ZG8zTHBJIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2hpcHgiLCJzZXNzaW9uX3N0YXRlIjoiMmFjYmRjYmMtMGM0My00YjcwLThkZGYtODZjNjhiY2U4N2QyIiwic2NvcGUiOiJvcGVuaWQgYXBpOmFwaXBvaW50cyIsInNpZCI6IjJhY2JkY2JjLTBjNDMtNGI3MC04ZGRmLTg2YzY4YmNlODdkMiIsImFsbG93ZWRfcmVmZXJyZXJzIjoid3d3Lm5vdmFzdHlsZWJ1dGlrLnBsIiwidXVpZCI6ImZlZDRlNjY2LWE1MmEtNDBlNy1hMTljLWIzMWI2MjIzMzQ0MSJ9.DzM2HZnmhWG5LuBkMHthuKUmZgZcsegfcTk-Nwd727La04YQBVVq8OsU1_A_CQfTJrJRLRVmHTrbd8EQzP92sE_cgeMw7VCrAIKLoa2D9BXFmb91ki9BYD7oLsaKngOMqQxgBM5hBad5fj55jHFPpYxAkLvoPtznP7g72tZMneSGdI_zxGl0SzM7IH5KV7Ob19g0M_M2TjTHc8xAaWBVuQGeVAYIwvD3GhX6wDZfo5b8tDjiNetFzDZ5BuQ7_2ih8mlXnCcVyVSseE4GNzHLpgeCL9te2xX3u_ifKhxe5eK01T5K4MvpQN8E4cMQqELXMBo81voAH-__cfp8QEqaSA';
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   items,
@@ -39,12 +57,41 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     name: '',
     phone: '',
     paczkomatCode: '',
+    paczkomatAddress: '',
     street: '',
     city: '',
     postalCode: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showGeowidget, setShowGeowidget] = useState(false);
+  const [isProduction, setIsProduction] = useState(false);
+  const geowidgetRef = useRef<HTMLDivElement>(null);
+
+  // Check if we're on production domain
+  useEffect(() => {
+    setIsProduction(window.location.hostname === 'www.novastylebutik.pl' || window.location.hostname === 'novastylebutik.pl');
+  }, []);
+
+  // Handle point selection from Geowidget
+  useEffect(() => {
+    const handlePointSelect = (event: CustomEvent<InPostPoint>) => {
+      const point = event.detail;
+      if (point) {
+        setFormData(prev => ({
+          ...prev,
+          paczkomatCode: point.name,
+          paczkomatAddress: point.address?.line1 || `${point.address_details?.street} ${point.address_details?.building_number}, ${point.address_details?.post_code} ${point.address_details?.city}` || '',
+        }));
+        setShowGeowidget(false);
+      }
+    };
+
+    document.addEventListener('onpointselect', handlePointSelect as EventListener);
+    return () => {
+      document.removeEventListener('onpointselect', handlePointSelect as EventListener);
+    };
+  }, []);
 
   const shippingCost = SHIPPING_OPTIONS[shippingMethod].price;
   const total = subtotal + shippingCost;
@@ -71,7 +118,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     // Paczkomat validation
     if (shippingMethod === 'paczkomat') {
       if (!formData.paczkomatCode || formData.paczkomatCode.length < 3) {
-        setError('Wprowadź numer paczkomatu');
+        setError('Wybierz paczkomat');
         return false;
       }
     }
@@ -116,6 +163,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           postalCode: shippingMethod === 'pickup' ? '67-100' : (formData.postalCode || '-'),
           shippingMethod: shippingMethod,
           paczkomatCode: shippingMethod === 'paczkomat' ? formData.paczkomatCode : undefined,
+          paczkomatAddress: shippingMethod === 'paczkomat' ? formData.paczkomatAddress : undefined,
           items: items.map(item => ({
             id: item.id,
             name: item.name,
@@ -260,31 +308,65 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </div>
         </div>
 
-        {/* Paczkomat number field */}
+        {/* Paczkomat selection */}
         {shippingMethod === 'paczkomat' && (
           <div className="space-y-4 pt-4 border-t border-light-grey">
             <h3 className="text-sm font-medium text-charcoal uppercase tracking-wider">
               Paczkomat
             </h3>
 
-            <div>
-              <label htmlFor="paczkomatCode" className="block text-xs text-charcoal/70 mb-1">
-                Numer paczkomatu *
-              </label>
-              <input
-                type="text"
-                id="paczkomatCode"
-                name="paczkomatCode"
-                value={formData.paczkomatCode}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors uppercase"
-                placeholder="np. WAW123M"
-              />
-              <p className="text-xs text-charcoal/50 mt-1">
-                Znajdź swój paczkomat na <a href="https://inpost.pl/znajdz-paczkomat" target="_blank" rel="noopener noreferrer" className="underline hover:text-charcoal">inpost.pl</a>
-              </p>
-            </div>
+            {formData.paczkomatCode ? (
+              <div className="p-3 bg-warm-beige/30 border border-warm-beige">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-medium text-charcoal">{formData.paczkomatCode}</p>
+                    <p className="text-sm text-charcoal/70">{formData.paczkomatAddress}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => isProduction ? setShowGeowidget(true) : setFormData(prev => ({ ...prev, paczkomatCode: '', paczkomatAddress: '' }))}
+                    className="text-sm text-charcoal/60 hover:text-charcoal underline"
+                  >
+                    Zmień
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                {isProduction ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowGeowidget(true)}
+                    className="w-full py-3 px-4 border-2 border-dashed border-charcoal/30 text-charcoal hover:border-charcoal hover:bg-warm-beige/10 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Wybierz paczkomat na mapie
+                  </button>
+                ) : (
+                  <div>
+                    <label htmlFor="paczkomatCode" className="block text-xs text-charcoal/70 mb-1">
+                      Numer paczkomatu *
+                    </label>
+                    <input
+                      type="text"
+                      id="paczkomatCode"
+                      name="paczkomatCode"
+                      value={formData.paczkomatCode}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2.5 border border-light-grey bg-white text-charcoal text-sm focus:outline-none focus:border-charcoal transition-colors uppercase"
+                      placeholder="np. WAW123M"
+                    />
+                    <p className="text-xs text-charcoal/50 mt-1">
+                      Znajdź swój paczkomat na <a href="https://inpost.pl/znajdz-paczkomat" target="_blank" rel="noopener noreferrer" className="underline hover:text-charcoal">inpost.pl</a>
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -373,6 +455,33 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           <span className="text-xs font-medium text-charcoal/70">Przelewy24</span>
         </div>
       </form>
+
+      {/* Geowidget Modal */}
+      {showGeowidget && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-4xl h-[80vh] rounded-lg overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-light-grey">
+              <h3 className="text-lg font-medium text-charcoal">Wybierz paczkomat</h3>
+              <button
+                onClick={() => setShowGeowidget(false)}
+                className="text-charcoal/60 hover:text-charcoal text-2xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="flex-1" ref={geowidgetRef}>
+              {/* @ts-ignore - InPost Geowidget custom element */}
+              <inpost-geowidget
+                onpoint="onpointselect"
+                token={GEOWIDGET_TOKEN}
+                language="pl"
+                config="parcelcollect"
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

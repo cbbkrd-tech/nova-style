@@ -18,9 +18,34 @@ interface ProductWithVariants extends Product {
   product_images?: ProductImage[];
 }
 
+type AdminView = 'products' | 'orders';
+
+interface Order {
+  id: number;
+  session_id: string;
+  customer_email: string;
+  customer_name: string;
+  customer_phone: string | null;
+  shipping_street: string;
+  shipping_city: string;
+  shipping_postal_code: string;
+  shipping_method: string;
+  items: any[];
+  subtotal: number;
+  shipping_cost: number;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  inpost_shipment_id: number | null;
+  inpost_tracking_number: string | null;
+  inpost_status: string | null;
+}
+
 export default function AdminApp() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentView, setCurrentView] = useState<AdminView>('products');
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -32,6 +57,7 @@ export default function AdminApp() {
     if (session) {
       setIsAuthenticated(true);
       fetchProducts();
+      fetchOrders();
     }
   }, []);
 
@@ -68,6 +94,19 @@ export default function AdminApp() {
       setProducts(data as ProductWithVariants[]);
     }
     setLoading(false);
+  };
+
+  const fetchOrders = async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching orders:', error);
+    } else {
+      setOrders((data as unknown) as Order[]);
+    }
   };
 
   const handleUpdateStock = async (variantId: string, newStock: number) => {
@@ -127,71 +166,98 @@ export default function AdminApp() {
     <div className="min-h-screen bg-[#37393D] text-white">
       <header className="bg-[#26272B] p-4 flex justify-between items-center border-b border-gray-700">
         <h1 className="text-xl tracking-[0.1em]" style={{ fontFamily: "'Playfair Display', serif" }}>NOVA STYLE <span className="text-gray-400 text-sm font-normal">Admin</span></h1>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 border border-gray-500 hover:border-white hover:text-white text-gray-300 text-sm transition-colors"
-        >
-          Wyloguj
-        </button>
+        <div className="flex items-center gap-4">
+          {/* Main navigation */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentView('products')}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                currentView === 'products' ? 'bg-white text-black' : 'bg-transparent border border-gray-500 hover:border-white text-gray-300'
+              }`}
+            >
+              Produkty
+            </button>
+            <button
+              onClick={() => setCurrentView('orders')}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                currentView === 'orders' ? 'bg-white text-black' : 'bg-transparent border border-gray-500 hover:border-white text-gray-300'
+              }`}
+            >
+              Zamówienia ({orders.filter(o => o.status === 'paid').length})
+            </button>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 border border-gray-500 hover:border-white hover:text-white text-gray-300 text-sm transition-colors"
+          >
+            Wyloguj
+          </button>
+        </div>
       </header>
 
       <main className="p-6 max-w-7xl mx-auto">
-        {/* Header with add button */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium tracking-wide">Produkty</h2>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors"
-          >
-            + Dodaj produkt
-          </button>
-        </div>
+        {currentView === 'products' ? (
+          <>
+            {/* Header with add button */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-medium tracking-wide">Produkty</h2>
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="px-4 py-2 bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors"
+              >
+                + Dodaj produkt
+              </button>
+            </div>
 
-        {/* Category tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setCategoryFilter('all')}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              categoryFilter === 'all' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
-            }`}
-          >
-            Wszystkie ({products.length})
-          </button>
-          <button
-            onClick={() => setCategoryFilter('women')}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              categoryFilter === 'women' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
-            }`}
-          >
-            Kobiety ({products.filter(p => p.category === 'women').length})
-          </button>
-          <button
-            onClick={() => setCategoryFilter('men')}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              categoryFilter === 'men' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
-            }`}
-          >
-            Mężczyźni ({products.filter(p => p.category === 'men').length})
-          </button>
-        </div>
+            {/* Category tabs */}
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setCategoryFilter('all')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  categoryFilter === 'all' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
+                }`}
+              >
+                Wszystkie ({products.length})
+              </button>
+              <button
+                onClick={() => setCategoryFilter('women')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  categoryFilter === 'women' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
+                }`}
+              >
+                Kobiety ({products.filter(p => p.category === 'women').length})
+              </button>
+              <button
+                onClick={() => setCategoryFilter('men')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  categoryFilter === 'men' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
+                }`}
+              >
+                Mężczyźni ({products.filter(p => p.category === 'men').length})
+              </button>
+            </div>
 
-        {loading ? (
-          <div className="text-center py-10">Ładowanie...</div>
+            {loading ? (
+              <div className="text-center py-10">Ładowanie...</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {products
+                  .filter(p => categoryFilter === 'all' || p.category === categoryFilter)
+                  .map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onToggleActive={handleToggleActive}
+                    onDelete={handleDeleteProduct}
+                    onUpdateStock={handleUpdateStock}
+                    onEdit={() => setEditingProduct(product)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {products
-              .filter(p => categoryFilter === 'all' || p.category === categoryFilter)
-              .map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onToggleActive={handleToggleActive}
-                onDelete={handleDeleteProduct}
-                onUpdateStock={handleUpdateStock}
-                onEdit={() => setEditingProduct(product)}
-              />
-            ))}
-          </div>
+          <OrdersView orders={orders} onRefresh={fetchOrders} />
         )}
 
         {showAddForm && (
@@ -1192,6 +1258,272 @@ function EditProductForm({
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// Orders View Component
+function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => void }) {
+  const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'shipped'>('paid');
+  const [creatingShipment, setCreatingShipment] = useState<number | null>(null);
+  const [selectedSize, setSelectedSize] = useState<'small' | 'medium' | 'large'>('small');
+
+  const filteredOrders = orders.filter(o => {
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'paid') return o.status === 'paid' && !o.inpost_shipment_id;
+    if (statusFilter === 'shipped') return o.inpost_shipment_id !== null;
+    return true;
+  });
+
+  const handleCreateShipment = async (orderId: number) => {
+    if (!confirm('Czy na pewno chcesz utworzyć przesyłkę InPost dla tego zamówienia?')) return;
+
+    setCreatingShipment(orderId);
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/inpost-create-shipment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          orderId,
+          parcelSize: selectedSize,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Błąd przy tworzeniu przesyłki');
+      }
+
+      alert(`Przesyłka utworzona!\nNumer śledzenia: ${data.trackingNumber}`);
+      onRefresh();
+    } catch (err) {
+      console.error('Create shipment error:', err);
+      alert('Błąd: ' + (err instanceof Error ? err.message : 'Nieznany błąd'));
+    } finally {
+      setCreatingShipment(null);
+    }
+  };
+
+  const handleDownloadLabel = async (shipmentId: number) => {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/inpost-get-label?shipmentId=${shipmentId}&format=pdf`,
+        {
+          headers: {
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Nie można pobrać etykiety');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `etykieta-${shipmentId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Download label error:', err);
+      alert('Błąd pobierania etykiety: ' + (err instanceof Error ? err.message : 'Nieznany błąd'));
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pl-PL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getStatusBadge = (order: Order) => {
+    if (order.inpost_shipment_id) {
+      return <span className="px-2 py-1 bg-green-600 text-white text-xs">Wysłane</span>;
+    }
+    if (order.status === 'paid') {
+      return <span className="px-2 py-1 bg-yellow-600 text-white text-xs">Opłacone</span>;
+    }
+    if (order.status === 'pending') {
+      return <span className="px-2 py-1 bg-gray-600 text-white text-xs">Oczekuje</span>;
+    }
+    return <span className="px-2 py-1 bg-red-600 text-white text-xs">{order.status}</span>;
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-medium tracking-wide">Zamówienia</h2>
+        <button
+          onClick={onRefresh}
+          className="px-4 py-2 bg-[#26272B] hover:bg-gray-600 text-sm border border-gray-600 transition-colors"
+        >
+          Odśwież
+        </button>
+      </div>
+
+      {/* Status filter */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setStatusFilter('paid')}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            statusFilter === 'paid' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
+          }`}
+        >
+          Do wysłania ({orders.filter(o => o.status === 'paid' && !o.inpost_shipment_id).length})
+        </button>
+        <button
+          onClick={() => setStatusFilter('shipped')}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            statusFilter === 'shipped' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
+          }`}
+        >
+          Wysłane ({orders.filter(o => o.inpost_shipment_id !== null).length})
+        </button>
+        <button
+          onClick={() => setStatusFilter('all')}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            statusFilter === 'all' ? 'bg-white text-black' : 'bg-[#26272B] hover:bg-gray-600 text-gray-300'
+          }`}
+        >
+          Wszystkie ({orders.length})
+        </button>
+      </div>
+
+      {/* Parcel size selector */}
+      {statusFilter === 'paid' && (
+        <div className="mb-4 flex items-center gap-4 p-4 bg-[#26272B] border border-gray-700">
+          <span className="text-sm text-gray-300">Rozmiar paczki dla nowych przesyłek:</span>
+          <select
+            value={selectedSize}
+            onChange={(e) => setSelectedSize(e.target.value as 'small' | 'medium' | 'large')}
+            className="px-3 py-2 bg-[#37393D] border border-gray-600 text-white text-sm"
+          >
+            <option value="small">A (mały) - 8×38×64 cm</option>
+            <option value="medium">B (średni) - 19×38×64 cm</option>
+            <option value="large">C (duży) - 41×38×64 cm</option>
+          </select>
+        </div>
+      )}
+
+      {/* Orders list */}
+      {filteredOrders.length === 0 ? (
+        <div className="text-center py-10 text-gray-400">Brak zamówień w tej kategorii</div>
+      ) : (
+        <div className="space-y-4">
+          {filteredOrders.map((order) => (
+            <div key={order.id} className="bg-[#26272B] border border-gray-700 p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium">#{order.id}</span>
+                    {getStatusBadge(order)}
+                  </div>
+                  <p className="text-sm text-gray-400">{formatDate(order.created_at)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">{(order.total_amount / 100).toFixed(2)} PLN</p>
+                  <p className="text-sm text-gray-400">{order.shipping_method}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Klient</p>
+                  <p className="text-sm">{order.customer_name}</p>
+                  <p className="text-sm text-gray-400">{order.customer_email}</p>
+                  {order.customer_phone && <p className="text-sm text-gray-400">{order.customer_phone}</p>}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Adres dostawy</p>
+                  <p className="text-sm">{order.shipping_street}</p>
+                  <p className="text-sm text-gray-400">{order.shipping_postal_code} {order.shipping_city}</p>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Produkty ({order.items?.length || 0})</p>
+                <div className="flex flex-wrap gap-2">
+                  {order.items?.map((item: any, idx: number) => (
+                    <span key={idx} className="text-xs bg-[#37393D] px-2 py-1">
+                      {item.name} ({item.selectedSize}) x{item.quantity}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* InPost info */}
+              {order.inpost_shipment_id && (
+                <div className="mb-3 p-3 bg-[#37393D] border border-gray-600">
+                  <p className="text-xs text-gray-500 mb-1">Przesyłka InPost</p>
+                  <p className="text-sm">
+                    <span className="text-gray-400">ID:</span> {order.inpost_shipment_id}
+                  </p>
+                  {order.inpost_tracking_number && (
+                    <p className="text-sm">
+                      <span className="text-gray-400">Tracking:</span>{' '}
+                      <a
+                        href={`https://inpost.pl/sledzenie-przesylek?number=${order.inpost_tracking_number}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:underline"
+                      >
+                        {order.inpost_tracking_number}
+                      </a>
+                    </p>
+                  )}
+                  {order.inpost_status && (
+                    <p className="text-sm">
+                      <span className="text-gray-400">Status:</span> {order.inpost_status}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                {order.status === 'paid' && !order.inpost_shipment_id && (order.shipping_method === 'paczkomat' || order.shipping_method === 'courier') && (
+                  <button
+                    onClick={() => handleCreateShipment(order.id)}
+                    disabled={creatingShipment === order.id}
+                    className="px-4 py-2 bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors disabled:opacity-50"
+                  >
+                    {creatingShipment === order.id ? 'Tworzenie...' : 'Utwórz przesyłkę InPost'}
+                  </button>
+                )}
+                {order.inpost_shipment_id && (
+                  <button
+                    onClick={() => handleDownloadLabel(order.inpost_shipment_id!)}
+                    className="px-4 py-2 bg-[#37393D] hover:bg-gray-600 text-sm border border-gray-600 transition-colors"
+                  >
+                    Pobierz etykietę
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
