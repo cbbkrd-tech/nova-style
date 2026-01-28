@@ -1303,7 +1303,9 @@ function OrdersView({ orders, onRefresh }: { orders: Order[]; onRefresh: () => v
         throw new Error(data.error || 'Błąd przy tworzeniu przesyłki');
       }
 
-      alert(`Przesyłka utworzona!\nNumer śledzenia: ${data.trackingNumber}`);
+      alert(data.trackingNumber
+        ? `Przesyłka utworzona!\nNumer śledzenia: ${data.trackingNumber}`
+        : `Przesyłka utworzona (ID: ${data.shipmentId})\n\nNumer śledzenia pojawi się wkrótce - odśwież za chwilę.`);
       onRefresh();
     } catch (err) {
       console.error('Create shipment error:', err);

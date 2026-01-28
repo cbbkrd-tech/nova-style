@@ -183,63 +183,77 @@ Deno.serve(async (req) => {
     const shipment = createResult.data;
     console.log('Shipment created:', shipment.id, 'Status:', shipment.status);
 
-    // Get offers for the shipment
-    const offersResult = await getInPostOffers(credentials, shipment.id);
+    // For postpaid (debit) customers, InPost processes offers asynchronously
+    // We need to poll for the shipment to be ready
+    let trackingNumber = shipment.tracking_number || '';
+    let finalStatus = shipment.status;
 
-    if (offersResult.error || !offersResult.data) {
-      console.error('Failed to get offers:', offersResult.error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to get shipping offers: ' + offersResult.error }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const offers = shipment.offers || [];
+    console.log('Initial offers:', offers.length, 'Status:', shipment.status);
+
+    // If offers are available (prepaid customer), buy the offer
+    if (offers.length > 0) {
+      const availableOffer = offers.find((o: any) => o.status === 'available' || o.status === 'in_preparation');
+
+      if (availableOffer) {
+        console.log('Buying offer:', availableOffer.id);
+        const buyResult = await buyInPostShipment(credentials, shipment.id, availableOffer.id);
+
+        if (buyResult.data) {
+          trackingNumber = buyResult.data.tracking_number ||
+            buyResult.data.parcels?.[0]?.tracking_number || '';
+          finalStatus = buyResult.data.status;
+        }
+      }
+    } else {
+      // Postpaid customer - InPost processes asynchronously
+      // Poll for tracking number (max 5 attempts, 2 seconds apart)
+      console.log('No offers - postpaid customer, polling for async processing...');
+
+      for (let attempt = 0; attempt < 5; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const pollResult = await getInPostOffers(credentials, shipment.id);
+        if (pollResult.data) {
+          console.log(`Poll ${attempt + 1}: Status=${pollResult.data.status}, Tracking=${pollResult.data.tracking_number}`);
+
+          if (pollResult.data.tracking_number) {
+            trackingNumber = pollResult.data.tracking_number;
+            finalStatus = pollResult.data.status;
+            break;
+          }
+
+          // Check if offers appeared and we need to buy
+          const pollOffers = pollResult.data.offers || [];
+          if (pollOffers.length > 0) {
+            const availableOffer = pollOffers.find((o: any) => o.status === 'available' || o.status === 'in_preparation');
+            if (availableOffer) {
+              console.log('Offers appeared, buying:', availableOffer.id);
+              const buyResult = await buyInPostShipment(credentials, shipment.id, availableOffer.id);
+              if (buyResult.data) {
+                trackingNumber = buyResult.data.tracking_number ||
+                  buyResult.data.parcels?.[0]?.tracking_number || '';
+                finalStatus = buyResult.data.status;
+                break;
+              }
+            }
+          }
+
+          finalStatus = pollResult.data.status;
+        }
+      }
     }
 
-    const offers = offersResult.data.offers || [];
-    console.log('Available offers:', offers.length);
-
-    // Find available offer
-    const availableOffer = offers.find(o => o.status === 'available' || o.status === 'in_preparation');
-
-    if (!availableOffer) {
-      console.error('No available offer found. Offers:', offers);
-      return new Response(
-        JSON.stringify({
-          error: 'No shipping offer available',
-          shipmentId: shipment.id,
-          shipmentStatus: shipment.status,
-          offers: offers,
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('Buying offer:', availableOffer.id);
-
-    // Buy/confirm the shipment
-    const buyResult = await buyInPostShipment(credentials, shipment.id, availableOffer.id);
-
-    if (buyResult.error || !buyResult.data) {
-      console.error('Failed to buy shipment:', buyResult.error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to confirm shipment: ' + buyResult.error }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const confirmedShipment = buyResult.data;
-    const trackingNumber = confirmedShipment.tracking_number ||
-      confirmedShipment.parcels?.[0]?.tracking_number || '';
-
-    console.log('Shipment confirmed! Tracking:', trackingNumber);
+    console.log('Final status:', finalStatus, 'Tracking:', trackingNumber || '(pending)');
 
     // Update order with shipment info
     const { error: updateError } = await supabase
       .from('orders')
       .update({
         inpost_shipment_id: shipment.id,
-        inpost_tracking_number: trackingNumber,
-        inpost_status: confirmedShipment.status,
-        status: 'shipped',
+        inpost_tracking_number: trackingNumber || null,
+        inpost_status: finalStatus,
+        status: trackingNumber ? 'shipped' : 'processing',
       })
       .eq('id', body.orderId);
 
@@ -252,8 +266,11 @@ Deno.serve(async (req) => {
       JSON.stringify({
         success: true,
         shipmentId: shipment.id,
-        trackingNumber: trackingNumber,
-        status: confirmedShipment.status,
+        trackingNumber: trackingNumber || null,
+        status: finalStatus,
+        message: trackingNumber
+          ? 'Przesyłka utworzona i gotowa do nadania'
+          : 'Przesyłka utworzona - numer śledzenia pojawi się wkrótce (przetwarzanie)',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
