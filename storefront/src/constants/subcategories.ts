@@ -23,8 +23,11 @@ export const SUBCATEGORIES: SubcategoryDefinition[] = [
   { slug: 'torebki', name: 'Torebki', parentCategory: 'women', image: '/images/categories/torebki.webp' },
   { slug: 'bielizna-women', name: 'Bielizna', parentCategory: 'women', image: '/images/categories/bielizna.webp' },
   { slug: 'akcesoria-women', name: 'Akcesoria', parentCategory: 'women', image: '/images/categories/akcesoria.webp' },
+  { slug: 'plaszcze-women', name: 'Płaszcze', parentCategory: 'women', image: '/images/categories/plaszcze.webp' },
+  { slug: 'legginsy', name: 'Legginsy', parentCategory: 'women', image: '/images/categories/legginsy.webp' },
+  { slug: 'marynarki-women', name: 'Marynarki', parentCategory: 'women', image: '/images/categories/marynarki.webp' },
 
-  // Men (9)
+  // Men (11)
   { slug: 't-shirty-men', name: 'T-shirty', parentCategory: 'men', image: '/images/categories/tshirty-men.webp' },
   { slug: 'bluzy', name: 'Bluzy', parentCategory: 'men', image: '/images/categories/bluzy-men.webp' },
   { slug: 'spodnie-men', name: 'Spodnie', parentCategory: 'men', image: '/images/categories/spodnie-men.webp' },
@@ -34,6 +37,8 @@ export const SUBCATEGORIES: SubcategoryDefinition[] = [
   { slug: 'kurtki-men', name: 'Kurtki', parentCategory: 'men', image: '/images/categories/kurtki-men.webp' },
   { slug: 'bielizna-men', name: 'Bielizna', parentCategory: 'men', image: '/images/categories/bielizna-men.webp' },
   { slug: 'akcesoria-men', name: 'Akcesoria', parentCategory: 'men', image: '/images/categories/akcesoria-men.webp' },
+  { slug: 'plaszcze-men', name: 'Płaszcze', parentCategory: 'men', image: '/images/categories/plaszcze-men.webp' },
+  { slug: 'marynarki-men', name: 'Marynarki', parentCategory: 'men', image: '/images/categories/marynarki-men.webp' },
 ];
 
 export const getSubcategoriesByCategory = (category: 'women' | 'men'): SubcategoryDefinition[] =>
