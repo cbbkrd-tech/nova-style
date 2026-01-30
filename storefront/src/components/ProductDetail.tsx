@@ -4,6 +4,7 @@ import { supabase } from '../lib/medusa';
 import { getCachedProduct } from '../lib/productCache';
 import OptimizedImage from './OptimizedImage';
 import { ChevronLeftIcon } from './Icons';
+import { getOptimizedImageUrl, IMAGE_SIZES } from '../lib/imageUtils';
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
 
@@ -140,7 +141,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                   }`}
                 >
                   <img
-                    src={img.url}
+                    src={getOptimizedImageUrl(img.url, IMAGE_SIZES.galleryThumbnail.width, IMAGE_SIZES.galleryThumbnail.height)}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
@@ -156,6 +157,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               alt={product.name}
               containerClassName="w-full h-full"
               className="w-full h-full object-cover"
+              width={IMAGE_SIZES.productMain.width}
+              height={IMAGE_SIZES.productMain.height}
             />
           </div>
         </div>

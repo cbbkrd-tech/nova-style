@@ -2,6 +2,7 @@ import React from 'react';
 import { Product } from '../types/types';
 import OptimizedImage from './OptimizedImage';
 import { prefetchProduct } from '../lib/productCache';
+import { IMAGE_SIZES } from '../lib/imageUtils';
 
 interface ProductGridProps {
   title?: string;
@@ -46,6 +47,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ title, categoryTitle, product
                 alt={product.name}
                 containerClassName="w-full h-full"
                 className="product-image w-full h-full object-cover"
+                width={IMAGE_SIZES.thumbnail.width}
+                height={IMAGE_SIZES.thumbnail.height}
               />
             </div>
 

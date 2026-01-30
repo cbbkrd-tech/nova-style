@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CartItem } from '../types/types';
 import { MinusIcon, PlusIcon, XIcon } from './Icons';
 import LegalModals from './LegalModals';
+import { getOptimizedImageUrl, IMAGE_SIZES } from '../lib/imageUtils';
 
 interface CartViewProps {
   items: CartItem[];
@@ -35,7 +36,7 @@ const CartView: React.FC<CartViewProps> = ({ items, onUpdateQuantity, onRemoveIt
               <div key={item.cartId} className="flex items-start gap-3 md:gap-4">
                 {/* Product Image */}
                 <div className="w-20 h-24 md:w-24 md:h-28 bg-product-bg overflow-hidden flex-shrink-0">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(item.image, IMAGE_SIZES.cartThumbnail.width, IMAGE_SIZES.cartThumbnail.height)} alt={item.name} className="w-full h-full object-cover" />
                 </div>
 
                 {/* Details */}
