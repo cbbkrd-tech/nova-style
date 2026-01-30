@@ -61,45 +61,70 @@ function App() {
 
   // Handle URL hash for product and category deep linking
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith('#product/')) {
-      const productId = hash.replace('#product/', '');
-      setPendingProductId(productId);
-    } else if (hash === '#cart') {
-      setCurrentView('cart');
-    } else if (hash === '#checkout') {
-      setCurrentView('checkout');
-    } else if (hash.startsWith('#payment-success')) {
-      setCurrentView('payment-success');
-    } else if (hash === '#payment-cancelled') {
-      setCurrentView('payment-cancelled');
-    } else if (hash === '#payment-error') {
-      setCurrentView('payment-error');
-    } else if (hash === '#women-categories') {
-      setCurrentView('women-categories');
-      setCurrentSubcategory(null);
-    } else if (hash === '#men-categories') {
-      setCurrentView('men-categories');
-      setCurrentSubcategory(null);
-    } else if (hash.startsWith('#women/')) {
-      const subSlug = hash.replace('#women/', '');
-      setCurrentView('women');
-      setCurrentSubcategory(subSlug);
-    } else if (hash.startsWith('#men/')) {
-      const subSlug = hash.replace('#men/', '');
-      setCurrentView('men');
-      setCurrentSubcategory(subSlug);
-    } else if (hash === '#women') {
-      setCurrentView('women');
-      setCurrentSubcategory(null);
-    } else if (hash === '#men') {
-      setCurrentView('men');
-      setCurrentSubcategory(null);
-    } else if (hash.startsWith('#brand/')) {
-      const brandSlug = hash.replace('#brand/', '');
-      setCurrentView('brand');
-      setCurrentBrand(brandSlug);
-    }
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#product/')) {
+        const productId = hash.replace('#product/', '');
+        setPendingProductId(productId);
+      } else if (hash === '#cart') {
+        setCurrentView('cart');
+        setSelectedProduct(null);
+      } else if (hash === '#checkout') {
+        setCurrentView('checkout');
+        setSelectedProduct(null);
+      } else if (hash.startsWith('#payment-success')) {
+        setCurrentView('payment-success');
+        setSelectedProduct(null);
+      } else if (hash === '#payment-cancelled') {
+        setCurrentView('payment-cancelled');
+        setSelectedProduct(null);
+      } else if (hash === '#payment-error') {
+        setCurrentView('payment-error');
+        setSelectedProduct(null);
+      } else if (hash === '#women-categories') {
+        setCurrentView('women-categories');
+        setCurrentSubcategory(null);
+        setSelectedProduct(null);
+      } else if (hash === '#men-categories') {
+        setCurrentView('men-categories');
+        setCurrentSubcategory(null);
+        setSelectedProduct(null);
+      } else if (hash.startsWith('#women/')) {
+        const subSlug = hash.replace('#women/', '');
+        setCurrentView('women');
+        setCurrentSubcategory(subSlug);
+        setSelectedProduct(null);
+      } else if (hash.startsWith('#men/')) {
+        const subSlug = hash.replace('#men/', '');
+        setCurrentView('men');
+        setCurrentSubcategory(subSlug);
+        setSelectedProduct(null);
+      } else if (hash === '#women') {
+        setCurrentView('women');
+        setCurrentSubcategory(null);
+        setSelectedProduct(null);
+      } else if (hash === '#men') {
+        setCurrentView('men');
+        setCurrentSubcategory(null);
+        setSelectedProduct(null);
+      } else if (hash.startsWith('#brand/')) {
+        const brandSlug = hash.replace('#brand/', '');
+        setCurrentView('brand');
+        setCurrentBrand(brandSlug);
+        setSelectedProduct(null);
+      } else if (hash === '' || hash === '#') {
+        setCurrentView('home');
+        setCurrentSubcategory(null);
+        setSelectedProduct(null);
+      }
+    };
+
+    // Handle initial hash on mount
+    handleHashChange();
+
+    // Listen for browser back/forward navigation
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   // Open product when products are loaded and we have a pending product ID
