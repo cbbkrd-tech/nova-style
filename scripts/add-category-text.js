@@ -49,8 +49,8 @@ async function addTextToImage(inputPath, outputPath, text) {
   // Draw original image
   ctx.drawImage(image, 0, 0);
 
-  // Calculate font size based on image width (approximately 8% of width)
-  const fontSize = Math.round(image.width * 0.07);
+  // Calculate font size based on image width (approximately 12% of width to match existing images)
+  const fontSize = Math.round(image.width * 0.12);
 
   // Set font - Playfair Display style (serif, slightly condensed letter spacing)
   ctx.font = `${fontSize}px "Playfair Display", "Times New Roman", serif`;
