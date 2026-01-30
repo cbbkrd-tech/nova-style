@@ -4,5 +4,9 @@
   "private": true,
   "dependencies": {
     "pg": "^8.17.1"
+  },
+  "devDependencies": {
+    "canvas": "^3.2.1",
+    "sharp": "^0.34.5"
   }
 }
