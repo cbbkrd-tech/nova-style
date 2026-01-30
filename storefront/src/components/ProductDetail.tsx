@@ -24,6 +24,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState<ProductImage[]>([]);
   const [currentImage, setCurrentImage] = useState(product.image);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -149,14 +150,25 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
             </div>
           )}
 
-          {/* Main Image */}
-          <div className="flex-1 h-[60vh] md:h-[75vh] max-h-[900px] bg-product-bg">
+          {/* Main Image - clickable for lightbox */}
+          <div
+            className="flex-1 h-[60vh] md:h-[75vh] max-h-[900px] bg-product-bg relative group cursor-zoom-in"
+            onClick={() => setLightboxOpen(true)}
+          >
             <OptimizedImage
               src={currentImage}
               alt={product.name}
               containerClassName="w-full h-full"
               className="w-full h-full object-cover"
             />
+            {/* Zoom icon overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-all">
+              <div className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                <svg className="w-6 h-6 text-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -305,6 +317,64 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
           )}
         </div>
       </div>
+
+      {/* Lightbox for full-size image */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Navigation arrows for multiple images */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const currentIdx = images.findIndex(img => img.url === currentImage);
+                  const prevIdx = currentIdx > 0 ? currentIdx - 1 : images.length - 1;
+                  setCurrentImage(images[prevIdx].url);
+                }}
+                className="absolute left-4 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const currentIdx = images.findIndex(img => img.url === currentImage);
+                  const nextIdx = currentIdx < images.length - 1 ? currentIdx + 1 : 0;
+                  setCurrentImage(images[nextIdx].url);
+                }}
+                className="absolute right-4 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Full resolution image */}
+          <img
+            src={currentImage}
+            alt={product.name}
+            className="max-h-[90vh] max-w-[90vw] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };

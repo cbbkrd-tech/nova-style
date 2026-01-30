@@ -2,6 +2,59 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/medusa';
 import type { Tables } from '../types/database';
 
+/**
+ * Resize image before upload to reduce file size and improve thumbnail quality
+ * Max dimension 1400px - good balance between quality and performance
+ */
+async function resizeImage(file: File, maxDimension: number = 1400): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    img.onload = () => {
+      let { width, height } = img;
+
+      // Only resize if larger than maxDimension
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Use high-quality image smoothing
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+      }
+
+      // Convert to blob with good quality JPEG
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create blob'));
+          }
+        },
+        'image/jpeg',
+        0.9 // 90% quality
+      );
+    };
+
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 type Product = Tables<'products'>;
 type ProductVariant = Tables<'product_variants'>;
 
@@ -571,15 +624,16 @@ function AddProductForm({
 
     setLoading(true);
 
-    // Upload all images
+    // Upload all images (resized for better performance)
     const uploadedImages: { url: string; isMain: boolean }[] = [];
     for (const img of images) {
-      const fileExt = img.file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Resize image before upload - max 1400px, converted to JPEG
+      const resizedBlob = await resizeImage(img.file);
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(fileName, img.file);
+        .upload(fileName, resizedBlob, { contentType: 'image/jpeg' });
 
       if (uploadError) {
         alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
@@ -983,15 +1037,16 @@ function EditProductForm({
 
     setLoading(true);
 
-    // Upload new images
+    // Upload new images (resized for better performance)
     const uploadedImages: { url: string; isMain: boolean }[] = [];
     for (const img of newImages) {
-      const fileExt = img.file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Resize image before upload - max 1400px, converted to JPEG
+      const resizedBlob = await resizeImage(img.file);
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(fileName, img.file);
+        .upload(fileName, resizedBlob, { contentType: 'image/jpeg' });
 
       if (uploadError) {
         alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
