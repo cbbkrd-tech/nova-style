@@ -444,7 +444,8 @@ function ProductCard({
   );
 }
 
-const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const SIZE_ORDER = ['One Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const STANDARD_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 function sortBySize(variants: ProductVariant[]) {
   return [...variants].sort((a, b) => SIZE_ORDER.indexOf(a.size) - SIZE_ORDER.indexOf(b.size));
@@ -506,6 +507,7 @@ function AddProductForm({
   const [sizeGuide, setSizeGuide] = useState('');
   const [images, setImages] = useState<ImageItem[]>([]);
   const [showOnHomepage, setShowOnHomepage] = useState(true);
+  const [sizeType, setSizeType] = useState<'standard' | 'onesize'>('standard');
   const [loading, setLoading] = useState(false);
 
   // Fetch brands on mount
@@ -630,8 +632,9 @@ function AddProductForm({
       await supabase.from('product_images').insert(imageRecords);
     }
 
-    // Add all sizes (use -1 stock to hide, 0 for out of stock)
-    const variants = SIZE_ORDER.map((size) => ({
+    // Add sizes based on size type selection
+    const sizesToCreate = sizeType === 'onesize' ? ['One Size'] : STANDARD_SIZES;
+    const variants = sizesToCreate.map((size) => ({
       product_id: product.id,
       size,
       stock: 10,
@@ -656,6 +659,39 @@ function AddProductForm({
             className="w-full p-3 bg-[#37393D] border border-gray-600 text-white focus:border-white outline-none transition-colors"
             required
           />
+
+          {/* Size type selection */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">Rozmiary:</p>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="sizeType"
+                  value="standard"
+                  checked={sizeType === 'standard'}
+                  onChange={() => setSizeType('standard')}
+                  className="w-4 h-4 accent-white"
+                />
+                <span>Standardowe (XS-XXL)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="sizeType"
+                  value="onesize"
+                  checked={sizeType === 'onesize'}
+                  onChange={() => setSizeType('onesize')}
+                  className="w-4 h-4 accent-white"
+                />
+                <span>One Size</span>
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {sizeType === 'onesize' ? 'Dla torebek, leginsów itp.' : 'Dla odzieży w różnych rozmiarach'}
+            </p>
+          </div>
+
           <input
             type="number"
             placeholder="Cena (PLN)"

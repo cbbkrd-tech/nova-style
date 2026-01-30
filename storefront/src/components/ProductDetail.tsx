@@ -5,7 +5,7 @@ import { getCachedProduct } from '../lib/productCache';
 import OptimizedImage from './OptimizedImage';
 import { ChevronLeftIcon } from './Icons';
 
-const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const SIZE_ORDER = ['One Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 function sortBySize(variants: ProductVariant[]) {
   return [...variants].sort((a, b) => SIZE_ORDER.indexOf(a.size) - SIZE_ORDER.indexOf(b.size));
