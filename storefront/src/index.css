@@ -51,9 +51,10 @@ a, button {
 
 .product-card .product-image {
   transition: transform 0.5s ease;
-  /* Improve image scaling quality to reduce aliasing on thumbnails */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  /* Smooth edges on scaled thumbnails - subtle blur eliminates aliasing jaggies */
+  filter: blur(0.3px);
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .product-card:hover .product-image {
