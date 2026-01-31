@@ -18,6 +18,7 @@ interface GenerateRequest {
   compositionText?: string;
   generatedImages?: { type: string; data: string }[];
   currentGeneratedImage?: string; // base64 - current version to edit
+  editReferenceImage?: string; // base64 - optional reference image for editing
 }
 
 // Helper to call Gemini API
@@ -90,7 +91,8 @@ async function generateProductImage(
   referenceImageBase64: string,
   imageType: 'full_body' | 'close_up' | 'ghost',
   editPrompt?: string,
-  currentGeneratedImage?: string // base64 of current version to edit
+  currentGeneratedImage?: string, // base64 of current version to edit
+  editReferenceImage?: string // base64 of optional reference image for editing
 ): Promise<string | null> {
   const prompts: Record<string, string> = {
     full_body: `Look at the first image - this is the reference model photo with perfect lighting, pose and background.
@@ -137,7 +139,43 @@ Output: Ghost mannequin fashion product photo, 4K, clean background.`,
 
   // If we have a current generated image, edit it directly
   if (currentGeneratedImage && editPrompt) {
-    prompt = `Look at this fashion product photo. Make the following changes while keeping everything else the same:
+    // Build prompt based on whether we have a reference image
+    if (editReferenceImage) {
+      prompt = `Look at the FIRST image - this is the fashion product photo I want to edit.
+Look at the SECOND image - this is my reference showing what I want.
+
+Make the following changes to the first image based on the reference:
+${editPrompt}
+
+Keep the same from the first image:
+- Overall composition and framing
+- Background
+- Lighting style
+- Professional e-commerce quality
+
+Output: High quality fashion product photo, 4K.`;
+
+      contents = [
+        {
+          parts: [
+            {
+              inline_data: {
+                mime_type: 'image/png',
+                data: currentGeneratedImage,
+              },
+            },
+            {
+              inline_data: {
+                mime_type: 'image/jpeg',
+                data: editReferenceImage,
+              },
+            },
+            { text: prompt },
+          ],
+        },
+      ];
+    } else {
+      prompt = `Look at this fashion product photo. Make the following changes while keeping everything else the same:
 
 ${editPrompt}
 
@@ -149,19 +187,20 @@ Keep the same:
 
 Output: High quality fashion product photo, 4K.`;
 
-    contents = [
-      {
-        parts: [
-          {
-            inline_data: {
-              mime_type: 'image/png',
-              data: currentGeneratedImage,
+      contents = [
+        {
+          parts: [
+            {
+              inline_data: {
+                mime_type: 'image/png',
+                data: currentGeneratedImage,
+              },
             },
-          },
-          { text: prompt },
-        ],
-      },
-    ];
+            { text: prompt },
+          ],
+        },
+      ];
+    }
   } else {
     // Normal generation from reference + product
     if (editPrompt) {
@@ -347,7 +386,8 @@ Deno.serve(async (req) => {
           refImage.data,
           imageType,
           body.editPrompt,
-          body.currentGeneratedImage // Pass current version for editing
+          body.currentGeneratedImage, // Pass current version for editing
+          body.editReferenceImage // Pass optional reference image for editing
         );
 
         if (imageData) {

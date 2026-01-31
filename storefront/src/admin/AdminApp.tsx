@@ -1780,6 +1780,7 @@ function AddProductAIForm({
   const [loadingMessage, setLoadingMessage] = useState('');
   const [editingImage, setEditingImage] = useState<'full_body' | 'close_up' | 'ghost' | null>(null);
   const [editPrompt, setEditPrompt] = useState('');
+  const [editReferenceImage, setEditReferenceImage] = useState<{ file: File; preview: string } | null>(null);
   const [regeneratingImage, setRegeneratingImage] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [viewingGeneratedImage, setViewingGeneratedImage] = useState<string | null>(null); // base64 for lightbox
@@ -1986,12 +1987,16 @@ function AddProductAIForm({
       const currentImg = generatedImages.find(img => img.type === imageType);
       const currentImageData = currentImg?.data;
 
+      // Get edit reference image if provided
+      const editRefBase64 = editReferenceImage ? await fileToBase64(editReferenceImage.file) : null;
+
       const result = await callAI('regenerate_image', {
         productImage: productBase64,
         referenceImages: [{ type: imageType, data: refBase64 }],
         imageType,
         editPrompt: editPrompt.trim(),
         currentGeneratedImage: currentImageData, // Send current version for editing
+        editReferenceImage: editRefBase64, // Optional reference image for editing
       });
 
       if (result.generatedImages?.[0]) {
@@ -2010,6 +2015,7 @@ function AddProductAIForm({
 
       setEditingImage(null);
       setEditPrompt('');
+      setEditReferenceImage(null);
     } catch (err) {
       console.error('Regeneration error:', err);
       setError(err instanceof Error ? err.message : 'Błąd regenerowania');
@@ -2351,7 +2357,44 @@ function AddProductAIForm({
                       rows={2}
                       className="w-full p-2 bg-[#26272B] border border-gray-600 text-white text-sm resize-none"
                     />
-                    <div className="flex gap-2 mt-2">
+
+                    {/* Optional reference image for editing */}
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-500 mb-2">📎 Załącz zdjęcie referencyjne (opcjonalne)</p>
+                      <div className="flex items-center gap-3">
+                        <label className="px-3 py-1 bg-[#26272B] border border-gray-600 text-xs text-gray-300 cursor-pointer hover:bg-gray-600 transition-colors">
+                          {editReferenceImage ? 'Zmień zdjęcie' : 'Wybierz zdjęcie'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setEditReferenceImage({ file, preview: URL.createObjectURL(file) });
+                              }
+                            }}
+                          />
+                        </label>
+                        {editReferenceImage && (
+                          <>
+                            <img
+                              src={editReferenceImage.preview}
+                              alt="Reference"
+                              className="w-12 h-12 object-cover border border-gray-600"
+                            />
+                            <button
+                              onClick={() => setEditReferenceImage(null)}
+                              className="text-red-400 text-xs hover:text-red-300"
+                            >
+                              ✕ Usuń
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-3">
                       <button
                         onClick={() => handleRegenerateImage(editingImage)}
                         disabled={!editPrompt.trim() || regeneratingImage !== null}
@@ -2360,7 +2403,7 @@ function AddProductAIForm({
                         Regeneruj
                       </button>
                       <button
-                        onClick={() => { setEditingImage(null); setEditPrompt(''); }}
+                        onClick={() => { setEditingImage(null); setEditPrompt(''); setEditReferenceImage(null); }}
                         className="px-4 py-2 bg-[#26272B] text-gray-300 text-sm hover:bg-gray-600"
                       >
                         Anuluj
