@@ -1724,7 +1724,9 @@ const DEFAULT_REFERENCE_IMAGES = {
 
 interface AIGeneratedImage {
   type: 'full_body' | 'close_up' | 'ghost';
-  data: string; // base64
+  data: string; // base64 - current version
+  versions: string[]; // all versions (base64), index 0 = original
+  currentVersion: number; // index of current version
   isMain: boolean;
 }
 
@@ -1931,6 +1933,8 @@ function AddProductAIForm({
 
       const generated = (imgResult.generatedImages || []).map((img: any, idx: number) => ({
         ...img,
+        versions: [img.data], // Original is version 0
+        currentVersion: 0,
         isMain: idx === 0, // First image is main by default
       }));
       setGeneratedImages(generated);
@@ -1978,17 +1982,28 @@ function AddProductAIForm({
         throw new Error('Brak zdjęcia referencyjnego');
       }
 
+      // Get current version of the image being edited
+      const currentImg = generatedImages.find(img => img.type === imageType);
+      const currentImageData = currentImg?.data;
+
       const result = await callAI('regenerate_image', {
         productImage: productBase64,
         referenceImages: [{ type: imageType, data: refBase64 }],
         imageType,
         editPrompt: editPrompt.trim(),
+        currentGeneratedImage: currentImageData, // Send current version for editing
       });
 
       if (result.generatedImages?.[0]) {
+        const newData = result.generatedImages[0].data;
         setGeneratedImages(prev => prev.map(img =>
           img.type === imageType
-            ? { ...img, data: result.generatedImages[0].data }
+            ? {
+                ...img,
+                data: newData,
+                versions: [...img.versions, newData],
+                currentVersion: img.versions.length, // New version index
+              }
             : img
         ));
       }
@@ -2009,6 +2024,15 @@ function AddProductAIForm({
       ...img,
       isMain: img.type === type,
     })));
+  };
+
+  // Change image version
+  const setImageVersion = (type: 'full_body' | 'close_up' | 'ghost', versionIndex: number) => {
+    setGeneratedImages(prev => prev.map(img =>
+      img.type === type
+        ? { ...img, data: img.versions[versionIndex], currentVersion: versionIndex }
+        : img
+    ));
   };
 
   // Submit product
@@ -2258,9 +2282,25 @@ function AddProductAIForm({
                       }`}
                     >
                       <div className="relative">
-                        <p className="text-xs text-gray-400 mb-2 text-center">
-                          {imageTypeLabels[img.type]}
-                        </p>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs text-gray-400">
+                            {imageTypeLabels[img.type]}
+                          </p>
+                          {/* Version selector - only show if more than 1 version */}
+                          {img.versions.length > 1 && (
+                            <select
+                              value={img.currentVersion}
+                              onChange={(e) => setImageVersion(img.type, parseInt(e.target.value))}
+                              className="text-xs bg-[#26272B] border border-gray-600 text-gray-300 px-2 py-1 cursor-pointer"
+                            >
+                              {img.versions.map((_, idx) => (
+                                <option key={idx} value={idx}>
+                                  Wersja {idx + 1}{idx === 0 ? ' (oryginał)' : ''}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
                         {regeneratingImage === img.type ? (
                           <div className="w-full h-40 flex items-center justify-center bg-[#26272B]">
                             <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>

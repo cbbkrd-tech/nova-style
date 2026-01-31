@@ -17,6 +17,7 @@ interface GenerateRequest {
   editPrompt?: string;
   compositionText?: string;
   generatedImages?: { type: string; data: string }[];
+  currentGeneratedImage?: string; // base64 - current version to edit
 }
 
 // Helper to call Gemini API
@@ -88,7 +89,8 @@ async function generateProductImage(
   productImageBase64: string,
   referenceImageBase64: string,
   imageType: 'full_body' | 'close_up' | 'ghost',
-  editPrompt?: string
+  editPrompt?: string,
+  currentGeneratedImage?: string // base64 of current version to edit
 ): Promise<string | null> {
   const prompts: Record<string, string> = {
     full_body: `Look at the first image - this is the reference model photo with perfect lighting, pose and background.
@@ -131,29 +133,61 @@ Output: Ghost mannequin fashion product photo, 4K, clean background.`,
   };
 
   let prompt = prompts[imageType];
-  if (editPrompt) {
-    prompt = `${prompt}\n\nADDITIONAL INSTRUCTIONS FROM USER: ${editPrompt}`;
-  }
+  let contents;
 
-  const contents = [
-    {
-      parts: [
-        {
-          inline_data: {
-            mime_type: 'image/jpeg',
-            data: referenceImageBase64,
+  // If we have a current generated image, edit it directly
+  if (currentGeneratedImage && editPrompt) {
+    prompt = `Look at this fashion product photo. Make the following changes while keeping everything else the same:
+
+${editPrompt}
+
+Keep the same:
+- Overall composition and framing
+- Background
+- Lighting style
+- Professional e-commerce quality
+
+Output: High quality fashion product photo, 4K.`;
+
+    contents = [
+      {
+        parts: [
+          {
+            inline_data: {
+              mime_type: 'image/png',
+              data: currentGeneratedImage,
+            },
           },
-        },
-        {
-          inline_data: {
-            mime_type: 'image/jpeg',
-            data: productImageBase64,
+          { text: prompt },
+        ],
+      },
+    ];
+  } else {
+    // Normal generation from reference + product
+    if (editPrompt) {
+      prompt = `${prompt}\n\nADDITIONAL INSTRUCTIONS FROM USER: ${editPrompt}`;
+    }
+
+    contents = [
+      {
+        parts: [
+          {
+            inline_data: {
+              mime_type: 'image/jpeg',
+              data: referenceImageBase64,
+            },
           },
-        },
-        { text: prompt },
-      ],
-    },
-  ];
+          {
+            inline_data: {
+              mime_type: 'image/jpeg',
+              data: productImageBase64,
+            },
+          },
+          { text: prompt },
+        ],
+      },
+    ];
+  }
 
   try {
     const result = await callGemini(apiKey, IMAGE_MODEL_ID, contents, {
@@ -312,7 +346,8 @@ Deno.serve(async (req) => {
           body.productImage,
           refImage.data,
           imageType,
-          body.editPrompt
+          body.editPrompt,
+          body.currentGeneratedImage // Pass current version for editing
         );
 
         if (imageData) {
