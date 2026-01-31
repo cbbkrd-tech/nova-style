@@ -157,16 +157,26 @@ Output: Ghost mannequin fashion product photo, 4K, clean background.`,
 
   try {
     const result = await callGemini(apiKey, IMAGE_MODEL_ID, contents, {
-      response_modalities: ['TEXT', 'IMAGE'],
+      responseModalities: ['Text', 'Image'],
     });
 
     // Extract image from response
     const parts = result.candidates?.[0]?.content?.parts || [];
+    console.log(`Response parts for ${imageType}:`, parts.length);
+
     for (const part of parts) {
+      // Check various possible formats
       if (part.inline_data?.data) {
+        console.log(`Found inline_data for ${imageType}`);
         return part.inline_data.data;
       }
+      if (part.inlineData?.data) {
+        console.log(`Found inlineData for ${imageType}`);
+        return part.inlineData.data;
+      }
     }
+
+    console.log(`No image data found in response for ${imageType}. Parts:`, JSON.stringify(parts).substring(0, 500));
     return null;
   } catch (error) {
     console.error(`Error generating ${imageType} image:`, error);
@@ -190,26 +200,20 @@ async function generateProductText(
           },
         },
         {
-          text: `Jesteś copywriterem dla ekskluzywnego butiku z modą damską "Nova Style".
-Przeanalizuj zdjęcie tego produktu (ubrania) i napisz:
+          text: `Napisz krótki opis produktu dla sklepu internetowego z modą damską.
 
-1. NAZWA: Krótka, elegancka nazwa produktu po polsku (3-5 słów), np. "Różowa bluzka koszulowa z koronką"
+Produkt: ubranie widoczne na zdjęciu
+Skład: ${compositionText}
 
-2. KOLOR: Jeden wyraz opisujący główny kolor produktu po polsku (np. "Różowy", "Beżowy", "Granatowy")
+Napisz:
+1. NAZWA: 3-4 słowa, np. "Elegancka bluzka z koronką"
+2. KOLOR: jeden wyraz po polsku
+3. OPIS: 2-3 zdania opisujące produkt naturalnym językiem. Wspomnij o stylu, do czego pasuje, i podaj skład. Bez przesadnych przymiotników.
 
-3. OPIS: Elegancki, zachęcający opis produktu po polsku (100-150 słów). Styl: romantyczny, kobiecy, profesjonalny.
-Opisz:
-- Charakter i styl produktu
-- Detale i wykończenia
-- Do jakich okazji pasuje
-- Na końcu dodaj skład materiałowy
-
-DANE ZE SKŁADU: ${compositionText}
-
-Odpowiedz w formacie:
+Format odpowiedzi:
 NAZWA: [nazwa]
 KOLOR: [kolor]
-OPIS: [opis ze składem na końcu]`,
+OPIS: [opis]`,
         },
       ],
     },
