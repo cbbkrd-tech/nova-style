@@ -200,7 +200,7 @@ async function generateProductText(
           },
         },
         {
-          text: `Napisz krótki opis produktu dla sklepu internetowego z modą damską.
+          text: `Napisz opis produktu dla ekskluzywnego butiku z modą damską.
 
 Produkt: ubranie widoczne na zdjęciu
 Skład: ${compositionText}
@@ -208,7 +208,16 @@ Skład: ${compositionText}
 Napisz:
 1. NAZWA: 3-4 słowa, np. "Elegancka bluzka z koronką"
 2. KOLOR: jeden wyraz po polsku
-3. OPIS: 2-3 zdania opisujące produkt naturalnym językiem. Wspomnij o stylu, do czego pasuje, i podaj skład. Bez przesadnych przymiotników.
+3. OPIS: Elegancki, płynny opis produktu (około 80-100 słów). Opisz:
+   - Jak wygląda produkt i z czego jest wykonany
+   - Konkretne detale widoczne na zdjęciu (guziki, koronka, kołnierzyk, rękawy itp.)
+   - Do jakich okazji pasuje (biuro, uroczystości, spotkania)
+   - Na końcu podaj skład i kraj produkcji (jeśli znany)
+
+Styl pisania: elegancki ale naturalny, bez przesadnych superlatywów typu "niezwykły", "wyjątkowy". Pisz konkretnie o tym co widać.
+
+Przykład dobrego opisu:
+"Elegancka bluzka koszulowa w delikatnym różowym odcieniu, która zachwyca subtelnymi detalami. Wykonana z lekkiego, przyjemnego w dotyku materiału, pięknie układa się na sylwetce i zapewnia komfort noszenia. Klasyczny kołnierzyk i zapięcie na ozdobne złote guziki nadają całości szyku i elegancji. Rękawy 3/4 zakończone delikatną koronką stanowią romantyczny akcent. Bluzka świetnie sprawdzi się zarówno w stylizacjach biurowych, jak i na rodzinne uroczystości. Skład: 75% poliester, 20% wiskoza, 5% elastan. Wyprodukowano we Włoszech."
 
 Format odpowiedzi:
 NAZWA: [nazwa]
