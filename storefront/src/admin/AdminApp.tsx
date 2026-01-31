@@ -1780,6 +1780,7 @@ function AddProductAIForm({
   const [editPrompt, setEditPrompt] = useState('');
   const [regeneratingImage, setRegeneratingImage] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [viewingGeneratedImage, setViewingGeneratedImage] = useState<string | null>(null); // base64 for lightbox
 
   // Fetch brands and subcategories
   useEffect(() => {
@@ -2247,20 +2248,18 @@ function AddProductAIForm({
             <div className="space-y-6">
               {/* Generated images */}
               <div>
-                <h3 className="text-sm font-medium text-gray-300 mb-3">🖼️ Wygenerowane zdjęcia (kliknij aby wybrać główne)</h3>
+                <h3 className="text-sm font-medium text-gray-300 mb-3">🖼️ Wygenerowane zdjęcia (kliknij aby powiększyć)</h3>
                 <div className="grid grid-cols-3 gap-4">
                   {generatedImages.map((img) => (
                     <div
                       key={img.type}
-                      className={`bg-[#37393D] p-3 border-2 transition-all cursor-pointer ${
-                        img.isMain ? 'border-yellow-500' : 'border-gray-600 hover:border-gray-400'
+                      className={`bg-[#37393D] p-3 border-2 transition-all ${
+                        img.isMain ? 'border-yellow-500' : 'border-gray-600'
                       }`}
-                      onClick={() => setMainImage(img.type)}
                     >
                       <div className="relative">
                         <p className="text-xs text-gray-400 mb-2 text-center">
                           {imageTypeLabels[img.type]}
-                          {img.isMain && <span className="ml-2 text-yellow-500">⭐ Główne</span>}
                         </p>
                         {regeneratingImage === img.type ? (
                           <div className="w-full h-40 flex items-center justify-center bg-[#26272B]">
@@ -2270,13 +2269,23 @@ function AddProductAIForm({
                           <img
                             src={`data:image/png;base64,${img.data}`}
                             alt={img.type}
-                            className="w-full h-40 object-cover"
+                            className="w-full h-40 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setViewingGeneratedImage(img.data)}
                           />
                         )}
                       </div>
+                      {/* Checkbox for main image */}
+                      <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={img.isMain}
+                          onChange={() => setMainImage(img.type)}
+                          className="w-4 h-4 accent-yellow-500"
+                        />
+                        <span className="text-xs text-gray-300">Główne zdjęcie</span>
+                      </label>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        onClick={() => {
                           setEditingImage(img.type);
                           setEditPrompt('');
                         }}
@@ -2493,6 +2502,27 @@ function AddProductAIForm({
           )}
         </div>
       </div>
+
+      {/* Lightbox for generated images */}
+      {viewingGeneratedImage && (
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60] cursor-pointer"
+          onClick={() => setViewingGeneratedImage(null)}
+        >
+          <img
+            src={`data:image/png;base64,${viewingGeneratedImage}`}
+            alt="Powiększone zdjęcie"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setViewingGeneratedImage(null)}
+            className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
