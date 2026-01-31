@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@supabase/supabase-js": "^2.93.3",
     "pg": "^8.17.1"
   },
   "devDependencies": {

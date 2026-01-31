@@ -105,6 +105,7 @@ export default function AdminApp() {
   const [loading, setLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddAIForm, setShowAddAIForm] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'women' | 'men'>('all');
 
   // Persist view to localStorage
@@ -273,15 +274,23 @@ export default function AdminApp() {
       <main className="p-6 max-w-7xl mx-auto">
         {currentView === 'products' ? (
           <>
-            {/* Header with add button */}
+            {/* Header with add buttons */}
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-medium tracking-wide">Produkty</h2>
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="px-4 py-2 bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors"
-              >
-                + Dodaj produkt
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowAddAIForm(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-sm font-medium transition-all flex items-center gap-2"
+                >
+                  <span>✨</span> Dodaj produkt (AI)
+                </button>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="px-4 py-2 bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors"
+                >
+                  + Dodaj produkt
+                </button>
+              </div>
             </div>
 
             {/* Category tabs */}
@@ -351,6 +360,16 @@ export default function AdminApp() {
             onClose={() => setEditingProduct(null)}
             onSuccess={() => {
               setEditingProduct(null);
+              fetchProducts();
+            }}
+          />
+        )}
+
+        {showAddAIForm && (
+          <AddProductAIForm
+            onClose={() => setShowAddAIForm(false)}
+            onSuccess={() => {
+              setShowAddAIForm(false);
               fetchProducts();
             }}
           />
@@ -560,6 +579,9 @@ function AddProductForm({
   const [images, setImages] = useState<ImageItem[]>([]);
   const [showOnHomepage, setShowOnHomepage] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [stockBySize, setStockBySize] = useState<Record<string, number>>({
+    'XS': -1, 'S': -1, 'M': -1, 'L': -1, 'XL': -1, 'XXL': -1, 'One Size': -1
+  });
 
   // Fetch brands on mount
   useEffect(() => {
@@ -684,11 +706,11 @@ function AddProductForm({
       await supabase.from('product_images').insert(imageRecords);
     }
 
-    // Add all sizes (use -1 stock to hide, 0 for out of stock)
+    // Add all sizes with user-specified stock (use -1 stock to hide, 0 for out of stock)
     const variants = SIZE_ORDER.map((size) => ({
       product_id: product.id,
       size,
-      stock: 10,
+      stock: stockBySize[size] ?? -1,
     }));
 
     await supabase.from('product_variants').insert(variants);
@@ -831,6 +853,27 @@ function AddProductForm({
               rows={4}
               className="w-full p-3 bg-[#26272B] border border-gray-600 text-white focus:border-white outline-none transition-colors resize-none"
             />
+          </div>
+
+          {/* Stock by size */}
+          <div className="bg-[#37393D] p-4 border border-gray-600">
+            <p className="text-sm text-gray-300 mb-2">📏 Stany magazynowe (-1 = ukryty, 0 = niedostępny):</p>
+            <div className="grid grid-cols-7 gap-2">
+              {Object.entries(stockBySize).map(([size, stock]) => (
+                <div key={size} className="text-center">
+                  <span className="text-[10px] text-gray-400 block mb-1">{size}</span>
+                  <input
+                    type="number"
+                    value={stock}
+                    onChange={(e) => setStockBySize(prev => ({
+                      ...prev,
+                      [size]: parseInt(e.target.value) || 0
+                    }))}
+                    className="w-full p-1 bg-[#26272B] border border-gray-600 text-xs text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Multi-image upload */}
@@ -1668,6 +1711,788 @@ function OrdersView({ orders, onRefresh, onDeleteOrder }: { orders: Order[]; onR
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// Default reference images URLs
+const DEFAULT_REFERENCE_IMAGES = {
+  full_body: 'https://iwrjwqdtjvdqqbxrdspu.supabase.co/storage/v1/object/public/products/ai-reference-full-body.jpg',
+  close_up: 'https://iwrjwqdtjvdqqbxrdspu.supabase.co/storage/v1/object/public/products/ai-reference-close-up.jpg',
+  ghost: 'https://iwrjwqdtjvdqqbxrdspu.supabase.co/storage/v1/object/public/products/ai-reference-ghost.jpg',
+};
+
+interface AIGeneratedImage {
+  type: 'full_body' | 'close_up' | 'ghost';
+  data: string; // base64
+  isMain: boolean;
+}
+
+interface ReferenceImage {
+  type: 'full_body' | 'close_up' | 'ghost';
+  url: string;
+  file?: File;
+}
+
+function AddProductAIForm({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  // Step tracking
+  const [currentStep, setCurrentStep] = useState<'upload' | 'generating' | 'review'>('upload');
+
+  // Input images
+  const [productImage, setProductImage] = useState<{ file: File; preview: string } | null>(null);
+  const [compositionImage, setCompositionImage] = useState<{ file: File; preview: string } | null>(null);
+  const [referenceImages, setReferenceImages] = useState<ReferenceImage[]>([
+    { type: 'full_body', url: DEFAULT_REFERENCE_IMAGES.full_body },
+    { type: 'close_up', url: DEFAULT_REFERENCE_IMAGES.close_up },
+    { type: 'ghost', url: DEFAULT_REFERENCE_IMAGES.ghost },
+  ]);
+
+  // Generated content
+  const [generatedImages, setGeneratedImages] = useState<AIGeneratedImage[]>([]);
+  const [_compositionText, setCompositionText] = useState(''); // Stored for potential display
+  const [productName, setProductName] = useState('');
+  const [productDescription, setProductDescription] = useState('');
+  const [productColor, setProductColor] = useState('');
+
+  // Form fields
+  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState<'women' | 'men'>('women');
+  const [subcategoryId, setSubcategoryId] = useState('');
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
+  const [brandId, setBrandId] = useState('');
+  const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
+  const [showOnHomepage, setShowOnHomepage] = useState(true);
+  const [sizeGuide, setSizeGuide] = useState('');
+  const [stockBySize, setStockBySize] = useState<Record<string, number>>({
+    'XS': -1, 'S': -1, 'M': -1, 'L': -1, 'XL': -1, 'XXL': -1, 'One Size': -1
+  });
+
+  // UI states
+  const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [editingImage, setEditingImage] = useState<'full_body' | 'close_up' | 'ghost' | null>(null);
+  const [editPrompt, setEditPrompt] = useState('');
+  const [regeneratingImage, setRegeneratingImage] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  // Fetch brands and subcategories
+  useEffect(() => {
+    async function fetchBrands() {
+      const { data } = await (supabase as any).from('brands').select('id, name').order('sort_order');
+      setBrands(data || []);
+    }
+    fetchBrands();
+  }, []);
+
+  useEffect(() => {
+    async function fetchSubcategories() {
+      const { data } = await supabase
+        .from('subcategories')
+        .select('id, name')
+        .eq('parent_category', category)
+        .order('sort_order');
+      setSubcategories(data || []);
+      setSubcategoryId('');
+    }
+    fetchSubcategories();
+  }, [category]);
+
+  // Convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove data:image/...;base64, prefix
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+    });
+  };
+
+  // Convert URL to base64
+  const urlToBase64 = async (url: string): Promise<string> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+    });
+  };
+
+  // Handle product image upload
+  const handleProductImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProductImage({ file, preview: URL.createObjectURL(file) });
+    }
+  };
+
+  // Handle composition image upload
+  const handleCompositionImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCompositionImage({ file, preview: URL.createObjectURL(file) });
+    }
+  };
+
+  // Handle reference image change
+  const handleReferenceImageChange = (type: 'full_body' | 'close_up' | 'ghost', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReferenceImages(prev => prev.map(img =>
+        img.type === type ? { ...img, url: URL.createObjectURL(file), file } : img
+      ));
+    }
+  };
+
+  // Reset reference image to default
+  const resetReferenceImage = (type: 'full_body' | 'close_up' | 'ghost') => {
+    setReferenceImages(prev => prev.map(img =>
+      img.type === type ? { type, url: DEFAULT_REFERENCE_IMAGES[type] } : img
+    ));
+  };
+
+  // Call AI API
+  const callAI = async (action: string, body: any) => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/ai-product`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({ action, ...body }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'AI API error');
+    }
+
+    return response.json();
+  };
+
+  // Generate all content
+  const handleGenerate = async () => {
+    if (!productImage || !compositionImage) {
+      setError('Wgraj zdjęcie produktu i składu');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setCurrentStep('generating');
+
+    try {
+      // Convert images to base64
+      const productBase64 = await fileToBase64(productImage.file);
+      const compositionBase64 = await fileToBase64(compositionImage.file);
+
+      // Prepare reference images
+      const refImagesBase64: { type: string; data: string }[] = [];
+      for (const ref of referenceImages) {
+        const data = ref.file
+          ? await fileToBase64(ref.file)
+          : await urlToBase64(ref.url);
+        refImagesBase64.push({ type: ref.type, data });
+      }
+
+      // Step 1: Analyze composition
+      setLoadingMessage('Analizuję skład produktu...');
+      const compResult = await callAI('analyze_composition', {
+        compositionImage: compositionBase64,
+      });
+      setCompositionText(compResult.compositionText || '');
+
+      // Step 2: Generate images
+      setLoadingMessage('Generuję zdjęcia produktu (to może potrwać kilka minut)...');
+      const imgResult = await callAI('generate_images', {
+        productImage: productBase64,
+        referenceImages: refImagesBase64,
+      });
+
+      const generated = (imgResult.generatedImages || []).map((img: any, idx: number) => ({
+        ...img,
+        isMain: idx === 0, // First image is main by default
+      }));
+      setGeneratedImages(generated);
+
+      // Step 3: Generate text
+      setLoadingMessage('Generuję nazwę i opis...');
+      const textResult = await callAI('generate_text', {
+        productImage: productBase64,
+        compositionText: compResult.compositionText || '',
+      });
+
+      setProductName(textResult.name || '');
+      setProductDescription(textResult.description || '');
+      setProductColor(textResult.color || '');
+
+      setCurrentStep('review');
+    } catch (err) {
+      console.error('Generation error:', err);
+      setError(err instanceof Error ? err.message : 'Błąd generowania');
+      setCurrentStep('upload');
+    } finally {
+      setLoading(false);
+      setLoadingMessage('');
+    }
+  };
+
+  // Regenerate single image
+  const handleRegenerateImage = async (imageType: 'full_body' | 'close_up' | 'ghost') => {
+    if (!productImage || !editPrompt.trim()) return;
+
+    setRegeneratingImage(imageType);
+    setError('');
+
+    try {
+      const productBase64 = await fileToBase64(productImage.file);
+
+      const refImage = referenceImages.find(r => r.type === imageType);
+      const refBase64 = refImage?.file
+        ? await fileToBase64(refImage.file)
+        : refImage?.url
+          ? await urlToBase64(refImage.url)
+          : null;
+
+      if (!refBase64) {
+        throw new Error('Brak zdjęcia referencyjnego');
+      }
+
+      const result = await callAI('regenerate_image', {
+        productImage: productBase64,
+        referenceImages: [{ type: imageType, data: refBase64 }],
+        imageType,
+        editPrompt: editPrompt.trim(),
+      });
+
+      if (result.generatedImages?.[0]) {
+        setGeneratedImages(prev => prev.map(img =>
+          img.type === imageType
+            ? { ...img, data: result.generatedImages[0].data }
+            : img
+        ));
+      }
+
+      setEditingImage(null);
+      setEditPrompt('');
+    } catch (err) {
+      console.error('Regeneration error:', err);
+      setError(err instanceof Error ? err.message : 'Błąd regenerowania');
+    } finally {
+      setRegeneratingImage(null);
+    }
+  };
+
+  // Set main image
+  const setMainImage = (type: 'full_body' | 'close_up' | 'ghost') => {
+    setGeneratedImages(prev => prev.map(img => ({
+      ...img,
+      isMain: img.type === type,
+    })));
+  };
+
+  // Submit product
+  const handleSubmit = async () => {
+    if (!subcategoryId) {
+      setError('Wybierz podkategorię produktu');
+      return;
+    }
+
+    if (!price || parseFloat(price) <= 0) {
+      setError('Podaj cenę produktu');
+      return;
+    }
+
+    if (generatedImages.length === 0) {
+      setError('Brak wygenerowanych zdjęć');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Upload generated images to Supabase storage
+      const uploadedImages: { url: string; isMain: boolean }[] = [];
+
+      for (const img of generatedImages) {
+        // Convert base64 to blob
+        const byteCharacters = atob(img.data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/png' });
+
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${img.type}.png`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('products')
+          .upload(fileName, blob, { contentType: 'image/png' });
+
+        if (uploadError) {
+          throw new Error(`Błąd uploadu: ${uploadError.message}`);
+        }
+
+        const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
+        uploadedImages.push({ url: urlData.publicUrl, isMain: img.isMain });
+      }
+
+      const mainImageUrl = uploadedImages.find(i => i.isMain)?.url || uploadedImages[0]?.url;
+      const slug = productName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+
+      // Create product
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .insert({
+          name: productName,
+          slug,
+          price: Math.round(parseFloat(price) * 100),
+          category,
+          subcategory_id: subcategoryId,
+          brand_id: brandId || null,
+          color: productColor,
+          description: productDescription,
+          size_guide: sizeGuide || null,
+          image_url: mainImageUrl,
+          is_active: true,
+          show_on_homepage: showOnHomepage,
+        })
+        .select()
+        .single();
+
+      if (productError) {
+        throw new Error(`Błąd tworzenia produktu: ${productError.message}`);
+      }
+
+      // Add images to product_images
+      const imageRecords = uploadedImages.map((img, idx) => ({
+        product_id: product.id,
+        image_url: img.url,
+        is_main: img.isMain,
+        sort_order: idx,
+      }));
+      await supabase.from('product_images').insert(imageRecords);
+
+      // Add variants with stock
+      const variants = Object.entries(stockBySize)
+        .filter(([_, stock]) => stock >= -1) // Include all, even hidden (-1)
+        .map(([size, stock]) => ({
+          product_id: product.id,
+          size,
+          stock,
+        }));
+
+      await supabase.from('product_variants').insert(variants);
+
+      onSuccess();
+    } catch (err) {
+      console.error('Submit error:', err);
+      setError(err instanceof Error ? err.message : 'Błąd dodawania produktu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const imageTypeLabels: Record<string, string> = {
+    full_body: 'Full Body',
+    close_up: 'Close-up',
+    ghost: 'Ghost',
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#26272B] border border-gray-700 w-full max-w-4xl max-h-[95vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-[#26272B] border-b border-gray-700 p-4 flex justify-between items-center z-10">
+          <h2 className="text-xl font-medium tracking-wide flex items-center gap-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <span>✨</span> Dodaj produkt z AI
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+
+        <div className="p-6">
+          {/* Error display */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-900/50 border border-red-600 text-red-200 text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Loading overlay */}
+          {loading && (
+            <div className="mb-6 p-6 bg-[#37393D] border border-gray-600 text-center">
+              <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-300">{loadingMessage || 'Przetwarzanie...'}</p>
+            </div>
+          )}
+
+          {/* Step 1: Upload */}
+          {currentStep === 'upload' && !loading && (
+            <div className="space-y-6">
+              {/* Source images */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-300 mb-3">📸 Krok 1: Wgraj zdjęcia źródłowe</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Product image */}
+                  <div className="bg-[#37393D] p-4 border border-gray-600">
+                    <p className="text-sm text-gray-400 mb-2">Zdjęcie produktu</p>
+                    {productImage ? (
+                      <div className="relative">
+                        <img src={productImage.preview} alt="Product" className="w-full h-40 object-cover" />
+                        <button
+                          onClick={() => setProductImage(null)}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white text-xs rounded-full"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="block w-full h-40 border-2 border-dashed border-gray-500 hover:border-white cursor-pointer flex items-center justify-center transition-colors">
+                        <span className="text-gray-400">+ Wgraj zdjęcie</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleProductImageChange} />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Composition image */}
+                  <div className="bg-[#37393D] p-4 border border-gray-600">
+                    <p className="text-sm text-gray-400 mb-2">Zdjęcie składu (metka)</p>
+                    {compositionImage ? (
+                      <div className="relative">
+                        <img src={compositionImage.preview} alt="Composition" className="w-full h-40 object-cover" />
+                        <button
+                          onClick={() => setCompositionImage(null)}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white text-xs rounded-full"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="block w-full h-40 border-2 border-dashed border-gray-500 hover:border-white cursor-pointer flex items-center justify-center transition-colors">
+                        <span className="text-gray-400">+ Wgraj zdjęcie</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleCompositionImageChange} />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Reference images */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-300 mb-3">📷 Krok 2: Zdjęcia referencyjne (modelka)</h3>
+                <p className="text-xs text-gray-500 mb-3">Domyślnie wgrane. Możesz zmienić jeśli chcesz użyć innej modelki.</p>
+                <div className="grid grid-cols-3 gap-4">
+                  {referenceImages.map((ref) => (
+                    <div key={ref.type} className="bg-[#37393D] p-3 border border-gray-600">
+                      <p className="text-xs text-gray-400 mb-2 text-center">{imageTypeLabels[ref.type]}</p>
+                      <img src={ref.url} alt={ref.type} className="w-full h-32 object-cover mb-2" />
+                      <div className="flex gap-1">
+                        <label className="flex-1 px-2 py-1 bg-[#26272B] text-center text-xs cursor-pointer hover:bg-gray-600 transition-colors">
+                          Zmień
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleReferenceImageChange(ref.type, e)}
+                          />
+                        </label>
+                        {ref.file && (
+                          <button
+                            onClick={() => resetReferenceImage(ref.type)}
+                            className="px-2 py-1 bg-[#26272B] text-xs hover:bg-gray-600 transition-colors"
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generate button */}
+              <button
+                onClick={handleGenerate}
+                disabled={!productImage || !compositionImage}
+                className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-lg"
+              >
+                🚀 Generuj zdjęcia i opis
+              </button>
+            </div>
+          )}
+
+          {/* Step 2: Review and edit */}
+          {currentStep === 'review' && !loading && (
+            <div className="space-y-6">
+              {/* Generated images */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-300 mb-3">🖼️ Wygenerowane zdjęcia (kliknij aby wybrać główne)</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {generatedImages.map((img) => (
+                    <div
+                      key={img.type}
+                      className={`bg-[#37393D] p-3 border-2 transition-all cursor-pointer ${
+                        img.isMain ? 'border-yellow-500' : 'border-gray-600 hover:border-gray-400'
+                      }`}
+                      onClick={() => setMainImage(img.type)}
+                    >
+                      <div className="relative">
+                        <p className="text-xs text-gray-400 mb-2 text-center">
+                          {imageTypeLabels[img.type]}
+                          {img.isMain && <span className="ml-2 text-yellow-500">⭐ Główne</span>}
+                        </p>
+                        {regeneratingImage === img.type ? (
+                          <div className="w-full h-40 flex items-center justify-center bg-[#26272B]">
+                            <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : (
+                          <img
+                            src={`data:image/png;base64,${img.data}`}
+                            alt={img.type}
+                            className="w-full h-40 object-cover"
+                          />
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingImage(img.type);
+                          setEditPrompt('');
+                        }}
+                        className="w-full mt-2 py-1 bg-[#26272B] text-xs hover:bg-gray-600 transition-colors"
+                      >
+                        ✏️ Edytuj
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Edit prompt */}
+                {editingImage && (
+                  <div className="mt-4 p-4 bg-[#37393D] border border-gray-600">
+                    <p className="text-sm text-gray-300 mb-2">
+                      Edycja: <strong>{imageTypeLabels[editingImage]}</strong>
+                    </p>
+                    <p className="text-xs text-gray-500 mb-2">Opisz co zmienić (np. "rękawy powinny mieć krótszą koronkę")</p>
+                    <textarea
+                      value={editPrompt}
+                      onChange={(e) => setEditPrompt(e.target.value)}
+                      placeholder="Wpisz instrukcje dla AI..."
+                      rows={2}
+                      className="w-full p-2 bg-[#26272B] border border-gray-600 text-white text-sm resize-none"
+                    />
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => handleRegenerateImage(editingImage)}
+                        disabled={!editPrompt.trim() || regeneratingImage !== null}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm disabled:opacity-50"
+                      >
+                        Regeneruj
+                      </button>
+                      <button
+                        onClick={() => { setEditingImage(null); setEditPrompt(''); }}
+                        className="px-4 py-2 bg-[#26272B] text-gray-300 text-sm hover:bg-gray-600"
+                      >
+                        Anuluj
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Product details */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-300">📝 Dane produktu</h3>
+
+                {/* Name */}
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Nazwa produktu</label>
+                  <input
+                    type="text"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    className="w-full p-3 bg-[#37393D] border border-gray-600 text-white"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Opis produktu</label>
+                  <textarea
+                    value={productDescription}
+                    onChange={(e) => setProductDescription(e.target.value)}
+                    rows={5}
+                    className="w-full p-3 bg-[#37393D] border border-gray-600 text-white resize-none"
+                  />
+                </div>
+
+                {/* Price and Color */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Cena (PLN)</label>
+                    <input
+                      type="number"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="np. 119"
+                      className="w-full p-3 bg-[#37393D] border border-gray-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Kolor</label>
+                    <input
+                      type="text"
+                      value={productColor}
+                      onChange={(e) => setProductColor(e.target.value)}
+                      className="w-full p-3 bg-[#37393D] border border-gray-600 text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Category */}
+                <div className="bg-[#37393D] p-4 border border-gray-600">
+                  <p className="text-xs text-gray-400 mb-2">Kategoria</p>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={category === 'women'}
+                        onChange={() => setCategory('women')}
+                        className="accent-white"
+                      />
+                      <span>Kobiety</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={category === 'men'}
+                        onChange={() => setCategory('men')}
+                        className="accent-white"
+                      />
+                      <span>Mężczyźni</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Subcategory */}
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Podkategoria <span className="text-red-400">*</span></label>
+                  <select
+                    value={subcategoryId}
+                    onChange={(e) => setSubcategoryId(e.target.value)}
+                    className="w-full p-3 bg-[#37393D] border border-gray-600 text-white"
+                  >
+                    <option value="">-- Wybierz --</option>
+                    {subcategories.map((sub) => (
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Brand */}
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Marka</label>
+                  <select
+                    value={brandId}
+                    onChange={(e) => setBrandId(e.target.value)}
+                    className="w-full p-3 bg-[#37393D] border border-gray-600 text-white"
+                  >
+                    <option value="">-- Bez marki --</option>
+                    {brands.map((brand) => (
+                      <option key={brand.id} value={brand.id}>{brand.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Show on homepage */}
+                <label className="flex items-center gap-3 cursor-pointer bg-[#37393D] p-4 border border-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={showOnHomepage}
+                    onChange={(e) => setShowOnHomepage(e.target.checked)}
+                    className="w-5 h-5 accent-white"
+                  />
+                  <div>
+                    <span className="font-medium">Pokaż na stronie głównej</span>
+                    <p className="text-sm text-gray-400">Produkt będzie widoczny na głównej stronie</p>
+                  </div>
+                </label>
+
+                {/* Stock by size */}
+                <div className="bg-[#37393D] p-4 border border-gray-600">
+                  <p className="text-xs text-gray-400 mb-2">📏 Stany magazynowe (-1 = ukryty, 0 = niedostępny)</p>
+                  <div className="grid grid-cols-7 gap-2">
+                    {Object.entries(stockBySize).map(([size, stock]) => (
+                      <div key={size} className="text-center">
+                        <span className="text-xs text-gray-400 block mb-1">{size}</span>
+                        <input
+                          type="number"
+                          value={stock}
+                          onChange={(e) => setStockBySize(prev => ({
+                            ...prev,
+                            [size]: parseInt(e.target.value) || 0
+                          }))}
+                          className="w-full p-2 bg-[#26272B] border border-gray-600 text-center text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Size guide */}
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Tabela rozmiarów (opcjonalne)</label>
+                  <textarea
+                    value={sizeGuide}
+                    onChange={(e) => setSizeGuide(e.target.value)}
+                    placeholder="ONE SIZE - uniwersalny rozmiar..."
+                    rows={3}
+                    className="w-full p-3 bg-[#37393D] border border-gray-600 text-white resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Submit buttons */}
+              <div className="flex gap-4 pt-4 border-t border-gray-700">
+                <button
+                  onClick={() => setCurrentStep('upload')}
+                  className="flex-1 py-3 bg-[#37393D] border border-gray-600 hover:border-white transition-colors"
+                >
+                  ← Wróć
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex-1 py-3 bg-white text-black font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
+                >
+                  ✅ Dodaj produkt
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
