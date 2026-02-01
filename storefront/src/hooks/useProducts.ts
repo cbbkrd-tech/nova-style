@@ -25,7 +25,8 @@ export function useProducts(category?: 'men' | 'women') {
             *,
             variants:product_variants(*)
           `)
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
 
         if (category) {
           query = query.eq('category', category);

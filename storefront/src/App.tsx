@@ -150,7 +150,8 @@ function App() {
             subcategory:subcategories(id, slug, name),
             brand:brands(id, slug, name)
           `)
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
 
         if (error) {
           console.error('Supabase error:', error);
