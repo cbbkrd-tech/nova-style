@@ -3,10 +3,35 @@ import { supabase } from '../lib/medusa';
 import type { Tables } from '../types/database';
 
 /**
- * Resize image before upload to reduce file size and improve thumbnail quality
- * Max dimension 1400px - good balance between quality and performance
+ * Helper to call admin-products Edge Function (uses service_role)
  */
-async function resizeImage(file: File, maxDimension: number = 1400): Promise<Blob> {
+async function adminProductsAPI(action: string, data: Record<string, unknown>) {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/admin-products`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+    },
+    body: JSON.stringify({ action, data }),
+  });
+
+  const result = await response.json();
+  if (!response.ok || result.error) {
+    throw new Error(result.error || 'Admin API error');
+  }
+  return result;
+}
+
+/**
+ * Convert image to WebP format with specified dimensions
+ * @param file - Original file or blob
+ * @param maxDimension - Max width/height (default 1400px for full, 400px for thumb)
+ * @param quality - WebP quality 0-1 (default 0.85)
+ */
+async function convertToWebP(file: File | Blob, maxDimension: number = 1400, quality: number = 0.85): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const canvas = document.createElement('canvas');
@@ -15,7 +40,7 @@ async function resizeImage(file: File, maxDimension: number = 1400): Promise<Blo
     img.onload = () => {
       let { width, height } = img;
 
-      // Only resize if larger than maxDimension
+      // Resize if larger than maxDimension
       if (width > maxDimension || height > maxDimension) {
         if (width > height) {
           height = Math.round((height * maxDimension) / width);
@@ -29,24 +54,23 @@ async function resizeImage(file: File, maxDimension: number = 1400): Promise<Blo
       canvas.width = width;
       canvas.height = height;
 
-      // Use high-quality image smoothing
       if (ctx) {
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
       }
 
-      // Convert to blob with good quality JPEG
+      // Convert to WebP
       canvas.toBlob(
         (blob) => {
           if (blob) {
             resolve(blob);
           } else {
-            reject(new Error('Failed to create blob'));
+            reject(new Error('Failed to create WebP blob'));
           }
         },
-        'image/jpeg',
-        0.9 // 90% quality
+        'image/webp',
+        quality
       );
     };
 
@@ -54,6 +78,48 @@ async function resizeImage(file: File, maxDimension: number = 1400): Promise<Blo
     img.src = URL.createObjectURL(file);
   });
 }
+
+/**
+ * Process and upload image with WebP conversion and thumbnail generation
+ * - Saves original to backups/ folder
+ * - Creates WebP version (max 1400px)
+ * - Creates thumbnail WebP (400px)
+ * Returns the WebP URL (thumbnail is auto-available with _thumb suffix)
+ */
+async function processAndUploadImage(file: File): Promise<string> {
+  const baseName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+  // 1. Upload original to backups folder (for safety)
+  const backupFileName = `backups/${baseName}-original.${file.name.split('.').pop()}`;
+  await supabase.storage
+    .from('products')
+    .upload(backupFileName, file, { contentType: file.type });
+
+  // 2. Convert to WebP (full size, max 1400px)
+  const webpBlob = await convertToWebP(file, 1400, 0.85);
+  const webpFileName = `${baseName}.webp`;
+
+  const { error: webpError } = await supabase.storage
+    .from('products')
+    .upload(webpFileName, webpBlob, { contentType: 'image/webp' });
+
+  if (webpError) {
+    throw new Error(`WebP upload failed: ${webpError.message}`);
+  }
+
+  // 3. Create and upload thumbnail (400px)
+  const thumbBlob = await convertToWebP(file, 400, 0.80);
+  const thumbFileName = `${baseName}_thumb.webp`;
+
+  await supabase.storage
+    .from('products')
+    .upload(thumbFileName, thumbBlob, { contentType: 'image/webp' });
+
+  // 4. Return the WebP URL
+  const { data: urlData } = supabase.storage.from('products').getPublicUrl(webpFileName);
+  return urlData.publicUrl;
+}
+
 
 type Product = Tables<'products'>;
 type ProductVariant = Tables<'product_variants'>;
@@ -194,43 +260,32 @@ export default function AdminApp() {
       )
     })));
 
-    // Save to database in background
-    const { error } = await supabase
-      .from('product_variants')
-      .update({ stock: newStock })
-      .eq('id', variantId);
-
-    if (error) {
+    // Save to database via Edge Function (service_role)
+    try {
+      await adminProductsAPI('update_variant', { id: variantId, stock: newStock });
+    } catch (error) {
       alert('Błąd przy aktualizacji stanu magazynowego');
       fetchProducts(); // Revert on error
     }
   };
 
   const handleToggleActive = async (productId: string, isActive: boolean) => {
-    const { error } = await supabase
-      .from('products')
-      .update({ is_active: !isActive })
-      .eq('id', productId);
-
-    if (error) {
-      alert('Błąd przy aktualizacji produktu: ' + error.message);
-    } else {
+    try {
+      await adminProductsAPI('update_product', { id: productId, is_active: !isActive });
       fetchProducts();
+    } catch (error) {
+      alert('Błąd przy aktualizacji produktu: ' + (error as Error).message);
     }
   };
 
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm('Czy na pewno chcesz usunąć ten produkt?')) return;
 
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', productId);
-
-    if (error) {
-      alert('Błąd przy usuwaniu produktu');
-    } else {
+    try {
+      await adminProductsAPI('delete_product', { id: productId });
       fetchProducts();
+    } catch (error) {
+      alert('Błąd przy usuwaniu produktu');
     }
   };
 
@@ -649,30 +704,23 @@ function AddProductForm({
     // Upload all images (resized for better performance)
     const uploadedImages: { url: string; isMain: boolean }[] = [];
     for (const img of images) {
-      // Resize image before upload - max 1400px, converted to JPEG
-      const resizedBlob = await resizeImage(img.file);
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(fileName, resizedBlob, { contentType: 'image/jpeg' });
-
-      if (uploadError) {
-        alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
+      try {
+        // Process image: backup original, convert to WebP, create thumbnail
+        const webpUrl = await processAndUploadImage(img.file);
+        uploadedImages.push({ url: webpUrl, isMain: img.isMain });
+      } catch (uploadError) {
+        alert('Błąd przy uploadzie zdjęcia: ' + (uploadError as Error).message);
         setLoading(false);
         return;
       }
-
-      const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
-      uploadedImages.push({ url: urlData.publicUrl, isMain: img.isMain });
     }
 
     const mainImage = uploadedImages.find(img => img.isMain)?.url || uploadedImages[0]?.url || null;
     const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
 
-    const { data: product, error } = await supabase
-      .from('products')
-      .insert({
+    let product;
+    try {
+      const result = await adminProductsAPI('insert_product', {
         name,
         slug,
         price: Math.round(parseFloat(price) * 100),
@@ -685,17 +733,15 @@ function AddProductForm({
         image_url: mainImage,
         is_active: true,
         show_on_homepage: showOnHomepage,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      alert('Błąd przy dodawaniu produktu: ' + error.message);
+      });
+      product = result.data;
+    } catch (error) {
+      alert('Błąd przy dodawaniu produktu: ' + (error as Error).message);
       setLoading(false);
       return;
     }
 
-    // Save images to product_images table
+    // Save images to product_images table (still uses anon - SELECT only policy)
     if (uploadedImages.length > 0) {
       const imageRecords = uploadedImages.map((img, idx) => ({
         product_id: product.id,
@@ -713,7 +759,7 @@ function AddProductForm({
       stock: stockBySize[size] ?? -1,
     }));
 
-    await supabase.from('product_variants').insert(variants);
+    await adminProductsAPI('insert_variants', { variants });
 
     setLoading(false);
     onSuccess();
@@ -1083,22 +1129,15 @@ function EditProductForm({
     // Upload new images (resized for better performance)
     const uploadedImages: { url: string; isMain: boolean }[] = [];
     for (const img of newImages) {
-      // Resize image before upload - max 1400px, converted to JPEG
-      const resizedBlob = await resizeImage(img.file);
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(fileName, resizedBlob, { contentType: 'image/jpeg' });
-
-      if (uploadError) {
-        alert('Błąd przy uploadzie zdjęcia: ' + uploadError.message);
+      try {
+        // Process image: backup original, convert to WebP, create thumbnail
+        const webpUrl = await processAndUploadImage(img.file);
+        uploadedImages.push({ url: webpUrl, isMain: img.isMain });
+      } catch (uploadError) {
+        alert('Błąd przy uploadzie zdjęcia: ' + (uploadError as Error).message);
         setLoading(false);
         return;
       }
-
-      const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
-      uploadedImages.push({ url: urlData.publicUrl, isMain: img.isMain });
     }
 
     // Delete removed images
@@ -1130,9 +1169,9 @@ function EditProductForm({
     const mainNew = uploadedImages.find(img => img.isMain);
     const mainImageUrl = mainNew?.url || mainExisting?.url || existingImages[0]?.url || uploadedImages[0]?.url || product.image_url;
 
-    const { error } = await supabase
-      .from('products')
-      .update({
+    try {
+      await adminProductsAPI('update_product', {
+        id: product.id,
         name,
         price: Math.round(parseFloat(price) * 100),
         category,
@@ -1143,13 +1182,10 @@ function EditProductForm({
         size_guide: sizeGuide || null,
         image_url: mainImageUrl,
         show_on_homepage: showOnHomepage,
-      })
-      .eq('id', product.id);
-
-    if (error) {
-      alert('Błąd przy aktualizacji produktu: ' + error.message);
-    } else {
+      });
       onSuccess();
+    } catch (error) {
+      alert('Błąd przy aktualizacji produktu: ' + (error as Error).message);
     }
     setLoading(false);
   };
@@ -2073,48 +2109,54 @@ function AddProductAIForm({
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/png' });
+        const originalBlob = new Blob([byteArray], { type: 'image/png' });
 
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${img.type}.png`;
+        const baseName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${img.type}`;
 
+        // 1. Backup original PNG
+        await supabase.storage
+          .from('products')
+          .upload(`backups/${baseName}-original.png`, originalBlob, { contentType: 'image/png' });
+
+        // 2. Convert to WebP
+        const webpBlob = await convertToWebP(originalBlob, 1400, 0.85);
         const { error: uploadError } = await supabase.storage
           .from('products')
-          .upload(fileName, blob, { contentType: 'image/png' });
+          .upload(`${baseName}.webp`, webpBlob, { contentType: 'image/webp' });
 
         if (uploadError) {
           throw new Error(`Błąd uploadu: ${uploadError.message}`);
         }
 
-        const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
+        // 3. Create thumbnail
+        const thumbBlob = await convertToWebP(originalBlob, 400, 0.80);
+        await supabase.storage
+          .from('products')
+          .upload(`${baseName}_thumb.webp`, thumbBlob, { contentType: 'image/webp' });
+
+        const { data: urlData } = supabase.storage.from('products').getPublicUrl(`${baseName}.webp`);
         uploadedImages.push({ url: urlData.publicUrl, isMain: img.isMain });
       }
 
       const mainImageUrl = uploadedImages.find(i => i.isMain)?.url || uploadedImages[0]?.url;
       const slug = productName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
 
-      // Create product
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .insert({
-          name: productName,
-          slug,
-          price: Math.round(parseFloat(price) * 100),
-          category,
-          subcategory_id: subcategoryId,
-          brand_id: brandId || null,
-          color: productColor,
-          description: productDescription,
-          size_guide: sizeGuide || null,
-          image_url: mainImageUrl,
-          is_active: true,
-          show_on_homepage: showOnHomepage,
-        })
-        .select()
-        .single();
-
-      if (productError) {
-        throw new Error(`Błąd tworzenia produktu: ${productError.message}`);
-      }
+      // Create product via Edge Function
+      const result = await adminProductsAPI('insert_product', {
+        name: productName,
+        slug,
+        price: Math.round(parseFloat(price) * 100),
+        category,
+        subcategory_id: subcategoryId,
+        brand_id: brandId || null,
+        color: productColor,
+        description: productDescription,
+        size_guide: sizeGuide || null,
+        image_url: mainImageUrl,
+        is_active: true,
+        show_on_homepage: showOnHomepage,
+      });
+      const product = result.data;
 
       // Add images to product_images
       const imageRecords = uploadedImages.map((img, idx) => ({
@@ -2125,7 +2167,7 @@ function AddProductAIForm({
       }));
       await supabase.from('product_images').insert(imageRecords);
 
-      // Add variants with stock
+      // Add variants with stock via Edge Function
       const variants = Object.entries(stockBySize)
         .filter(([_, stock]) => stock >= -1) // Include all, even hidden (-1)
         .map(([size, stock]) => ({
@@ -2134,7 +2176,7 @@ function AddProductAIForm({
           stock,
         }));
 
-      await supabase.from('product_variants').insert(variants);
+      await adminProductsAPI('insert_variants', { variants });
 
       onSuccess();
     } catch (err) {
