@@ -3,6 +3,15 @@ import { Product } from '../types/types';
 import OptimizedImage from './OptimizedImage';
 import { prefetchProduct } from '../lib/productCache';
 
+// Konwertuje URL obrazu na miniaturkę (400px WebP)
+const getThumbnailUrl = (imageUrl: string): string => {
+  if (!imageUrl || !imageUrl.includes('supabase.co')) {
+    return imageUrl;
+  }
+  // Zamień rozszerzenie na _thumb.webp
+  return imageUrl.replace(/\.(webp|jpg|jpeg|png)$/i, '_thumb.webp');
+};
+
 interface ProductGridProps {
   title?: string;
   categoryTitle?: string;
@@ -42,7 +51,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ title, categoryTitle, product
             {/* Image Container with grey background */}
             <div className="relative aspect-[3/4] bg-product-bg mb-3 overflow-hidden">
               <OptimizedImage
-                src={product.image}
+                src={getThumbnailUrl(product.image)}
                 alt={product.name}
                 containerClassName="w-full h-full"
                 className="product-image w-full h-full object-cover"
