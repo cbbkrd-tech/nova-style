@@ -107,8 +107,8 @@ async function processAndUploadImage(file: File): Promise<string> {
     throw new Error(`WebP upload failed: ${webpError.message}`);
   }
 
-  // 3. Create and upload thumbnail (400px)
-  const thumbBlob = await convertToWebP(file, 400, 0.80);
+  // 3. Create and upload thumbnail (600px, higher quality)
+  const thumbBlob = await convertToWebP(file, 600, 0.85);
   const thumbFileName = `${baseName}_thumb.webp`;
 
   await supabase.storage
@@ -2128,8 +2128,8 @@ function AddProductAIForm({
           throw new Error(`Błąd uploadu: ${uploadError.message}`);
         }
 
-        // 3. Create thumbnail
-        const thumbBlob = await convertToWebP(originalBlob, 400, 0.80);
+        // 3. Create thumbnail (600px, higher quality)
+        const thumbBlob = await convertToWebP(originalBlob, 600, 0.85);
         await supabase.storage
           .from('products')
           .upload(`${baseName}_thumb.webp`, thumbBlob, { contentType: 'image/webp' });
