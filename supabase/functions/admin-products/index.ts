@@ -100,6 +100,32 @@ Deno.serve(async (req) => {
         });
       }
 
+      // ============ PRODUCT IMAGES ============
+      case 'insert_images': {
+        const { error, data: images } = await supabase
+          .from('product_images')
+          .insert(data.images)
+          .select();
+
+        if (error) throw error;
+        return new Response(JSON.stringify({ success: true, data: images }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      case 'delete_images': {
+        const { product_id } = data;
+        const { error } = await supabase
+          .from('product_images')
+          .delete()
+          .eq('product_id', product_id);
+
+        if (error) throw error;
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400,

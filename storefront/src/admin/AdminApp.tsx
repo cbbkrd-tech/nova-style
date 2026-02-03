@@ -749,7 +749,7 @@ function AddProductForm({
         is_main: img.isMain,
         sort_order: idx,
       }));
-      await supabase.from('product_images').insert(imageRecords);
+      await adminProductsAPI('insert_images', { images: imageRecords });
     }
 
     // Add all sizes with user-specified stock (use -1 stock to hide, 0 for out of stock)
@@ -1161,7 +1161,7 @@ function EditProductForm({
         is_main: img.isMain,
         sort_order: maxSort + idx,
       }));
-      await supabase.from('product_images').insert(imageRecords);
+      await adminProductsAPI('insert_images', { images: imageRecords });
     }
 
     // Determine main image URL
@@ -2099,11 +2099,9 @@ function AddProductAIForm({
 
     try {
       // Upload generated images to Supabase storage
-      console.log('AI Product - Starting upload, generatedImages count:', generatedImages.length);
       const uploadedImages: { url: string; isMain: boolean }[] = [];
 
       for (const img of generatedImages) {
-        console.log('AI Product - Uploading image type:', img.type, 'isMain:', img.isMain);
         // Convert base64 to blob
         const byteCharacters = atob(img.data);
         const byteNumbers = new Array(byteCharacters.length);
@@ -2138,10 +2136,8 @@ function AddProductAIForm({
 
         const { data: urlData } = supabase.storage.from('products').getPublicUrl(`${baseName}.webp`);
         uploadedImages.push({ url: urlData.publicUrl, isMain: img.isMain });
-        console.log('AI Product - Uploaded:', img.type, urlData.publicUrl);
       }
 
-      console.log('AI Product - Total uploaded images:', uploadedImages.length);
       const mainImageUrl = uploadedImages.find(i => i.isMain)?.url || uploadedImages[0]?.url;
       const slug = productName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
 
@@ -2162,20 +2158,14 @@ function AddProductAIForm({
       });
       const product = result.data;
 
-      // Add images to product_images
+      // Add images to product_images via Edge Function
       const imageRecords = uploadedImages.map((img, idx) => ({
         product_id: product.id,
         image_url: img.url,
         is_main: img.isMain,
         sort_order: idx,
       }));
-      console.log('AI Product - Inserting image records:', imageRecords.length, imageRecords);
-      const { error: imagesError } = await supabase.from('product_images').insert(imageRecords);
-      if (imagesError) {
-        console.error('Error inserting images:', imagesError);
-        throw new Error(`Błąd zapisywania zdjęć: ${imagesError.message}`);
-      }
-      console.log('AI Product - Images inserted successfully');
+      await adminProductsAPI('insert_images', { images: imageRecords });
 
       // Add variants with stock via Edge Function
       const variants = Object.entries(stockBySize)
