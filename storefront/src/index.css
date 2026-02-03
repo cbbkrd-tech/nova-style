@@ -39,16 +39,7 @@ a, button {
   width: 100%;
 }
 
-/* Product card hover effects */
-.product-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
-
+/* Product card hover effects - only on image */
 .product-card .product-image {
   transition: transform 0.5s ease;
   /* Smooth edges on scaled thumbnails - subtle blur eliminates aliasing jaggies */
