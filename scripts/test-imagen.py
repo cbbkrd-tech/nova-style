@@ -5,7 +5,7 @@ from PIL import Image
 from io import BytesIO
 
 # Klucz API z .env
-API_KEY = "AIzaSyAM0SaynVLqIQUFJFzOBnvAwQGtYmRqWHU"
+API_KEY = os.environ.get("GOOGLE_AI_API_KEY")
 
 # Konfiguracja klienta
 client = genai.Client(api_key=API_KEY)

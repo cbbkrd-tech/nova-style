@@ -4,7 +4,7 @@ from google.genai.types import GenerateContentConfig, Modality
 from PIL import Image
 from io import BytesIO
 
-API_KEY = "AIzaSyAM0SaynVLqIQUFJFzOBnvAwQGtYmRqWHU"
+API_KEY = os.environ.get("GOOGLE_AI_API_KEY")
 client = genai.Client(api_key=API_KEY)
 
 BASE_DIR = "/workspaces/nova-style/prototyp-image-generation"
