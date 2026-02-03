@@ -26,6 +26,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
   const [currentImage, setCurrentImage] = useState(product.image);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
+  // Scroll to top when product detail opens
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [product.id]);
+
   useEffect(() => {
     async function fetchData() {
       if (!product.supabaseId) {
