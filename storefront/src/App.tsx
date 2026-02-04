@@ -43,6 +43,8 @@ function App() {
   const [currentView, setCurrentView] = useState<ViewState>('home');
   const [currentSubcategory, setCurrentSubcategory] = useState<string | null>(null);
   const [currentBrand, setCurrentBrand] = useState<string | null>(null);
+  const [brandGenderFilter, setBrandGenderFilter] = useState<'all' | 'women' | 'men'>('all');
+  const [brandPriceSort, setBrandPriceSort] = useState<'none' | 'asc' | 'desc'>('none');
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('nova-cart');
@@ -202,6 +204,16 @@ function App() {
     if (currentView === 'brand' && currentBrand) {
       // Filter by brand
       filtered = filtered.filter(p => p.brandSlug === currentBrand);
+      // Apply gender filter
+      if (brandGenderFilter !== 'all') {
+        filtered = filtered.filter(p => p.category === brandGenderFilter);
+      }
+      // Apply price sort
+      if (brandPriceSort === 'asc') {
+        filtered = [...filtered].sort((a, b) => a.price - b.price);
+      } else if (brandPriceSort === 'desc') {
+        filtered = [...filtered].sort((a, b) => b.price - a.price);
+      }
       return filtered;
     } else if (currentView === 'men') {
       filtered = filtered.filter(p => p.category === 'men');
@@ -251,6 +263,8 @@ function App() {
     setCurrentView('brand');
     setCurrentBrand(brandSlug);
     setCurrentSubcategory(null);
+    setBrandGenderFilter('all');
+    setBrandPriceSort('none');
     setIsMenuOpen(false);
     window.location.hash = `brand/${brandSlug}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -531,6 +545,83 @@ function App() {
                       <span className="text-sm text-charcoal font-medium">
                         {BRAND_NAMES[currentBrand] || currentBrand}
                       </span>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-wrap gap-3 mb-6">
+                      {/* Gender Filter */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-charcoal/60 uppercase tracking-wider">Płeć:</span>
+                        <div className="flex border border-light-grey rounded overflow-hidden">
+                          <button
+                            onClick={() => setBrandGenderFilter('all')}
+                            className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors ${
+                              brandGenderFilter === 'all'
+                                ? 'bg-charcoal text-white'
+                                : 'bg-white text-charcoal hover:bg-gray-100'
+                            }`}
+                          >
+                            Wszystkie
+                          </button>
+                          <button
+                            onClick={() => setBrandGenderFilter('women')}
+                            className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors border-l border-light-grey ${
+                              brandGenderFilter === 'women'
+                                ? 'bg-charcoal text-white'
+                                : 'bg-white text-charcoal hover:bg-gray-100'
+                            }`}
+                          >
+                            Damskie
+                          </button>
+                          <button
+                            onClick={() => setBrandGenderFilter('men')}
+                            className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors border-l border-light-grey ${
+                              brandGenderFilter === 'men'
+                                ? 'bg-charcoal text-white'
+                                : 'bg-white text-charcoal hover:bg-gray-100'
+                            }`}
+                          >
+                            Męskie
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Price Sort */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-charcoal/60 uppercase tracking-wider">Cena:</span>
+                        <div className="flex border border-light-grey rounded overflow-hidden">
+                          <button
+                            onClick={() => setBrandPriceSort('none')}
+                            className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors ${
+                              brandPriceSort === 'none'
+                                ? 'bg-charcoal text-white'
+                                : 'bg-white text-charcoal hover:bg-gray-100'
+                            }`}
+                          >
+                            Domyślnie
+                          </button>
+                          <button
+                            onClick={() => setBrandPriceSort('asc')}
+                            className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors border-l border-light-grey ${
+                              brandPriceSort === 'asc'
+                                ? 'bg-charcoal text-white'
+                                : 'bg-white text-charcoal hover:bg-gray-100'
+                            }`}
+                          >
+                            Rosnąco
+                          </button>
+                          <button
+                            onClick={() => setBrandPriceSort('desc')}
+                            className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors border-l border-light-grey ${
+                              brandPriceSort === 'desc'
+                                ? 'bg-charcoal text-white'
+                                : 'bg-white text-charcoal hover:bg-gray-100'
+                            }`}
+                          >
+                            Malejąco
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   {loading ? (
