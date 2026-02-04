@@ -45,6 +45,7 @@ function App() {
   const [currentBrand, setCurrentBrand] = useState<string | null>(null);
   const [brandGenderFilter, setBrandGenderFilter] = useState<'all' | 'women' | 'men'>('all');
   const [brandPriceSort, setBrandPriceSort] = useState<'none' | 'asc' | 'desc'>('none');
+  const [categoryPriceSort, setCategoryPriceSort] = useState<'none' | 'asc' | 'desc'>('none');
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('nova-cart');
@@ -229,6 +230,13 @@ function App() {
       filtered = filtered.filter(p => p.subcategorySlug === currentSubcategory);
     }
 
+    // Apply price sort for category views
+    if (categoryPriceSort === 'asc') {
+      filtered = [...filtered].sort((a, b) => a.price - b.price);
+    } else if (categoryPriceSort === 'desc') {
+      filtered = [...filtered].sort((a, b) => b.price - a.price);
+    }
+
     return filtered;
   };
 
@@ -245,6 +253,7 @@ function App() {
   const handleCategoryChange = (category: 'men' | 'women') => {
     setCurrentView(category);
     setCurrentSubcategory(null);
+    setCategoryPriceSort('none');
     setIsMenuOpen(false);
     window.location.hash = category;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -254,6 +263,7 @@ function App() {
     setCurrentView(category);
     setCurrentSubcategory(subSlug);
     setCurrentBrand(null);
+    setCategoryPriceSort('none');
     setIsMenuOpen(false);
     window.location.hash = `${category}/${subSlug}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -514,6 +524,43 @@ function App() {
                           {currentView === 'women' ? 'Damskie' : 'Męskie'}
                         </span>
                       )}
+                    </div>
+
+                    {/* Price Sort Filter */}
+                    <div className="flex items-center gap-2 mb-6">
+                      <span className="text-xs text-charcoal/60 uppercase tracking-wider">Cena:</span>
+                      <div className="flex border border-light-grey rounded overflow-hidden">
+                        <button
+                          onClick={() => setCategoryPriceSort('none')}
+                          className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors ${
+                            categoryPriceSort === 'none'
+                              ? 'bg-charcoal text-white'
+                              : 'bg-white text-charcoal hover:bg-gray-100'
+                          }`}
+                        >
+                          Domyślnie
+                        </button>
+                        <button
+                          onClick={() => setCategoryPriceSort('asc')}
+                          className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors border-l border-light-grey ${
+                            categoryPriceSort === 'asc'
+                              ? 'bg-charcoal text-white'
+                              : 'bg-white text-charcoal hover:bg-gray-100'
+                          }`}
+                        >
+                          Rosnąco
+                        </button>
+                        <button
+                          onClick={() => setCategoryPriceSort('desc')}
+                          className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-colors border-l border-light-grey ${
+                            categoryPriceSort === 'desc'
+                              ? 'bg-charcoal text-white'
+                              : 'bg-white text-charcoal hover:bg-gray-100'
+                          }`}
+                        >
+                          Malejąco
+                        </button>
+                      </div>
                     </div>
                   </div>
                   {loading ? (
